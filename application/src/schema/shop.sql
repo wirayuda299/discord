@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS shop_items(
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  type VARCHAR(100) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  descriptions TEXT NOT NULL,
+  price DECIMAL(10, 2) DEFAULT 0,
+  image_url VARCHAR(255) NOT NULL,
+  owner_id VARCHAR(100) NOT NULL,
+  CONSTRAINT fk_user_id FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
