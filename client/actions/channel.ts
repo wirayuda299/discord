@@ -15,7 +15,7 @@ export async function getChannelById(id: string) {
 				name: string;
 			};
 			messages: any[];
-		}>(`/api/v1/channels/${id}`);
+		}>(`/channels/${id}`);
 		return channel!;
 	} catch (error) {
 		throw error;
@@ -29,7 +29,7 @@ export async function createChannel(
 	path: string
 ) {
 	try {
-		await api.post('/api/v1/channels/create', {
+		await api.post('/channels/create', {
 			name,
 			server_id: serverId,
 			type,

@@ -12,6 +12,7 @@ async function bootstrap() {
       credentials: true,
     },
   });
+  app.enableCors();
   app.useGlobalFilters(new ValidationFilter());
 
   await app.listen(3001);

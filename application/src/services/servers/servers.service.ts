@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { z } from 'zod';
-import { DatabaseService } from '../database/database.service';
 import { ValidationService } from '../validation/validation.service';
+import { DatabaseService } from '../database/database.service';
 
 const schema = z.object({
   name: z.string().min(3),
@@ -13,9 +13,10 @@ const schema = z.object({
 @Injectable()
 export class ServersService {
   constructor(
-    private databaseService: DatabaseService,
     private validationService: ValidationService,
+    private databaseService: DatabaseService,
   ) {}
+
   async createServer(
     name: string,
     logo: string,
@@ -34,8 +35,9 @@ export class ServersService {
 
       const existingChannel = await this.databaseService.pool.query(
         `SELECT * FROM servers WHERE name = $1`,
-        [name.toLowerCase()],
+        [name],
       );
+
       if (existingChannel.rows.length >= 1) {
         throw new HttpException(
           'Server name already exists, please choose another name',
@@ -43,42 +45,65 @@ export class ServersService {
         );
       }
 
+      await this.databaseService.pool.query('BEGIN');
+
       try {
-        await this.databaseService.pool.query(
-          `
-          do $$
-            declare
-              server_id uuid;
-              text_channel uuid;
-              audio_channel uuid;
-            begin
-              insert into servers(name, logo, logo_asset_id, owner_id)
-              values('${name}', '${logo}', '${logo_asset_id}', '${owner_id}')
-              returning id into server_id;
-
-              insert into channels(name, server_id)
-              values('general', server_id)
-              returning id into text_channel;
-
-              insert into channels_category(type, channel_id)
-              values('text', text_channel);
-
-              insert into channels(name, server_id)
-              values('general', server_id)
-              returning id into audio_channel;
-
-              insert into channels_category(type, channel_id)
-              values('audio', audio_channel);
-              
-              insert into server_channels (server_id, channel_id)
-              values(server_id, text_channel);
-
-              insert into server_channels (server_id, channel_id)
-              values(server_id, audio_channel);
-
-              end $$;`,
+        const {
+          rows: [server],
+        } = await this.databaseService.pool.query(
+          `insert into servers (name, logo, logo_asset_id, owner_id)
+         VALUES($1, $2, $3, $4)
+         RETURNING id`,
+          [name, logo, logo_asset_id, owner_id],
         );
+
+        const serverId = server.id;
+        const {
+          rows: [channel],
+        } = await this.databaseService.pool.query(
+          `insert into channels (server_id, "name", "type")
+          values($1, 'general', 'text')
+          returning id`,
+          [serverId],
+        );
+        const channelId = channel.id;
+        const {
+          rows: [category1],
+        } = await this.databaseService.pool.query(`
+          insert into categories ( "name")
+          values('text')
+          returning id`);
+
+        await this.databaseService.pool.query(
+          `insert into channels_category (channel_id, category_id)
+            values($1, $2)`,
+          [channelId, category1.id],
+        );
+
+        const {
+          rows: [audioChannel],
+        } = await this.databaseService.pool.query(
+          `insert into channels (server_id, type, name)
+        VALUES($1, 'audio', 'general')
+         RETURNING id`,
+          [serverId],
+        );
+
+        const {
+          rows: [category2],
+        } = await this.databaseService.pool.query(`
+          insert into categories ( "name")
+          values('voice')
+          returning id`);
+
+        await this.databaseService.pool.query(
+          `insert into channels_category (channel_id, category_id)
+            values($1, $2)`,
+          [audioChannel.id, category2.id],
+        );
+        await this.databaseService.pool.query('COMMIT');
       } catch (e) {
+        await this.databaseService.pool.query('ROLLBACK');
         throw e;
       }
 
@@ -95,13 +120,16 @@ export class ServersService {
     try {
       const servers = await this.databaseService.pool.query(
         `select name, logo, created_at, updated_at, id, logo_asset_id from servers
-where servers.owner_id = $1
-union
-select name, logo, created_at, updated_at, id, logo_asset_id from servers
-join server_members on servers.id = server_members.server_id
-where server_members.user_id = $1`,
+        where servers.owner_id = $1
+        union
+        select name, logo, created_at, updated_at, servers.id, logo_asset_id from servers
+        join members as m on m.user_id = servers.owner_id
+        where m.user_id = $1
+        order by created_at asc
+        `,
         [ownerId],
       );
+
       return {
         data: servers.rows,
         error: false,
@@ -113,49 +141,59 @@ where server_members.user_id = $1`,
 
   async getServerById(id: string) {
     try {
+      const server = await this.databaseService.pool.query(
+        `select * from servers where id = $1`,
+        [id],
+      );
       const channelsQuery = await this.databaseService.pool.query(
-        `select servers.invite_code, servers.owner_id as user_id, servers.name as server_name, servers.id as server_id, servers.logo,
-servers.created_at, c.id as channel_id, c.name as channel_name, cc.type
-from servers 
-join channels as c on c.server_id = servers.id 
-join channels_category as cc on cc.channel_id = c.id 
-where servers.id = '${id}'
-`,
+        `SELECT 
+    c.id AS channel_id,
+    c.name AS channel_name,
+    c.type AS channel_type,
+    cat.id AS category_id,
+    cat.name AS category_name
+FROM 
+    channels c
+JOIN 
+    channels_category cc ON c.id = cc.channel_id
+JOIN 
+    categories cat ON cc.category_id = cat.id
+WHERE 
+    c.server_id = $1
+GROUP BY 
+    cat.id, c.id
+    order by cat.name
+    `,
+        [id],
       );
 
       const channels = channelsQuery.rows;
 
-      const groupedChannels = {
-        audio: channels.filter((channel) => channel.type === 'audio'),
-        text: channels.filter((channel) => channel.type === 'text'),
-      };
-
       return {
         data: {
-          server: {
-            name: groupedChannels?.audio[0]?.server_name,
-            logo: groupedChannels?.audio[0]?.logo,
-            id: groupedChannels?.audio[0]?.server_id,
-            invite_code: groupedChannels?.audio[0]?.invite_code,
-          },
-          channels: groupedChannels,
+          channels,
+          server: server.rows,
         },
         error: false,
       };
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }
 
   async updateServerCode(serverId: string) {
     try {
-      const res = await this.databaseService.pool.query(`
-      
+      const res = await this.databaseService.pool.query(
+        `
       update servers 
-set invite_code = uuid_generate_v4()
-where id = '${serverId}'`);
+      set invite_code = uuid_generate_v4()
+      where id = $1`,
+        [serverId],
+      );
       return {
-        data: res.rows[0],
+        data: res[0],
         error: false,
       };
     } catch (error) {
@@ -163,12 +201,7 @@ where id = '${serverId}'`);
     }
   }
 
-  async inviteUser(
-    inviteCode: string,
-    userId: string,
-    server_id: string,
-    channelId: string,
-  ) {
+  async inviteUser(inviteCode: string, userId: string, server_id: string) {
     try {
       if (!inviteCode)
         throw new HttpException(
@@ -176,13 +209,15 @@ where id = '${serverId}'`);
           HttpStatus.BAD_REQUEST,
         );
       if (!userId)
-        throw new HttpException('user id is missing', HttpStatus.BAD_REQUEST);
+        throw new HttpException('User id is missing', HttpStatus.BAD_REQUEST);
       if (!server_id)
         throw new HttpException('server id is missing', HttpStatus.BAD_REQUEST);
 
-      const isServerExists = await this.databaseService.pool
-        .query(`select * from servers 
-where servers.invite_code = '${inviteCode}'`);
+      const isServerExists = await this.databaseService.pool.query(
+        `SELECT * FROM servers WHERE servers.invite_code = $1`,
+        [inviteCode],
+      );
+
       if (isServerExists.rows.length < 1) {
         throw new HttpException(
           'Invite code is not valid anymore',
@@ -190,15 +225,17 @@ where servers.invite_code = '${inviteCode}'`);
         );
       }
 
-      if (isServerExists.rows[0].owner_id === userId) {
+      if (isServerExists.rows[0]?.owner_id === userId) {
         throw new HttpException(
           'You already an admin of this server',
           HttpStatus.BAD_REQUEST,
         );
       }
-      const isUserMember = await this.databaseService.pool
-        .query(`select * from server_members as sm
-where sm.user_id = '${userId}'`);
+
+      const isUserMember = await this.databaseService.pool.query(
+        `SELECT * FROM members AS m WHERE m.user_id = $1 AND m.server_id = $2`,
+        [userId, server_id],
+      );
 
       if (isUserMember.rows.length >= 1) {
         throw new HttpException(
@@ -207,27 +244,39 @@ where sm.user_id = '${userId}'`);
         );
       }
 
-      await this.databaseService.pool.query(`
-      do $$
-declare
-role_id uuid;
-begin
-insert into server_members (server_id, user_id)
-values('${server_id}', '${userId}');
+      await this.databaseService.pool.query('BEGIN');
 
-insert into roles("name", server_id)
-values('member', '${server_id}')
-returning id into role_id;
+      const member = await this.databaseService.pool.query(
+        `INSERT INTO members(server_id, user_id) VALUES($1, $2)
+        returning id`,
+        [server_id, userId],
+      );
 
-insert into server_roles (server_id, channel_id, role_id)
-values('${server_id}', '${channelId}', role_id);
+      const roles = await this.databaseService.pool.query(
+        `INSERT INTO roles(name) VALUES('common') RETURNING id`,
+      );
+      await this.databaseService.pool.query(
+        `INSERT INTO member_roles (member_id, role_id) VALUES($1, $2)`,
+        [member.rows[0].id, roles.rows[0].id],
+      );
 
-end$$;`);
+      const permission = await this.databaseService.pool.query(
+        `INSERT INTO permissions ("name") VALUES('common') RETURNING id`,
+      );
+
+      await this.databaseService.pool.query(
+        `INSERT INTO role_permissions (role_id, permission_id) VALUES($1, $2)`,
+        [roles.rows[0].id, permission.rows[0].id],
+      );
+
+      await this.databaseService.pool.query('COMMIT');
+
       return {
         message: 'Successfully join the server',
         error: false,
       };
     } catch (error) {
+      await this.databaseService.pool.query('ROLLBACK');
       throw error;
     }
   }
@@ -235,11 +284,16 @@ end$$;`);
   async getMemberInServer(serverId: string) {
     try {
       const members = await this.databaseService.pool.query(
-        `select * from server_members as sm 
-join users as u on sm.user_id = u.id 
-join server_roles as sr on sr.server_id = sm.server_id 
-join roles as r on r.id = sr.role_id 
-where sm.server_id = '${serverId}'`,
+        `select * from servers as s
+join members as m on m.server_id = s.id 
+join member_roles as mr on mr.member_id = m.id  
+join users as u on u.id = m.user_id 
+join roles as r on r.id =mr.role_id 
+join role_permissions as rp on rp.role_id = r.id  
+ join permissions as p on p.id = rp.permission_id 
+ join role_permissions as rp2 on rp2.permission_id = p.id 
+where s.id = $1`,
+        [serverId],
       );
 
       return {
@@ -247,7 +301,6 @@ where sm.server_id = '${serverId}'`,
         error: false,
       };
     } catch (error) {
-      console.error('Error in getMemberInServer:', error);
       throw error;
     }
   }

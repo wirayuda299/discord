@@ -10,15 +10,15 @@ const api = new ApiRequest();
 export async function createServer(
 	name: string,
 	logo: string,
-	logo_public_id: string
+	logoAssetId: string
 ) {
 	try {
 		const userId = api.getUserId;
-		await api.post('/api/v1/servers/create', {
+		await api.post('/servers/create', {
 			name,
 			logo,
 			ownerId: userId,
-			logoAssetId: logo_public_id,
+			logoAssetId,
 		});
 		revalidatePath('/');
 	} catch (error) {
@@ -29,9 +29,7 @@ export async function createServer(
 export async function getAllServerCreatedByCurrentUser() {
 	try {
 		const userId = api.getUserId;
-		return await api.get<Servers[]>(
-			`/api/v1/servers/all-servers?userId=${userId}`
-		);
+		return await api.get<Servers[]>(`/servers/all-servers?userId=${userId}`);
 	} catch (error) {
 		throw error;
 	}
@@ -45,7 +43,7 @@ export async function getServerById(id: string) {
 				audio: Channel[];
 				text: Channel[];
 			};
-		}>(`/api/v1/servers/${id}`);
+		}>(`/servers/${id}`);
 
 		return res!;
 	} catch (error) {
@@ -55,7 +53,7 @@ export async function getServerById(id: string) {
 
 export async function generateNewInviteCode(serverId: string, path: string) {
 	try {
-		await api.patch('/api/v1/servers/new-invite-code', { serverId });
+		await api.patch('/servers/new-invite-code', { serverId });
 		revalidatePath(path);
 	} catch (error) {
 		throw error;
@@ -69,7 +67,7 @@ export async function inviteUser(
 	channelId: string
 ) {
 	try {
-		await api.post('/api/v1/servers/invite-user', {
+		await api.post('/servers/invite-user', {
 			inviteCode,
 			userId: api.getUserId,
 			server_id: serverId,
@@ -84,7 +82,7 @@ export async function inviteUser(
 export async function getServerMembers(serverId: string) {
 	try {
 		return await api.get<ServerMember[]>(
-			`/api/v1/servers/members?serverId=${serverId}`
+			`/servers/members?serverId=${serverId}`
 		);
 	} catch (error) {
 		throw error;

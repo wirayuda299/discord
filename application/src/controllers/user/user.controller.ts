@@ -21,6 +21,11 @@ export class UserController {
 
     return this.userService.createUser(id, username, email, image);
   }
+  @Get('/find')
+  searchUser(@Query('name') name: string, @Query('id') id?: string) {
+    return this.userService.searchUser(name, id);
+  }
+
   @Get('/find-all')
   listAllUsers(@Query('userId') userId: string) {
     return this.userService.findAllUser(userId);

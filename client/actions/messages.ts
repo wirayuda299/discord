@@ -12,7 +12,7 @@ export async function pinMessage(
 	path: string
 ) {
 	try {
-		await api.post('/api/v1/messages/pin-message', {
+		await api.post('/messages/pin-message', {
 			channelId,
 			messageId: msgId,
 		});
@@ -24,7 +24,7 @@ export async function pinMessage(
 export async function getPinnedMessages(channelId: string) {
 	try {
 		return await api.get<Message[]>(
-			`/api/v1/messages/pinned-messages?channelId=${channelId}`
+			`/messages/pinned-messages?channelId=${channelId}`
 		);
 	} catch (error) {
 		throw error;

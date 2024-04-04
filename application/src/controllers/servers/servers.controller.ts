@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Param,
@@ -13,7 +14,7 @@ import {
 import { Request } from 'express';
 import { ServersService } from 'src/services/servers/servers.service';
 
-@Controller('api/v1/servers')
+@Controller('/api/v1/servers')
 export class ServersController {
   constructor(private serverService: ServersService) {}
 
@@ -41,25 +42,21 @@ export class ServersController {
     return this.serverService.getMemberInServer(id);
   }
 
-  @Get(':id')
+  @Get('/:id')
   getServerById(@Param('id') serverId: string) {
     return this.serverService.getServerById(serverId);
   }
 
   @Patch('/new-invite-code')
+  @HttpCode(201)
   generateNewInviteCode(@Body('serverId') id: string) {
     return this.serverService.updateServerCode(id);
   }
 
   @Post('/invite-user')
   inviteUser(@Req() req: Request) {
-    const { inviteCode, userId, server_id, channelId } = req.body;
+    const { inviteCode, userId, server_id } = req.body;
 
-    return this.serverService.inviteUser(
-      inviteCode,
-      userId,
-      server_id,
-      channelId,
-    );
+    return this.serverService.inviteUser(inviteCode, userId, server_id);
   }
 }

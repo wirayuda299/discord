@@ -2,7 +2,7 @@ import { Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { ChannelsService } from 'src/services/channels/channels.service';
 
-@Controller('api/v1/channels')
+@Controller('/api/v1/channels')
 export class ChannelsController {
   constructor(private channelService: ChannelsService) {}
 

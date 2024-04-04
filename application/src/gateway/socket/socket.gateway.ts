@@ -10,7 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/services/messages/messages.service';
 @WebSocketGateway({
   cors: {
-    origin: process.env.ORIGIN,
+    origin: '*',
   },
 })
 export class SocketGateway implements OnModuleInit {
@@ -22,6 +22,8 @@ export class SocketGateway implements OnModuleInit {
   private userConnections = new Map<string, string>();
 
   onModuleInit() {
+    console.log(process.env.ORIGIN);
+
     this.server.on('connection', (socket) => {
       this.handleConnection(socket);
     });

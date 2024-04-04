@@ -1,11 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
 import { filterUUIDCookies } from '@/utils/uuidCookies';
 
-export async function setCookie(key: string, value: string, path: string) {
+export async function setCookie(key: string, value: string) {
 	const currentCookies = cookies().getAll();
 
 	const uuidCookies = filterUUIDCookies(currentCookies);
@@ -16,7 +15,6 @@ export async function setCookie(key: string, value: string, path: string) {
 		});
 	}
 	cookies().set(key, value);
-	revalidatePath(path);
 }
 
 export async function getCookies() {

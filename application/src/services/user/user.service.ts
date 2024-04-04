@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 
 import { createUserSchema, idSchema } from '../../schema/zodSchema/user';
-import { DatabaseService } from '../../services/database/database.service';
 import { ValidationService } from '../validation/validation.service';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class UserService {
   constructor(
-    private databaseService: DatabaseService,
     private validationService: ValidationService,
+    private databaseService: DatabaseService,
   ) {}
 
   async createUser(id: string, name: string, email: string, image: string) {
@@ -25,9 +25,10 @@ export class UserService {
       };
 
       this.validationService.validate(createUserSchema, body);
-
       await this.databaseService.pool.query(
-        `INSERT INTO USERS(id, username, image, email) VALUES('${id}', '${name}', '${image}', '${email}')`,
+        `INSERT INTO USERS(id, username, image, email) 
+        VALUES($1, $2, $3, $4)`,
+        [id, name, image, email],
       );
 
       return {
@@ -44,7 +45,8 @@ export class UserService {
       if (!id) throw new BadRequestException('Id is required');
 
       const users = await this.databaseService.pool.query(
-        `SELECT * FROM USERS WHERE id != '${id}' ORDER BY created_at desc`,
+        `SELECT * FROM USERS WHERE id != $1 ORDER BY created_at desc`,
+        [id],
       );
 
       return {
@@ -58,16 +60,19 @@ export class UserService {
 
   async getUserById(id: string): Promise<NotFoundException | any> {
     try {
-      const idData = this.validationService.validate(idSchema, id);
+      this.validationService.validate(idSchema, id);
 
       const user = await this.databaseService.pool.query(
-        `select * from users where id= $1 `,
-        [idData],
+        `select * from users where id = $1`,
+        [id],
       );
 
       if (user.rows.length < 1) throw new NotFoundException('User not found');
 
-      return user.rows;
+      return {
+        data: user.rows,
+        error: false,
+      };
     } catch (error) {
       throw error;
     }
@@ -81,8 +86,9 @@ export class UserService {
       if (user.status !== 404) {
         await this.databaseService.pool.query(
           `update users set username = $1 where id = $2`,
-          [name, idData],
+          [name, id],
         );
+
         return {
           message: 'Updated',
           error: false,
@@ -102,13 +108,41 @@ export class UserService {
       const user = await this.getUserById(idData);
       if (user.status === 404) throw new NotFoundException('User not found');
 
-      await this.databaseService.pool.query(
-        `delete from users where id='${idData}'`,
-      );
+      await this.databaseService.pool.query(`delete from users where id = $1`, [
+        id,
+      ]);
 
       return {
         message: `User with ID: ${id} has been deleted`,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async searchUser(name: string, id: string) {
+    try {
+      if (name) {
+        const users = await this.databaseService.pool.query(
+          `
+      select * from users 
+      where to_tsvector(username) @@ to_tsquery($1)`,
+          [name],
+        );
+        return {
+          data: users,
+          error: false,
+        };
+      } else {
+        const users = await this.databaseService.pool.query(
+          `select * from users where id = $1`,
+          [id],
+        );
+        return {
+          data: users,
+          error: false,
+        };
+      }
     } catch (error) {
       throw error;
     }

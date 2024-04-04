@@ -1,10 +1,8 @@
 export type Channel = {
-	server_name: string;
-	server_id: string;
-	logo: string;
-	created_at: string; // This cou
+	channels: Channel[];
+	category_id: string;
+	category_name: string;
 	channel_id: string;
 	channel_name: string;
-	user_id: string;
-	type: 'audio' | 'text';
+	channel_type: string;
 };

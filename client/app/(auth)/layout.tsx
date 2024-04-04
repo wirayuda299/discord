@@ -1,9 +1,7 @@
-import type { ReactNode } from "react";
+import { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <main className="flex h-full min-h-screen items-center justify-center">
-      {children}
-    </main>
-  );
+export default function AuthLayout({ children }: { children: ReactNode }) {
+	return (
+		<div className='flex h-screen items-center justify-center'>{children}</div>
+	);
 }
