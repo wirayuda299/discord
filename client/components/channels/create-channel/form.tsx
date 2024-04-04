@@ -3,6 +3,7 @@ import { DialogClose } from '@radix-ui/react-dialog';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { KeyedMutator } from 'swr';
 
 import { createChannel } from '@/actions/channel';
 import { Button } from '@/components/ui/button';
@@ -15,25 +16,25 @@ import {
 } from '@/components/ui/form';
 import ChannelTypeItem from './channel-type';
 import { Input } from '@/components/ui/input';
-import { KeyedMutator } from 'swr';
 
 const schema = z.object({
 	channelType: z.enum(['text', 'audio']),
 	name: z.string().min(4),
 });
+
 export default function CreateChannelForm<T>({
 	serverId,
 	type,
 	mutate,
 }: {
 	serverId: string;
-	type: 'text' | 'audio';
+	type: string;
 	mutate: KeyedMutator<T>;
 }) {
 	const form = useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
 		defaultValues: {
-			channelType: type,
+			channelType: type as z.infer<typeof schema>['channelType'],
 			name: '',
 		},
 	});
@@ -78,7 +79,7 @@ export default function CreateChannelForm<T>({
 					name='name'
 					render={({ field }) => (
 						<FormItem className='mt-5'>
-							<FormLabel className='text-gray-1 uppercase'>
+							<FormLabel className='text-gray-2 uppercase'>
 								Channel name
 							</FormLabel>
 							<FormControl>
@@ -86,7 +87,7 @@ export default function CreateChannelForm<T>({
 									onClick={(e) => e.stopPropagation()}
 									autoComplete='off'
 									placeholder='# new-channel'
-									className='bg-[var(--primary)] text-white caret-white ring-offset-[[var(--primary)]] focus:border-none focus:shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-transparent'
+									className='bg-foreground ring-offset-background text-white caret-white focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0'
 									required
 									{...field}
 								/>
@@ -95,7 +96,11 @@ export default function CreateChannelForm<T>({
 					)}
 				/>
 				<div className='mt-3 flex items-center justify-end gap-3'>
-					<DialogClose type='button' onClick={(e) => e.stopPropagation()}>
+					<DialogClose
+						className='text-white'
+						type='button'
+						onClick={(e) => e.stopPropagation()}
+					>
 						Cancel
 					</DialogClose>
 

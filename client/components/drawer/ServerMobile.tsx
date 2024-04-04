@@ -1,12 +1,12 @@
-import { Ellipsis } from 'lucide-react';
+import { Bell, ChevronRight, Cog } from 'lucide-react';
 import Image from 'next/image';
 import { KeyedMutator } from 'swr';
 
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import { serverOptions } from '@/constants/server-option';
 import { Servers } from '@/types/server';
 import CreateChannelDrawerMobile from './create-channel';
 import CreateCategoryMobile from './create-category';
+import AddUserDrawer from './add-user';
 
 export default function ServerDrawerMobile<T>({
 	server,
@@ -20,7 +20,7 @@ export default function ServerDrawerMobile<T>({
 	return (
 		<Drawer>
 			<DrawerTrigger>
-				<Ellipsis stroke='#fff' />
+				<ChevronRight className='text-gray-2' size={17} />
 			</DrawerTrigger>
 			<DrawerContent className='top-0 !h-full  border-none bg-black p-3'>
 				<div className='min-h-full overflow-y-auto pb-28'>
@@ -28,6 +28,7 @@ export default function ServerDrawerMobile<T>({
 						<Image
 							src={server?.logo}
 							width={50}
+							priority
 							height={50}
 							alt='server logo'
 							className='size-14 rounded-full object-cover'
@@ -45,14 +46,36 @@ export default function ServerDrawerMobile<T>({
 					</div>
 
 					<ul className='mt-5 flex justify-between text-white'>
-						{serverOptions.map((item) => (
-							<li key={item.label} className='flex flex-col items-center'>
-								{item.icon}
-								<p className='text-gray-2 text-xs font-semibold capitalize'>
-									{item.label}
-								</p>
-							</li>
-						))}
+						<li className='flex flex-col items-center'>
+							<Image
+								src={'/icons/boost.svg'}
+								width={25}
+								height={25}
+								alt='boost'
+								className='aspect-auto object-contain'
+							/>
+							<p className='text-gray-2 text-xs font-semibold capitalize'>
+								boost
+							</p>
+						</li>
+						<li className='flex flex-col items-center'>
+							<AddUserDrawer />
+							<p className='text-gray-2 text-xs font-semibold capitalize'>
+								invite
+							</p>
+						</li>
+						<li className='flex flex-col items-center'>
+							<Bell />
+							<p className='text-gray-2 text-xs font-semibold capitalize'>
+								notifications
+							</p>
+						</li>
+						<li className='flex flex-col items-center'>
+							<Cog />
+							<p className='text-gray-2 text-xs font-semibold capitalize'>
+								settings
+							</p>
+						</li>
 					</ul>
 
 					<ul className='bg-background/25 divide-background mt-8  gap-3 divide-y rounded-md p-3 text-white'>
@@ -65,7 +88,7 @@ export default function ServerDrawerMobile<T>({
 
 					<ul className='bg-background/25 mt-8  divide-y divide-gray-700 rounded-md p-3 text-white'>
 						<li className='py-3 text-sm font-semibold capitalize'>
-							Edit server info
+							Edit server profile
 						</li>
 						<li className='py-3 text-sm font-semibold capitalize'>
 							Report raid

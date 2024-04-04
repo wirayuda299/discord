@@ -2,7 +2,7 @@
 
 import { Channel } from '@/types/channels';
 import { revalidatePath } from 'next/cache';
-import { ServerMember, Servers } from '../types/server';
+import { Member, Servers } from '../types/server';
 import { ApiRequest } from '../utils/api';
 
 const api = new ApiRequest();
@@ -38,11 +38,8 @@ export async function getAllServerCreatedByCurrentUser() {
 export async function getServerById(id: string) {
 	try {
 		const res = await api.get<{
-			server: Servers;
-			channels: {
-				audio: Channel[];
-				text: Channel[];
-			};
+			server: Servers[];
+			channels: Channel[];
 		}>(`/servers/${id}`);
 
 		return res!;
@@ -81,9 +78,7 @@ export async function inviteUser(
 
 export async function getServerMembers(serverId: string) {
 	try {
-		return await api.get<ServerMember[]>(
-			`/servers/members?serverId=${serverId}`
-		);
+		return await api.get<Member[]>(`/servers/members?serverId=${serverId}`);
 	} catch (error) {
 		throw error;
 	}

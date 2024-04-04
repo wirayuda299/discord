@@ -2,6 +2,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { ServerContextProvider } from '@/providers/server';
 
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
@@ -18,8 +19,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 		<html lang='en'>
 			<ClerkProvider>
 				<body className={`${inter.className} md:bg-background bg-black`}>
-					{children}
-					<Toaster className='text-white' />
+					<ServerContextProvider>
+						{children}
+						<Toaster className='text-white' />
+					</ServerContextProvider>
 				</body>
 			</ClerkProvider>
 		</html>

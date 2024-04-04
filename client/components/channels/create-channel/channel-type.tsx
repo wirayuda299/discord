@@ -28,7 +28,7 @@ export default function ChannelTypeItem<T extends FieldValues>({
 					}}
 					className={cn(
 						'mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-md md:bg-[#2b2d31] px-5 py-2 bg-black/25 md:hover:bg-[#43444b]',
-						value === type.label && 'bg-foreground/25 *:md:bg-[#43444b]'
+						value === type.label && 'bg-foreground/30 md:bg-[#43444b]'
 					)}
 				>
 					<div className='flex items-center gap-3'>
@@ -40,7 +40,7 @@ export default function ChannelTypeItem<T extends FieldValues>({
 							alt='hashtag icon'
 						/>
 						<div>
-							<h4 className='text-gray-1 text-lg font-medium capitalize'>
+							<h4 className='text-gray-2 text-lg font-medium capitalize'>
 								{type.label}
 							</h4>
 							<p className='truncate text-wrap text-[10px] text-[#9fa6ae] sm:text-xs'>

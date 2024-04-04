@@ -9,20 +9,25 @@ import {
 	DrawerTrigger,
 } from '@/components/ui/drawer';
 
-export default function AddUserDrawer() {
+export default function AddUserDrawer({
+	styles,
+	size = 18,
+}: {
+	styles?: string;
+	size?: number;
+}) {
 	return (
 		<Drawer>
-			<DrawerTrigger className='pt-2'>
-				<UserPlus2 stroke='#fff' />
+			<DrawerTrigger className={styles} onClick={(e) => e.stopPropagation()}>
+				<UserPlus2 stroke='#fff' size={size} />
 			</DrawerTrigger>
-			<DrawerContent className='border-none bg-black p-3 md:hidden'>
+			<DrawerContent className='w-full border-none bg-black p-3  md:top-0 md:mx-auto md:h-max md:max-h-[500px] md:max-w-[500px] md:overflow-y-auto'>
 				<DrawerHeader>
 					<DrawerTitle className='text-white'>Invite a friend</DrawerTitle>
 				</DrawerHeader>
 				<button className='bg-background flex size-10 items-center justify-center rounded-full'>
 					<Link stroke='#fff' size={18} />
 				</button>
-				<p className='text-sm font-semibold text-white'>Copy server id</p>
 				<ul className='mt-5'>
 					<li className='flex items-center justify-between'>
 						<div className='flex items-center gap-2'>

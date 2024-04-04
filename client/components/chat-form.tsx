@@ -100,9 +100,9 @@ export default function ChatForm({
 										<label
 											title='Upload image'
 											htmlFor='image-upload'
-											className='bg-background flex h-6 min-w-6 cursor-pointer items-center justify-center rounded-full'
+											className='bg-background md:bg-foreground flex h-6 min-w-6 cursor-pointer items-center justify-center rounded-full md:h-7 md:min-h-7 md:min-w-7 md:p-1'
 										>
-											<Plus className='text-gray-2' size={18} />
+											<Plus className='text-gray-2 text-base md:text-lg' />
 										</label>
 										<input
 											onChange={(e) => handleChange(e, 'image')}
@@ -128,7 +128,7 @@ export default function ChatForm({
 										autoComplete='off'
 										cols={10}
 										rows={1}
-										className='bg-background/20 flex min-h-[30px] w-full items-center rounded-full border-none px-3 pt-2 text-sm font-light text-white caret-white brightness-110 focus:outline-none md:bg-transparent'
+										className='bg-background/20 md:bg-foreground flex min-h-[30px] w-full items-center rounded-full border-none px-3 pt-2 text-sm font-light text-white caret-white brightness-110 focus:outline-none focus-visible:shadow-none focus-visible:ring-offset-0'
 									/>
 								</FormControl>
 							</FormItem>

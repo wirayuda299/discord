@@ -10,8 +10,8 @@ export default function ServerList({ servers }: { servers: Servers[] }) {
 	const { setSelectedServer } = useServerContext();
 
 	const handleClick = (server: Servers) => {
-		setSelectedServer(server);
 		localStorage.setItem(server.id, server.id);
+		setSelectedServer(server);
 	};
 
 	return (

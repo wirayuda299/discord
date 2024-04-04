@@ -69,10 +69,13 @@ export class ServersService {
         const channelId = channel.id;
         const {
           rows: [category1],
-        } = await this.databaseService.pool.query(`
-          insert into categories ( "name")
-          values('text')
-          returning id`);
+        } = await this.databaseService.pool.query(
+          `
+          insert into categories (name, server_id)
+          values('text', $1)
+          returning id`,
+          [serverId],
+        );
 
         await this.databaseService.pool.query(
           `insert into channels_category (channel_id, category_id)
@@ -91,10 +94,13 @@ export class ServersService {
 
         const {
           rows: [category2],
-        } = await this.databaseService.pool.query(`
-          insert into categories ( "name")
-          values('voice')
-          returning id`);
+        } = await this.databaseService.pool.query(
+          `
+          insert into categories (name, server_id)
+          values('voice', $1)
+          returning id`,
+          [serverId],
+        );
 
         await this.databaseService.pool.query(
           `insert into channels_category (channel_id, category_id)
@@ -162,7 +168,6 @@ WHERE
     c.server_id = $1
 GROUP BY 
     cat.id, c.id
-    order by cat.name
     `,
         [id],
       );
