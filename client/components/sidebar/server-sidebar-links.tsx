@@ -14,7 +14,9 @@ export default function ServerSidebarLinksItem({
 	return (
 		<li
 			key={label}
-			className={cn('p-2 transition-colors ease duration-300 rounded-md')}
+			className={cn(
+				'p-2 transition-colors hover:bg-background/35 ease duration-300 rounded-md'
+			)}
 		>
 			<Link
 				href={path}
@@ -27,7 +29,9 @@ export default function ServerSidebarLinksItem({
 					height={30}
 					alt={label}
 				/>
-				<h3 className='text-gray-2 font-semibold'>{label}</h3>
+				<h3 className='text-gray-2 font-semibold group-hover:text-white'>
+					{label}
+				</h3>
 			</Link>
 		</li>
 	);

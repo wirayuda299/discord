@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { useServerContext } from '@/providers/server';
 import { Servers } from '@/types/server';
+import { useMemo } from 'react';
 
 export default function ServerList({ servers }: { servers: Servers[] }) {
 	const { setSelectedServer } = useServerContext();
@@ -14,9 +15,13 @@ export default function ServerList({ servers }: { servers: Servers[] }) {
 		setSelectedServer(server);
 	};
 
+	const serverList = useMemo(() => {
+		return servers;
+	}, [servers]);
+
 	return (
 		<ul className=' mt-3 flex flex-col gap-3 '>
-			{servers?.map((server) => (
+			{serverList?.map((server) => (
 				<li
 					onClick={() => handleClick(server)}
 					key={server.id}

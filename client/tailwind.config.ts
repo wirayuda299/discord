@@ -70,10 +70,28 @@ const config = {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: '0' },
 				},
+				'slide-left': {
+					from: {
+						transform: 'translateX(200px)',
+						display: 'none',
+						opacity: '0',
+					},
+					to: { transform: 'translateX(0px)', display: 'block', opacity: '1' },
+				},
+				'slide-right': {
+					from: {
+						transform: 'translateX(0px)',
+						display: 'block',
+						opacity: '1',
+					},
+					to: { transform: 'translateX(200px)', display: 'none', opacity: '0' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slide-left': 'slide-left 0.5s ease forward',
+				'slide-right': 'slide-right 0.5s ease forwards',
 			},
 		},
 	},

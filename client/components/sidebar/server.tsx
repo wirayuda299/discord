@@ -10,6 +10,7 @@ import { getServerById } from '@/actions/server';
 import ChannelList from '../channels/list';
 import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
+import ServerMenu from '../server-menus';
 
 export default function ServerSidebar() {
 	const params = useParams();
@@ -27,6 +28,11 @@ export default function ServerSidebar() {
 				data ? 'hidden md:flex' : 'flex'
 			)}
 		>
+			<ServerMenu
+				serverName={data?.server[0].name ?? ''}
+				mutate={mutate}
+				serverId={data?.server[0].id ?? ''}
+			/>
 			<form className='my-3 w-full md:hidden'>
 				<input
 					type='search'
@@ -34,9 +40,7 @@ export default function ServerSidebar() {
 					placeholder='Find or start conversation '
 				/>
 			</form>
-			<h3 className='hidden text-balance pl-3 text-xl font-semibold capitalize text-white md:block'>
-				{data?.server[0].name}
-			</h3>
+
 			{serverSidebarLinks.map((item) => (
 				<ServerSidebarLinkItem {...item} key={item.label} />
 			))}

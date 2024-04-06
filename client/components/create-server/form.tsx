@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import Image from 'next/image';
 
-import { deleteImage, uploadFile } from '@/actions/file-upload';
+import { deleteImage, uploadFile } from '@/actions/file';
 import { createServer } from '@/actions/server';
 import useUploadFile from '@/hooks/useFileUpload';
 import { Button } from '@/components/ui/button';
@@ -131,7 +131,7 @@ export default function CreateServerForm({
 									/>
 									<p className='text-xs font-light leading-relaxed'>
 										By createing a server, you&apos;re agree to discord{' '}
-										<span className='text-secondary-purple font-semibold'>
+										<span className='text-primary font-semibold'>
 											Community Guidelines
 										</span>
 									</p>

@@ -14,7 +14,8 @@ import { getServerById } from '@/actions/server';
 export default function ChannelDrawerMobile() {
 	const params = useParams();
 	const { selectedChannel } = useServerContext();
-	const selectedServer = localStorage.getItem(params.slug[1]);
+	const selectedServer =
+		typeof window !== 'undefined' ? localStorage.getItem(params.slug[1]) : '';
 	const { data, mutate, isLoading, error } = useSWR(
 		'/server/' + params.slug[1],
 		async () =>

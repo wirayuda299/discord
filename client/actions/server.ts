@@ -83,3 +83,34 @@ export async function getServerMembers(serverId: string) {
 		throw error;
 	}
 }
+
+export async function deleteServer(serverId: string) {
+	try {
+		await api.delete(`/servers/delete`, {
+			serverId,
+			currentSessionId: api.getUserId,
+		});
+		revalidatePath('/server');
+	} catch (error) {
+		throw error;
+	}
+}
+export async function updateServer(
+	serverId: string,
+	name: string,
+	logo: string,
+	logoAssetId: string
+) {
+	try {
+		await api.patch(`/servers/update`, {
+			serverId,
+			currentSessionId: api.getUserId,
+			name,
+			logo,
+			logoAssetId,
+		});
+		revalidatePath('/server');
+	} catch (error) {
+		throw error;
+	}
+}

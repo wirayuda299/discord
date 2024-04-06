@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { z } from 'zod';
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
@@ -30,7 +35,10 @@ export class ServersService {
         owner_id,
         logo_asset_id,
       };
-
+      const author = await this.databaseService.pool.query(
+        `select * from users where id = $1`,
+        [owner_id],
+      );
       this.validationService.validate(schema, data);
 
       const existingChannel = await this.databaseService.pool.query(
@@ -58,6 +66,11 @@ export class ServersService {
         );
 
         const serverId = server.id;
+        await this.databaseService.pool.query(
+          `insert into server_profile(server_id, user_id, avatar)
+          values($1, $2, $3)`,
+          [serverId, author.rows[0].id, author.rows[0].image],
+        );
         const {
           rows: [channel],
         } = await this.databaseService.pool.query(
@@ -168,6 +181,7 @@ WHERE
     c.server_id = $1
 GROUP BY 
     cat.id, c.id
+    order by cat.name asc
     `,
         [id],
       );
@@ -303,6 +317,88 @@ where s.id = $1`,
 
       return {
         data: members.rows,
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteServer(serverId: string, currentSessionId: string) {
+    try {
+      const server = await this.databaseService.pool.query(
+        `
+      select * from servers where id = $1
+      `,
+        [serverId],
+      );
+      if (server.rows.length < 1) {
+        throw new NotFoundException('Server not found');
+      }
+
+      if (currentSessionId !== server.rows[0].owner_id) {
+        throw new HttpException(
+          'You are not allowed to delete this server',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await this.databaseService.pool.query(`begin`);
+      await this.databaseService.pool.query(
+        `delete from servers where id = $1`,
+        [serverId],
+      );
+      await this.databaseService.pool.query(
+        `delete from members where members.server_id = $1`,
+        [serverId],
+      );
+
+      await this.databaseService.pool.query(`commit`);
+
+      return {
+        message: 'Server has been deleted',
+        error: false,
+      };
+    } catch (error) {
+      await this.databaseService.pool.query(`rollback`);
+      throw error;
+    }
+  }
+
+  async updateServer(
+    serverId: string,
+    currentSessionId: string,
+    name: string,
+    logo: string,
+    logo_asset_id: string,
+  ) {
+    try {
+      const { rows } = await this.databaseService.pool.query(
+        `select * from servers where id = $1`,
+        [serverId],
+      );
+
+      if (rows.length < 1) {
+        throw new NotFoundException('Server not found');
+      }
+
+      if (rows[0].owner_id !== currentSessionId) {
+        throw new HttpException(
+          'You are not allowed to update this server',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      await this.databaseService.pool.query(
+        `UPDATE servers
+   SET name = $2,
+       logo = $3,
+       logo_asset_id = $4
+   WHERE id = $1`,
+        [rows[0].id, name, logo, logo_asset_id],
+      );
+
+      return {
+        message: 'Server updated',
         error: false,
       };
     } catch (error) {

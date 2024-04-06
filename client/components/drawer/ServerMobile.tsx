@@ -7,6 +7,11 @@ import { Servers } from '@/types/server';
 import CreateChannelDrawerMobile from './create-channel';
 import CreateCategoryMobile from './create-category';
 import AddUserDrawer from './add-user';
+import DeleteServer from '../modals/delete-server';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import UpdateServerDrawer from './update-server';
 
 export default function ServerDrawerMobile<T>({
 	server,
@@ -15,12 +20,25 @@ export default function ServerDrawerMobile<T>({
 	server: Servers;
 	mutate: KeyedMutator<T>;
 }) {
+	const { userId } = useAuth();
+	const [isCopied, setIsCopied] = useState<boolean>(false);
 	if (!server) return null;
+
+	function copyText(text: string) {
+		navigator.clipboard.writeText(text).then(() => {
+			toast.success('Server id copied');
+			setIsCopied(true);
+
+			setTimeout(() => {
+				setIsCopied(false);
+			}, 4000);
+		});
+	}
 
 	return (
 		<Drawer>
 			<DrawerTrigger>
-				<ChevronRight className='text-gray-2' size={17} />
+				<ChevronRight className='text-gray-2' size={18} />
 			</DrawerTrigger>
 			<DrawerContent className='top-0 !h-full  border-none bg-black p-3'>
 				<div className='min-h-full overflow-y-auto pb-28'>
@@ -59,7 +77,7 @@ export default function ServerDrawerMobile<T>({
 							</p>
 						</li>
 						<li className='flex flex-col items-center'>
-							<AddUserDrawer />
+							<AddUserDrawer size={25} />
 							<p className='text-gray-2 text-xs font-semibold capitalize'>
 								invite
 							</p>
@@ -87,9 +105,14 @@ export default function ServerDrawerMobile<T>({
 					</ul>
 
 					<ul className='bg-background/25 mt-8  divide-y divide-gray-700 rounded-md p-3 text-white'>
-						<li className='py-3 text-sm font-semibold capitalize'>
-							Edit server profile
-						</li>
+						{userId === server.owner_id && (
+							<UpdateServerDrawer
+								logo={server.logo}
+								name={server.name}
+								logoAssetId={server.logo_asset_id}
+								serverId={server.id}
+							/>
+						)}
 						<li className='py-3 text-sm font-semibold capitalize'>
 							Report raid
 						</li>
@@ -101,10 +124,21 @@ export default function ServerDrawerMobile<T>({
 						<h3 className='mt-3 text-base font-semibold text-white'>
 							Developer mode
 						</h3>
-						<button className='bg-background/25 mt-3 w-full p-2 text-left font-semibold capitalize text-white'>
+						<button
+							disabled={isCopied}
+							aria-disabled={isCopied}
+							onClick={() => copyText(server.id)}
+							className='bg-background/25 mt-3 w-full p-2 text-left font-semibold capitalize text-white disabled:cursor-not-allowed'
+						>
 							Copy server id
 						</button>
 					</div>
+					{userId === server.owner_id && (
+						<DeleteServer
+							serverId={server.id}
+							logoAssetId={server.logo_asset_id}
+						/>
+					)}
 				</div>
 			</DrawerContent>
 		</Drawer>

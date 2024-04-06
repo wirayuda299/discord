@@ -7,7 +7,10 @@ import { ServerContextProvider } from '@/providers/server';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+	subsets: ['latin'],
+	weight: ['300', '400', '600', '500', '700', '800', '900'],
+});
 
 export const metadata: Metadata = {
 	title: 'Discord',

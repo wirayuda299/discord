@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -41,7 +42,13 @@ export class ServersController {
   getMembers(@Query('serverId') id: string) {
     return this.serverService.getMemberInServer(id);
   }
-
+  @Delete('/delete')
+  deleteServer(
+    @Body('serverId') serverId: string,
+    @Body('currentSessionId') sessionId: string,
+  ) {
+    return this.serverService.deleteServer(serverId, sessionId);
+  }
   @Get('/:id')
   getServerById(@Param('id') serverId: string) {
     return this.serverService.getServerById(serverId);
@@ -51,6 +58,18 @@ export class ServersController {
   @HttpCode(201)
   generateNewInviteCode(@Body('serverId') id: string) {
     return this.serverService.updateServerCode(id);
+  }
+
+  @Patch('/update')
+  updateServer(@Req() req: Request) {
+    const { serverId, currentSessionId, name, logo, logoAssetId } = req.body;
+    return this.serverService.updateServer(
+      serverId,
+      currentSessionId,
+      name,
+      logo,
+      logoAssetId,
+    );
   }
 
   @Post('/invite-user')

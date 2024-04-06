@@ -13,7 +13,7 @@ export default function ChannelTypeItem<T extends FieldValues>({
 }) {
 	return (
 		<div className='w-full space-y-4'>
-			<h3 className='md:text-gray-1 pt-3 uppercase text-white md:pt-0'>
+			<h3 className='md:text-gray-2 pt-3 uppercase text-white md:pt-0'>
 				Channel type
 			</h3>
 			{channelTypes.map((type) => (

@@ -14,9 +14,9 @@ import { cloudinaryConfig } from 'src/config/cloudinary';
 const storage = memoryStorage();
 const configService = new ConfigService();
 
-@Controller('/api/v1/upload')
+@Controller('/api/v1/file')
 export class FileUploadController {
-  @Post('image')
+  @Post('/upload-image')
   @UseInterceptors(
     FileInterceptor('file', {
       dest: './uploads',
@@ -40,7 +40,7 @@ export class FileUploadController {
     };
   }
 
-  @Post('/delete')
+  @Post('/delete-image')
   async deleteImage(@Body('id') id: string) {
     v2.config(cloudinaryConfig(configService));
     await v2.uploader.destroy(id);

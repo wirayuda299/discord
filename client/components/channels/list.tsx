@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
@@ -27,7 +27,7 @@ export default function ChannelList<T>({
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 
 	const groupedChannels = useMemo(() => {
-		return channels?.reduce((acc: Channel[], channel) => {
+		const grouped = channels?.reduce((acc: Channel[], channel) => {
 			const category = acc.find((c) => c.channel_type === channel.channel_type);
 			if (category) {
 				category.channels.push(channel);
@@ -43,6 +43,16 @@ export default function ChannelList<T>({
 			}
 			return acc;
 		}, []);
+
+		return grouped?.sort((a, b) => {
+			if (a.channel_type === 'text' && b.channel_type !== 'text') {
+				return -1;
+			} else if (a.channel_type !== 'text' && b.channel_type === 'text') {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
 	}, [channels]);
 
 	return (
@@ -73,7 +83,11 @@ export default function ChannelList<T>({
 							mutate={mutate}
 							serverId={server?.id!}
 							type={channel?.channel_type}
-						/>
+						>
+							<button>
+								<Plus size={18} />
+							</button>
+						</CreateChannelModals>
 					</div>
 					<ul
 						className={cn(
