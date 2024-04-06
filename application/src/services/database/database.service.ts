@@ -6,7 +6,7 @@ export class DatabaseService {
   pool: Pool;
   constructor() {
     this.pool = new Pool({
-      connectionString: 'jdbc://postgres:postgres@localhost:5432/postgres',
+      connectionString: process.env.DATABASE_URL,
     });
   }
 }
