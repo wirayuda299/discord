@@ -18,8 +18,5 @@ export async function setCookie(key: string, value: string) {
 }
 
 export async function getCookies() {
-	const currentCookies = cookies().getAll();
-
-	const uuidCookies = filterUUIDCookies(currentCookies);
-	return uuidCookies[0];
+	return await cookies().toString();
 }

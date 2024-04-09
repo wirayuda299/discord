@@ -1,5 +1,4 @@
-import { useState, type ReactNode } from 'react';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 import {
@@ -12,24 +11,24 @@ import { cn } from '@/lib/utils';
 import UserAccount from '../settings/user-account';
 import EditProfile from '../settings/edit-profile';
 import { settings } from '@/constants/settings';
+import { useServerContext } from '@/providers/server';
 
 export default function UserSettingsModals({
 	children,
 }: {
 	children: ReactNode;
 }) {
-	const { user, isLoaded, isSignedIn } = useUser();
-
-	const [selectedSetting, setSelectedSetting] = useState<string>('my account');
-	if (!isLoaded || !isSignedIn) return null;
+	const { selectedSetting, setSelectedSetting } = useServerContext();
 
 	return (
 		<Dialog modal>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+			<DialogTrigger asChild className='hidden md:block'>
+				{children}
+			</DialogTrigger>
 			<DialogContent className='bg-background hidden h-screen min-w-full  border-none p-0 text-white md:block'>
 				<div className='flex size-full justify-center gap-5'>
-					<div className=' w-full max-w-[410px] bg-[#2b2d31] py-10'>
-						<aside className='sticky top-0 flex h-screen   flex-col overflow-y-auto p-5 lg:items-end'>
+					<div className=' w-full max-w-[410px] bg-[#2b2d31] py-10 max-md:max-w-96'>
+						<aside className='sticky top-0 flex h-screen  flex-col overflow-y-auto px-5 pb-16 pt-5 lg:items-end'>
 							<ul className='flex w-max flex-col gap-3'>
 								{settings.map((setting) => (
 									<li key={setting.label}>
@@ -57,28 +56,14 @@ export default function UserSettingsModals({
 						</aside>
 					</div>
 					<div className='no-scrollbar h-screen w-full overflow-y-auto px-6 py-10'>
-						{selectedSetting === 'my account' && <UserAccount user={user} />}
-						{selectedSetting === 'profiles' && (
-							<EditProfile
-								avatar={user.imageUrl}
-								username={user.username ?? ''}
-							/>
-						)}
-						{selectedSetting === 'devices' && (
-							<div className='w-full'>
-								<UserButton>
-									<UserButton.UserProfilePage label='profile'>
-										Page
-									</UserButton.UserProfilePage>
-								</UserButton>
-							</div>
-						)}
+						{selectedSetting === 'my account' && <UserAccount />}
+						{selectedSetting === 'profiles' && <EditProfile />}
 					</div>
 					<div className=' min-w-24 pt-10'>
 						<DialogClose className='border-gray-2 flex size-10 flex-col items-center justify-center rounded-full border'>
 							<X className='text-gray-2' />
 						</DialogClose>
-						<p className='text-gray-2 font-light'>ESC</p>
+						<p className='text-gray-2 pl-1 font-light'>ESC</p>
 					</div>
 				</div>
 			</DialogContent>

@@ -1,3 +1,6 @@
+import { UserPlus, ChevronRightIcon } from 'lucide-react';
+import Image from 'next/image';
+
 import {
 	Sheet,
 	SheetContent,
@@ -5,8 +8,6 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '@/components/ui/sheet';
-import { UserPlus, ChevronRightIcon } from 'lucide-react';
-import Image from 'next/image';
 
 export default function AddFriendSheet() {
 	return (

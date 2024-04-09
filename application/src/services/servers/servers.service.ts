@@ -35,6 +35,7 @@ export class ServersService {
         owner_id,
         logo_asset_id,
       };
+
       const author = await this.databaseService.pool.query(
         `select * from users where id = $1`,
         [owner_id],
@@ -67,9 +68,14 @@ export class ServersService {
 
         const serverId = server.id;
         await this.databaseService.pool.query(
-          `insert into server_profile(server_id, user_id, avatar)
-          values($1, $2, $3)`,
-          [serverId, author.rows[0].id, author.rows[0].image],
+          `insert into server_profile(server_id, user_id, avatar, username)
+          values($1, $2, $3, $4)`,
+          [
+            serverId,
+            author.rows[0].id,
+            author.rows[0].image,
+            author.rows[0].username,
+          ],
         );
         const {
           rows: [channel],
@@ -399,6 +405,65 @@ where s.id = $1`,
 
       return {
         message: 'Server updated',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getServerProfile(serverId: string, userId: string) {
+    try {
+      const serverProfile = await this.databaseService.pool.query(
+        `select * from server_profile as sp
+          where sp.server_id = $1 AND sp.user_id = $2`,
+        [serverId, userId],
+      );
+      return {
+        data: serverProfile.rows[0],
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateServerprofile(
+    serverId: string,
+    userId: string,
+    username: string,
+    avatar: string,
+    avatarAssetId: string,
+    bio: string,
+  ) {
+    try {
+      const serverProfile = await this.databaseService.pool.query(
+        `select * from server_profile as sp
+          where sp.server_id = $1 AND sp.user_id = $2`,
+        [serverId, userId],
+      );
+
+      if (serverProfile.rows.length < 1) {
+        throw new NotFoundException('Server profile not found');
+      }
+      await this.databaseService.pool.query(
+        `
+        UPDATE server_profile AS sp
+SET 
+  username = $1,
+  avatar = $2,
+  avatar_asset_id = $3,
+  bio = $4
+WHERE 
+  sp.server_id = $5 
+  AND sp.user_id = $6;
+
+      `,
+        [username, avatar, avatarAssetId, bio, serverId, userId],
+      );
+
+      return {
+        message: 'Server profile updated',
         error: false,
       };
     } catch (error) {

@@ -4,7 +4,7 @@ const nextConfig = {
     WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
     SERVER_URL: process.env.SERVER_URL,
     LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
-    LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET
+    LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
   },
   images: {
     remotePatterns: [
@@ -37,7 +37,7 @@ const nextConfig = {
         pathname: "/**/*",
         port: "",
         protocol: "https",
-      }
+      },
     ],
   },
 };

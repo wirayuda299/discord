@@ -59,7 +59,7 @@ export default function ChannelList<T>({
 		<div className='text-gray-2'>
 			{groupedChannels?.map((channel) => (
 				<div className='my-4' key={channel?.category_id}>
-					<div className='flex w-full items-center justify-between'>
+					<div className='flex w-full items-center justify-between pr-2'>
 						<div
 							onClick={() =>
 								setSelectedCategory((prev) =>
@@ -93,7 +93,7 @@ export default function ChannelList<T>({
 						className={cn(
 							'h-0 flex flex-col gap-1',
 							selectedCategory === channel?.category_name
-								? 'h-auto overflow-auto transition-all ease duration-300'
+								? 'h-auto overflow-auto [&>*:nth-child(1)]:mt-2 transition-all ease duration-300'
 								: 'overflow-hidden'
 						)}
 					>
@@ -101,7 +101,7 @@ export default function ChannelList<T>({
 							<li
 								key={c?.channel_id}
 								onClick={() => setSelectedChannel(c)}
-								className='hover:bg-background/25 group mt-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm'
+								className='hover:bg-background/25 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm'
 							>
 								<div className='flex h-max items-center justify-between'>
 									<div className='flex items-center gap-1'>

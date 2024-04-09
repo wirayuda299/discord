@@ -3,8 +3,8 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -15,12 +15,20 @@ import { UserService } from '../../services/user/user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @Patch('/update')
+  updateUser(@Req() req: Request) {
+    const { name, id, bio, image, imageAssetId } = req.body;
+
+    return this.userService.updateUser(name, id, bio, image, imageAssetId);
+  }
+
   @Post('/create')
   async createUser(@Req() req: Request) {
     const { id, username, email, image } = req.body;
 
     return this.userService.createUser(id, username, email, image);
   }
+
   @Get('/find')
   searchUser(@Query('name') name: string, @Query('id') id?: string) {
     return this.userService.searchUser(name, id);
@@ -31,16 +39,9 @@ export class UserController {
     return this.userService.findAllUser(userId);
   }
 
-  @Get(':id')
+  @Get('/:id')
   getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
-  }
-
-  @Put('/update')
-  updateUser(@Req() req: Request) {
-    const { name, id } = req.body;
-
-    return this.userService.updateUser(name, id);
   }
 
   @Delete('/delete')

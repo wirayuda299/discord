@@ -1,13 +1,29 @@
-import { UserResource } from '@clerk/types';
 import Image from 'next/image';
-import { Button } from '../ui/button';
+import { useAuth } from '@clerk/nextjs';
+import useSWR from 'swr';
 
-export default function UserAccount({
-	user,
-}: {
-	user: UserResource | null | undefined;
-}) {
-	if (!user) return null;
+import { Button } from '../ui/button';
+import { getUserById } from '@/helper/user';
+import { useServerContext } from '@/providers/server';
+
+export default function UserAccount() {
+	const { setSelectedSetting, setSelectedOption } = useServerContext();
+	const { userId } = useAuth();
+	const {
+		data: user,
+		isLoading: userLoading,
+		error: userError,
+	} = useSWR('user', async () => {
+		return getUserById(userId!!);
+	});
+
+	const handleClick = () => {
+		setSelectedSetting('profiles');
+		setSelectedOption('user');
+	};
+
+	if (userLoading || userError || !user) return null;
+
 	return (
 		<div className='flex size-full max-w-2xl flex-col p-5'>
 			<h2 className='py-2 text-lg font-semibold'>My account</h2>
@@ -16,8 +32,8 @@ export default function UserAccount({
 				<li className='flex items-center justify-between '>
 					<div className='flex gap-2'>
 						<Image
-							className='border-background aspect-auto -translate-y-3 rounded-full border-4 object-contain'
-							src={user.imageUrl}
+							className='border-background aspect-auto min-h-[90px] min-w-[90px] -translate-y-3 rounded-full border-4 object-cover'
+							src={user.image}
 							width={90}
 							height={90}
 							alt='user'
@@ -26,10 +42,10 @@ export default function UserAccount({
 							<h3 className='pt-2 text-base font-semibold text-white'>
 								{user.username}
 							</h3>
-							<p className='text-xs '>{user.createdAt?.toLocaleString()}</p>
+							<p className='text-xs '>{user.created_at?.toLocaleString()}</p>
 						</div>
 					</div>
-					<Button>Edit user profile</Button>
+					<Button onClick={handleClick}>Edit user profile</Button>
 				</li>
 				<li className='bg-background flex w-full flex-col gap-5 rounded-lg p-3'>
 					<div className='flex items-center justify-between'>
@@ -39,7 +55,10 @@ export default function UserAccount({
 							</h5>
 							<p className='text-sm text-white'>{user.username}</p>
 						</div>
-						<Button className='!bg-[#4e5058] text-sm font-medium text-white'>
+						<Button
+							onClick={handleClick}
+							className='!bg-[#4e5058] text-sm font-medium text-white'
+						>
 							Edit
 						</Button>
 					</div>
@@ -48,27 +67,15 @@ export default function UserAccount({
 							<h5 className='text-gray-2 text-sm uppercase leading-relaxed'>
 								Email
 							</h5>
-							<p className='text-sm text-white'>
-								{user.emailAddresses[0].emailAddress}
-							</p>
+							<p className='text-sm text-white'>{user.email}</p>
 						</div>
-						<Button className='!bg-[#4e5058] text-sm font-medium text-white'>
+						<Button
+							onClick={handleClick}
+							className='!bg-[#4e5058] text-sm font-medium text-white'
+						>
 							Edit
 						</Button>
 					</div>
-					{user.phoneNumbers.length >= 1 && (
-						<div className='flex items-center justify-between'>
-							<div>
-								<h5 className='text-gray-2 text-sm uppercase leading-relaxed'>
-									Phone Number
-								</h5>
-								<p className='text-sm text-white'>
-									{user.phoneNumbers[0]?.phoneNumber}
-								</p>
-							</div>
-							<Button>Edit</Button>
-						</div>
-					)}
 				</li>
 				<div className='py-5'>
 					<h5 className='text-gray-2 text-sm font-normal'>Account removal</h5>

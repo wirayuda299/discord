@@ -1,104 +1,104 @@
-'use client';
-import { Message } from '@/types/messages';
-import { useAuth } from '@clerk/nextjs';
+"use client";
+import { Message } from "@/types/messages";
+import { useAuth } from "@clerk/nextjs";
 import {
-	Dispatch,
-	FC,
-	ReactNode,
-	SetStateAction,
-	createContext,
-	useContext,
-	useEffect,
-	useState,
-} from 'react';
-import { Socket, io } from 'socket.io-client';
+  Dispatch,
+  FC,
+  ReactNode,
+  SetStateAction,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Socket, io } from "socket.io-client";
 
 export type SocketContextType = {
-	socket: Socket | null;
-	isConnected: boolean;
-	activeUsers: string[];
-	channelMessages: Message[];
-	setChannelMessages: Dispatch<SetStateAction<Message[]>>;
+  socket: Socket | null;
+  isConnected: boolean;
+  activeUsers: string[];
+  channelMessages: Message[];
+  setChannelMessages: Dispatch<SetStateAction<Message[]>>;
 };
 
 type ContextProviderProps = {
-	children: ReactNode;
+  children: ReactNode;
 };
 export const SocketContext = createContext<SocketContextType>({
-	activeUsers: [],
-	isConnected: false,
-	socket: null,
-	channelMessages: [],
-	setChannelMessages: () => {},
+  activeUsers: [],
+  isConnected: false,
+  socket: null,
+  channelMessages: [],
+  setChannelMessages: () => {},
 });
 
 export const SocketContextProvider: FC<ContextProviderProps> = ({
-	children,
+  children,
 }) => {
-	const [isConnected, setIsConnected] = useState<boolean>(false);
-	const [socket, setSocket] = useState<Socket | null>(null);
-	const [activeUsers, setActiveUsers] = useState<string[]>([]);
-	const [channelMessages, setChannelMessages] = useState<Message[]>([]);
-	const { userId } = useAuth();
-	useEffect(() => {
-		const clientSocket = io('http://localhost:3001', {
-			query: {
-				userId,
-			},
-		});
-		setSocket(clientSocket);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [activeUsers, setActiveUsers] = useState<string[]>([]);
+  const [channelMessages, setChannelMessages] = useState<Message[]>([]);
+  const { userId } = useAuth();
+  useEffect(() => {
+    const clientSocket = io("http://localhost:3001", {
+      query: {
+        userId,
+      },
+    });
+    setSocket(clientSocket);
 
-		clientSocket.on('connect', () => {
-			setIsConnected(true);
-		});
+    clientSocket.on("connect", () => {
+      setIsConnected(true);
+    });
 
-		clientSocket.on('disconnect', () => {
-			setIsConnected(false);
-		});
+    clientSocket.on("disconnect", () => {
+      setIsConnected(false);
+    });
 
-		return () => {
-			clientSocket.disconnect();
-		};
-	}, [userId]);
+    return () => {
+      clientSocket.disconnect();
+    };
+  }, [userId]);
 
-	useEffect(() => {
-		if (!socket) return;
-		socket.on('set-active-users', (data) => {
-			setActiveUsers(data);
-		});
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("set-active-users", (data) => {
+      setActiveUsers(data);
+    });
 
-		socket.on('set-message', ({ msg }) => {
-			console.log(msg);
+    socket.on("set-message", ({ msg }) => {
+      console.log(msg);
 
-			setChannelMessages((prev) => [...prev, msg]);
-		});
+      setChannelMessages((prev) => [...prev, msg]);
+    });
 
-		socket.on('messages-loaded', (data) => {
-			setChannelMessages((prev) => {
-				const newMessages = data.filter(
-					(msg: { id: string }) =>
-						!prev.some((prevMsg) => prevMsg.id === msg.id)
-				);
-				return [...prev, ...newMessages];
-			});
-		});
-	}, [socket]);
+    socket.on("messages-loaded", (data) => {
+      setChannelMessages((prev) => {
+        const newMessages = data.filter(
+          (msg: { id: string }) =>
+            !prev.some((prevMsg) => prevMsg.id === msg.id),
+        );
+        return [...prev, ...newMessages];
+      });
+    });
+  }, [socket]);
 
-	return (
-		<SocketContext.Provider
-			value={{
-				setChannelMessages,
-				channelMessages,
-				activeUsers,
-				isConnected,
-				socket,
-			}}
-		>
-			{children}
-		</SocketContext.Provider>
-	);
+  return (
+    <SocketContext.Provider
+      value={{
+        setChannelMessages,
+        channelMessages,
+        activeUsers,
+        isConnected,
+        socket,
+      }}
+    >
+      {children}
+    </SocketContext.Provider>
+  );
 };
 
 export function useSocketContext() {
-	return useContext(SocketContext);
+  return useContext(SocketContext);
 }

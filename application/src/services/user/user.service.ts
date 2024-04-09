@@ -70,33 +70,61 @@ export class UserService {
       if (user.rows.length < 1) throw new NotFoundException('User not found');
 
       return {
-        data: user.rows,
+        data: user.rows[0],
         error: false,
       };
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }
 
-  async updateUser(name: string, id: string) {
+  async updateUser(
+    name: string,
+    id: string,
+    bio: string,
+    image?: string,
+    imageAssetId?: string,
+  ) {
     try {
-      const idData = this.validationService.validate(idSchema, id);
+      const user = await this.getUserById(id);
 
-      const user = await this.getUserById(idData);
-      if (user.status !== 404) {
+      if (user.status === 404) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (image) {
         await this.databaseService.pool.query(
-          `update users set username = $1 where id = $2`,
-          [name, id],
+          `update users
+            set username = $1,
+            image = $2,
+            image_asset_id = $3,
+            bio = $4
+            where id = $5`,
+          [name, image, imageAssetId, bio, id],
         );
 
         return {
-          message: 'Updated',
+          message: 'User updated',
           error: false,
         };
       } else {
-        throw new NotFoundException('User not found');
+        await this.databaseService.pool.query(
+          `update users
+            set username = $1,
+                bio = $2
+            where id = $3`,
+          [name, bio, id],
+        );
+        return {
+          message: 'User updated',
+          error: false,
+        };
       }
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }

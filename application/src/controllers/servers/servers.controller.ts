@@ -11,11 +11,14 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { ServersService } from 'src/services/servers/servers.service';
 
 @Controller('/api/v1/servers')
+@UseGuards(AuthGuard)
 export class ServersController {
   constructor(private serverService: ServersService) {}
 
@@ -27,6 +30,30 @@ export class ServersController {
     @Body('logoAssetId') logoAssetId: string,
   ) {
     return this.serverService.createServer(name, logo, owner, logoAssetId);
+  }
+
+  @Get('/server-profile')
+  getServerProfile(
+    @Query('serverId') id: string,
+    @Query('userId') user_id: string,
+  ) {
+    return this.serverService.getServerProfile(id, user_id);
+  }
+
+  @Patch('/update-server-profile')
+  updateServerProfile(@Req() req: Request) {
+    const { serverId, userId, username, avatar, avatarAssetId, bio } = req.body;
+
+    console.log(req.body);
+
+    return this.serverService.updateServerprofile(
+      serverId,
+      userId,
+      username,
+      avatar,
+      avatarAssetId,
+      bio,
+    );
   }
 
   @Get('all-servers')

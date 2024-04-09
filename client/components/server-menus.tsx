@@ -1,4 +1,6 @@
 import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
+import type { KeyedMutator } from 'swr';
+
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -6,8 +8,8 @@ import {
 	DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import CreateChannelModals from './modals/create-channel';
-import { KeyedMutator } from 'swr';
 import UserSettingsModals from './modals/user-settings';
+import { useServerContext } from '@/providers/server';
 
 export default function ServerMenu<T>({
 	serverName,
@@ -18,17 +20,26 @@ export default function ServerMenu<T>({
 	serverId: string;
 	mutate: KeyedMutator<T>;
 }) {
+	const { setSelectedSetting, setSelectedOption } = useServerContext();
 	if (!serverName) return null;
+
+	const handleClick = (setting: string) => {
+		setSelectedSetting(setting);
+		setSelectedOption('server');
+	};
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger className='hidden focus-visible:outline-none md:block'>
-				<div className='border-foreground text-gray-2 flex w-full items-center justify-between gap-2 truncate border-b-2 pb-2 text-base font-semibold'>
-					<p className='truncate text-wrap'>{serverName}</p>
-					<Ellipsis color='#fff' size={18} />
+			<DropdownMenuTrigger
+				asChild
+				className='hidden focus-visible:outline-none md:block'
+			>
+				<div className='border-foreground text-gray-2 bg-background sticky top-0 !flex min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 px-2 text-base font-semibold'>
+					<p className='truncate text-wrap'>{serverName ?? ''}</p>
+					<Ellipsis className='text-gray-2' size={18} />
 				</div>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className='flex w-full min-w-[240px] flex-col gap-3 rounded border-none bg-black p-2 text-white shadow-none'>
+			<DropdownMenuContent className='hidden w-full min-w-[240px] flex-col gap-3 rounded border-none bg-black p-2 text-white shadow-none md:flex'>
 				<DropdownMenuItem className='hover:!bg-primary border-b-foreground text-gray-2 flex items-center justify-between border-b !bg-black text-xs font-semibold capitalize hover:!text-white'>
 					<span>server boost</span>
 					<svg
@@ -64,8 +75,11 @@ export default function ServerMenu<T>({
 					</div>
 				</CreateChannelModals>
 				<UserSettingsModals>
-					<div className='hover:!bg-primary text-gray-2 group flex items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize hover:!text-white'>
-						<span>edit server </span>
+					<div
+						onClick={() => handleClick('profiles')}
+						className='hover:!bg-primary text-gray-2 group !flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize hover:!text-white'
+					>
+						<span>edit server profile </span>
 						<Pencil size={18} className='text-gray-2 group-hover:text-white' />
 					</div>
 				</UserSettingsModals>

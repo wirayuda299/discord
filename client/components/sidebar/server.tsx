@@ -3,36 +3,46 @@
 import useSWR from 'swr';
 import { useParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { useUser } from '@clerk/nextjs';
+import Image from 'next/image';
 
 import { serverSidebarLinks } from '@/constants/sidebarLinks';
 import ServerSidebarLinkItem from './server-sidebar-links';
-import { getServerById } from '@/actions/server';
 import ChannelList from '../channels/list';
 import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
 import ServerMenu from '../server-menus';
+import { getServerById } from '@/helper/server';
 
 export default function ServerSidebar() {
 	const params = useParams();
+	const { user, isLoaded, isSignedIn } = useUser();
 
-	const { data, mutate, isLoading } = useSWR('/server/' + params.slug[1], () =>
-		params.slug && params.slug[1]
-			? getServerById(params.slug[1] as string)
-			: null
+	const { data, mutate, isLoading, error } = useSWR(
+		'/server/' + params.slug[1],
+		async () => {
+			return params.slug && params.slug[1]
+				? getServerById(params.slug[1] as string)
+				: null;
+		}
 	);
+
+	if (error) return <p>{error.message}</p>;
 
 	return (
 		<ul
 			className={cn(
-				'min-w-[255px] flex-col gap-3 p-3 border-r-2 border-r-foreground  md:flex md:bg-[#2b2d31] h-screen overflow-y-auto',
+				'min-w-[255px] relative flex-col gap-3 border-r-2 border-r-foreground  md:flex md:bg-[#2b2d31] h-screen overflow-y-auto',
 				data ? 'hidden md:flex' : 'flex'
 			)}
 		>
-			<ServerMenu
-				serverName={data?.server[0].name ?? ''}
-				mutate={mutate}
-				serverId={data?.server[0].id ?? ''}
-			/>
+			{!isLoading && (
+				<ServerMenu
+					serverName={(data && data?.server?.[0].name) || ''}
+					mutate={mutate}
+					serverId={(data && data?.server?.[0].id) || ''}
+				/>
+			)}
 			<form className='my-3 w-full md:hidden'>
 				<input
 					type='search'
@@ -61,6 +71,28 @@ export default function ServerSidebar() {
 					/>
 				</Suspense>
 			)}
+			<div
+				className={cn(
+					'absolute bottom-0 left-0 h-16 flex items-center w-full bg-black/40 px-3 text-white',
+					(!isLoaded || !isSignedIn) && 'animate-pulse'
+				)}
+			>
+				{isLoaded && isSignedIn && (
+					<div className='flex items-center gap-3'>
+						<Image
+							src={user?.imageUrl}
+							width={40}
+							className='aspect-auto min-h-10 min-w-10 rounded-full  object-cover '
+							height={40}
+							alt='user'
+						/>
+						<div>
+							<h3 className='text-sm capitalize'>{user?.username}</h3>
+							<p className='text-gray-2 text-xs'>invisible</p>
+						</div>
+					</div>
+				)}
+			</div>
 		</ul>
 	);
 }

@@ -1,11 +1,16 @@
 import { Compass } from 'lucide-react';
 import Image from 'next/image';
+import { auth } from '@clerk/nextjs';
+
 import ServerList from './server-list';
 import CreateServerModal from '../create-server/modal';
-import { getAllServerCreatedByCurrentUser } from '@/actions/server';
+import { getAllServerCreatedByCurrentUser } from '@/helper/server';
 
 export default async function Sidebar() {
-	const servers = await getAllServerCreatedByCurrentUser();
+	const { userId } = auth();
+	if (!userId) return null;
+
+	const servers = await getAllServerCreatedByCurrentUser(userId);
 
 	return (
 		<aside className='md:bg-foreground border-r-foreground flex size-full min-h-screen  min-w-[80px] max-w-[80px] shrink flex-col items-center overflow-y-auto border-r-2 bg-black/50 p-4'>
