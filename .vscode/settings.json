@@ -7,5 +7,18 @@
 	},
 	"[typescriptreact]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+	},
+	"javascript.format.insertSpaceAfterConstructor": true,
+	"javascript.format.semicolons": "insert",
+	"javascript.inlayHints.enumMemberValues.enabled": true,
+	"javascript.inlayHints.functionLikeReturnTypes.enabled": true,
+	"javascript.inlayHints.propertyDeclarationTypes.enabled": true,
+	"javascript.inlayHints.parameterTypes.enabled": true,
+	"javascript.referencesCodeLens.enabled": true,
+	"javascript.suggest.completeFunctionCalls": true,
+	"js/ts.implicitProjectConfig.checkJs": true,
+	"editor.cursorBlinking": "smooth",
+	"editor.cursorSmoothCaretAnimation": "on",
+	"editor.formatOnSaveMode": "modifications",
+	"editor.formatOnType": true
 }

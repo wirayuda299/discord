@@ -1,23 +1,25 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 
-import { ApiRequest } from "@/utils/api";
+import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
 
 export async function pinMessage(
-  channelId: string,
-  msgId: string,
-  path: string,
+	channelId: string,
+	msgId: string,
+	pinnedBy: string,
+	path: string
 ) {
-  try {
-    await api.post("/messages/pin-message", {
-      channelId,
-      messageId: msgId,
-    });
-    revalidatePath(path);
-  } catch (error) {
-    throw error;
-  }
+	try {
+		await api.post('/messages/pin-message', {
+			channelId,
+			messageId: msgId,
+			pinnedBy,
+		});
+		revalidatePath(path);
+	} catch (error) {
+		throw error;
+	}
 }

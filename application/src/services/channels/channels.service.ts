@@ -11,7 +11,8 @@ export class ChannelsService {
         `select * from channels as c
 left join channel_messages as cm on cm.channel_id = c.id 
 left join messages as m on m.id = cm.message_id 
-left join channel_pinned_messages as cpm on cpm.channel_id  = c.id 
+left join channel_pinned_messages as cpm on cpm.channel_id  = c.id
+
 where c.id = $1`,
         [id],
       );

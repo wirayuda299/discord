@@ -1,10 +1,13 @@
-import ClerkProviders from '@/providers/clerk';
+import { ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
 import type { ReactNode } from 'react';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
 	return (
 		<div className='flex h-screen items-center justify-center'>
-			<ClerkProviders>{children}</ClerkProviders>
+			<ClerkLoading>
+				<div className='border-primary size-24 animate-spin rounded-full border-t'></div>
+			</ClerkLoading>
+			<ClerkLoaded>{children}</ClerkLoaded>
 		</div>
 	);
 }

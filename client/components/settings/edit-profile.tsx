@@ -14,17 +14,26 @@ import { useServerContext } from '@/providers/server';
 export default function EditProfile() {
 	const params = useParams();
 	const { userId } = useAuth();
-	const { selectedOption, setSelectedOption } = useServerContext();
+	const {
+		serversState: { selectedOption },
+		setServerStates,
+	} = useServerContext();
 	const {
 		data: user,
 		isLoading: userLoading,
 		error: userError,
-		mutate,
 	} = useSWR('user', () => getUserById(userId!!));
 
 	const { data: serverProfile, isLoading } = useSWR('server-profile', () =>
 		getServerProfile(params.slug[1], userId!!)
 	);
+
+	function handleChange(option: string) {
+		setServerStates((prev) => ({
+			...prev,
+			selectedOption: option,
+		}));
+	}
 
 	if (!user || userLoading || userError || isLoading || !serverProfile)
 		return (
@@ -43,13 +52,13 @@ export default function EditProfile() {
 				)}
 			>
 				<li
-					onClick={() => setSelectedOption('user')}
+					onClick={() => handleChange('user')}
 					className='text-gray-2 cursor-pointer text-sm font-normal uppercase hover:text-white '
 				>
 					user profile
 				</li>
 				<li
-					onClick={() => setSelectedOption('server')}
+					onClick={() => handleChange('server')}
 					className='text-gray-2 cursor-pointer text-sm font-normal uppercase hover:text-white '
 				>
 					server profile
@@ -89,8 +98,6 @@ export default function EditProfile() {
 			)}
 			<UserUpdateForm
 				user={user}
-				// @ts-ignore
-				mutate={mutate}
 				serverProfile={serverProfile}
 				selectedOption={selectedOption}
 			/>

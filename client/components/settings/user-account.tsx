@@ -7,7 +7,7 @@ import { getUserById } from '@/helper/user';
 import { useServerContext } from '@/providers/server';
 
 export default function UserAccount() {
-	const { setSelectedSetting, setSelectedOption } = useServerContext();
+	const { setServerStates } = useServerContext();
 	const { userId } = useAuth();
 	const {
 		data: user,
@@ -18,19 +18,22 @@ export default function UserAccount() {
 	});
 
 	const handleClick = () => {
-		setSelectedSetting('profiles');
-		setSelectedOption('user');
+		setServerStates((prev) => ({
+			...prev,
+			selectedSetting: 'profiles',
+			selectedOption: 'user',
+		}));
 	};
 
 	if (userLoading || userError || !user) return null;
 
 	return (
-		<div className='flex size-full max-w-2xl flex-col p-5'>
+		<div className='flex size-full max-w-2xl flex-col '>
 			<h2 className='py-2 text-lg font-semibold'>My account</h2>
 			<div className='min-h-[120px] w-full rounded bg-[#020505]'></div>
 			<ul className='bg-[#1E1F22] px-3'>
-				<li className='flex items-center justify-between '>
-					<div className='flex gap-2'>
+				<li className='flex flex-wrap items-center justify-between gap-3 '>
+					<div className='inline-flex gap-2'>
 						<Image
 							className='border-background aspect-auto min-h-[90px] min-w-[90px] -translate-y-3 rounded-full border-4 object-cover'
 							src={user.image}
@@ -45,7 +48,13 @@ export default function UserAccount() {
 							<p className='text-xs '>{user.created_at?.toLocaleString()}</p>
 						</div>
 					</div>
-					<Button onClick={handleClick}>Edit user profile</Button>
+					<Button
+						size={'sm'}
+						className='mb-3 text-sm lg:mb-0'
+						onClick={handleClick}
+					>
+						Edit user profile
+					</Button>
 				</li>
 				<li className='bg-background flex w-full flex-col gap-5 rounded-lg p-3'>
 					<div className='flex items-center justify-between'>

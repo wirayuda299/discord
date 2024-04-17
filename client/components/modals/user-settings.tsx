@@ -1,5 +1,7 @@
 import { type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useClerk } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 import {
 	Dialog,
@@ -18,7 +20,12 @@ export default function UserSettingsModals({
 }: {
 	children: ReactNode;
 }) {
-	const { selectedSetting, setSelectedSetting } = useServerContext();
+	const {
+		serversState: { selectedSetting },
+		setServerStates,
+	} = useServerContext();
+	const { signOut } = useClerk();
+	const router = useRouter();
 
 	return (
 		<Dialog modal>
@@ -26,8 +33,8 @@ export default function UserSettingsModals({
 				{children}
 			</DialogTrigger>
 			<DialogContent className='bg-background hidden h-screen min-w-full  border-none p-0 text-white md:block'>
-				<div className='flex size-full justify-center gap-5'>
-					<div className=' w-full max-w-[410px] bg-[#2b2d31] py-10 max-md:max-w-96'>
+				<div className='flex size-full justify-center gap-2 lg:gap-5'>
+					<div className=' bg-[#2b2d31]  py-10 md:min-w-[250px] xl:min-w-[410px]'>
 						<aside className='sticky top-0 flex h-screen  flex-col overflow-y-auto px-5 pb-16 pt-5 lg:items-end'>
 							<ul className='flex w-max flex-col gap-3'>
 								{settings.map((setting) => (
@@ -38,7 +45,14 @@ export default function UserSettingsModals({
 										<ul className='flex flex-col gap-1'>
 											{setting.items.map((item) => (
 												<li
-													onClick={() => setSelectedSetting(item)}
+													onClick={() => {
+														setServerStates((prev) => {
+															return {
+																...prev,
+																selectedSetting: item,
+															};
+														});
+													}}
 													className={cn(
 														'hover:bg-background min-w-[200px] cursor-pointer text-nowrap rounded p-2 text-sm font-medium capitalize text-[#b5b8bc] transition ease hover:text-[#ced0d3]',
 														selectedSetting === item &&
@@ -52,6 +66,12 @@ export default function UserSettingsModals({
 										</ul>
 									</li>
 								))}
+								<li
+									onClick={() => signOut().then(() => router.push('/sign-in'))}
+									className='hover:bg-background ease min-w-[200px] cursor-pointer text-nowrap rounded p-2 text-sm font-medium capitalize text-[#b5b8bc] transition hover:text-[#ced0d3]'
+								>
+									Sign Out
+								</li>
 							</ul>
 						</aside>
 					</div>

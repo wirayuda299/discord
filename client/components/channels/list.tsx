@@ -1,15 +1,18 @@
 'use client';
 
+import Image from 'next/image';
+import type { KeyedMutator } from 'swr';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
-import Image from 'next/image';
-import { useMemo, useState } from 'react';
-import type { KeyedMutator } from 'swr';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import { Channel } from '@/types/channels';
+import { Servers } from '@/types/server';
 
 import { cn } from '@/lib/utils';
 import { useServerContext } from '@/providers/server';
-import { Channel } from '@/types/channels';
-import { Servers } from '@/types/server';
+
 import CreateChannelModals from '../modals/create-channel';
 import AddUserDrawer from '../drawer/add-user';
 
@@ -23,8 +26,13 @@ export default function ChannelList<T>({
 	mutate: KeyedMutator<T>;
 }) {
 	const { userId } = useAuth();
-	const { setSelectedChannel } = useServerContext();
+	const {
+		serversState: { selectedChannel },
+		setServerStates,
+	} = useServerContext();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
+	const router = useRouter();
+	const params = useParams();
 
 	const groupedChannels = useMemo(() => {
 		const grouped = channels?.reduce((acc: Channel[], channel) => {
@@ -55,6 +63,20 @@ export default function ChannelList<T>({
 		});
 	}, [channels]);
 
+	useEffect(() => {
+		const channel = channels.find((c) => c.channel_id === params.slug[2]);
+		setServerStates((prev) => ({
+			...prev,
+			selectedChannel: channel || null,
+		}));
+		return () => {
+			setServerStates((prev) => ({
+				...prev,
+				selectedChannel: null,
+			}));
+		};
+	}, [params.slug]);
+
 	return (
 		<div className='text-gray-2'>
 			{groupedChannels?.map((channel) => (
@@ -71,7 +93,7 @@ export default function ChannelList<T>({
 							<ChevronRight
 								size={18}
 								className={cn(
-									' transition-all ease duration-500',
+									' transition-all ease duration-300',
 									selectedCategory === channel?.category_name && 'rotate-90'
 								)}
 							/>
@@ -92,7 +114,8 @@ export default function ChannelList<T>({
 					<ul
 						className={cn(
 							'h-0 flex flex-col gap-1',
-							selectedCategory === channel?.category_name
+							selectedCategory === channel?.category_name ||
+								selectedChannel?.channel_id === channel.channel_id
 								? 'h-auto overflow-auto [&>*:nth-child(1)]:mt-2 transition-all ease duration-300'
 								: 'overflow-hidden'
 						)}
@@ -100,8 +123,20 @@ export default function ChannelList<T>({
 						{channel?.channels?.map((c) => (
 							<li
 								key={c?.channel_id}
-								onClick={() => setSelectedChannel(c)}
-								className='hover:bg-background/25 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm'
+								onClick={() => {
+									setServerStates((prev) => {
+										return {
+											...prev,
+											selectedChannel: c,
+										};
+									});
+									router.push(`/server/${server?.id}/${c.channel_id}`);
+								}}
+								className={cn(
+									'hover:bg-background/80 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm',
+									c.channel_id === selectedChannel?.channel_id &&
+										'bg-background/80'
+								)}
 							>
 								<div className='flex h-max items-center justify-between'>
 									<div className='flex items-center gap-1'>
@@ -113,7 +148,18 @@ export default function ChannelList<T>({
 												alt='volume icon'
 											/>
 										)}
-										<span>#{c?.channel_name}</span>
+										<div className='flex items-center gap-1'>
+											{c.channel_type !== 'audio' && (
+												<Image
+													src={'/icons/hashtag.svg'}
+													width={24}
+													height={24}
+													alt={'hashtag'}
+													key={'hashtag'}
+												/>
+											)}
+											<span>{c?.channel_name}</span>
+										</div>
 									</div>
 									{userId === server?.owner_id && (
 										<button className='opacity-0 group-hover:opacity-100'>

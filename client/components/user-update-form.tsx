@@ -1,11 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import Image from 'next/image';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUser } from '@clerk/nextjs';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { KeyedMutator } from 'swr';
 
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -18,6 +16,8 @@ import { User } from '@/types/user';
 import { ServerProfile } from '@/types/server';
 import { getCookies } from '@/helper/cookies';
 import { updateServerProfile } from '@/helper/server';
+import UserInfo from './user-info';
+import { useSWRConfig } from 'swr';
 
 const schema = z.object({
 	username: z.string().min(4),
@@ -29,13 +29,13 @@ export default function UserUpdateForm({
 	selectedOption,
 	user,
 	serverProfile,
-	mutate,
 }: {
 	user: User;
 	serverProfile: ServerProfile;
 	selectedOption: string;
-	mutate: KeyedMutator<User | ServerProfile>;
 }) {
+	const { mutate } = useSWRConfig();
+
 	const form = useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -113,7 +113,6 @@ export default function UserUpdateForm({
 				}
 
 				toast.success('User updated');
-				// @ts-ignore
 				mutate('user');
 				await currentUser?.reload();
 			}
@@ -144,7 +143,6 @@ export default function UserUpdateForm({
 					);
 				}
 				toast.success('Server profile updated');
-				// @ts-ignore
 				mutate('server-profile');
 			}
 		} catch (error) {
@@ -203,12 +201,12 @@ export default function UserUpdateForm({
 						name='avatar'
 						render={({ field }) => (
 							<FormItem className='border-b-foreground border-b'>
-								<FormLabel>Avatar</FormLabel>
+								<FormLabel className='pb-2'>Avatar</FormLabel>
 								<FormControl>
 									<div>
 										<Label
 											htmlFor='avatar'
-											className='bg-primary mt-1 rounded-md p-3'
+											className='bg-primary mt-1 cursor-pointer rounded-md p-3'
 										>
 											Change avatar
 										</Label>
@@ -299,64 +297,12 @@ export default function UserUpdateForm({
 					</Button>
 				</form>
 			</Form>
-			<div className='h-max rounded-lg bg-[#1E1F22]'>
-				<div className='h-20 w-full rounded-t-md bg-black'></div>
-				<div className='flex items-center justify-between px-5'>
-					{selectedOption === 'user' ? (
-						<Image
-							className='border-background aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 object-cover'
-							src={preview && preview.avatar ? preview?.avatar : data.avatar}
-							width={90}
-							height={90}
-							alt='user'
-						/>
-					) : (
-						<Image
-							className='border-background aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 object-cover'
-							src={preview && preview.avatar ? preview?.avatar : data.avatar}
-							width={90}
-							height={90}
-							alt='user'
-						/>
-					)}
-					<div className='aspect-square size-8 rounded-md bg-black p-1'>
-						<div className='size-full rounded-md bg-green-600 text-center'>
-							#
-						</div>
-					</div>
-				</div>
-				<div className='w-full p-3'>
-					<div className='w-full rounded-md bg-black p-5 '>
-						<div className='border-b-foreground border-b  pb-4'>
-							<h3 className='text-wrap break-words text-sm font-semibold'>
-								{data.username}
-							</h3>
-							<p className='text-wrap break-words text-sm'>{data.bio}</p>
-						</div>
-						<div className='pt-3'>
-							<h4 className='text-xs font-semibold uppercase'>
-								Customizing user profile
-							</h4>
-							<div className='flex items-center gap-3'>
-								<div className='mt-2 w-max rounded-md bg-blue-600 p-2'>
-									<Image
-										src={'/images/pencil.png'}
-										width={50}
-										height={50}
-										alt='pencil'
-									/>
-								</div>
-								<div>
-									<h5 className='text-sm font-semibold'>User profile</h5>
-								</div>
-							</div>
-							<Button className='mt-3 w-full !bg-[#4e5058]'>
-								Example button
-							</Button>
-						</div>
-					</div>
-				</div>
-			</div>
+			<UserInfo
+				selectedOption={selectedOption}
+				avatar={preview && preview.avatar ? preview?.avatar : data.avatar}
+				bio={data.bio ?? ''}
+				username={data.username}
+			/>
 		</div>
 	);
 }

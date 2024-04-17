@@ -11,10 +11,11 @@ import ServerSidebarLinkItem from './server-sidebar-links';
 import ChannelList from '../channels/list';
 import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
-import ServerMenu from '../server-menus';
+import ServerMenu from '../channels/server-menus';
 import { getServerById } from '@/helper/server';
+import error from 'next/error';
 
-export default function ServerSidebar() {
+export default function ServerSidebar(props) {
 	const params = useParams();
 	const { user, isLoaded, isSignedIn } = useUser();
 
@@ -27,53 +28,61 @@ export default function ServerSidebar() {
 		}
 	);
 
-	if (error) return <p>{error.message}</p>;
+	if (error) return <p>{JSON.stringify(error)}</p>;
+	console.log(props);
 
 	return (
 		<ul
 			className={cn(
-				'min-w-[255px] relative flex-col gap-3 border-r-2 border-r-foreground  md:flex md:bg-[#2b2d31] h-screen overflow-y-auto',
+				'min-w-[255px] relative flex-col gap-3 border-r-2 border-r-foreground justify-between no-scrollbar md:flex md:bg-[#2b2d31] h-full min-h-screen overflow-y-auto',
 				data ? 'hidden md:flex' : 'flex'
 			)}
 		>
-			{!isLoading && (
-				<ServerMenu
-					serverName={(data && data?.server?.[0].name) || ''}
-					mutate={mutate}
-					serverId={(data && data?.server?.[0].id) || ''}
-				/>
-			)}
-			<form className='my-3 w-full md:hidden'>
-				<input
-					type='search'
-					className='bg-foreground w-full rounded-md py-1 pl-2 placeholder:text-xs'
-					placeholder='Find or start conversation '
-				/>
-			</form>
-
-			{serverSidebarLinks.map((item) => (
-				<ServerSidebarLinkItem {...item} key={item.label} />
-			))}
-			{isLoading ? (
-				[1, 2, 3, 4].map((c) => (
-					<div key={c} className='bg-background/25 h-8 w-full rounded-md'></div>
-				))
-			) : (
-				<Suspense
-					fallback={
-						<div className='bg-secondary h-4 w-full rounded-full'></div>
-					}
-				>
-					<ChannelList
-						channels={data?.channels ?? []}
-						server={data && data.server && (data.server[0] as Servers)}
+			<div className='size-full'>
+				{!isLoading && (
+					<ServerMenu
+						serverName={(data && data?.server?.[0].name) || ''}
 						mutate={mutate}
+						serverId={(data && data?.server?.[0].id) || ''}
 					/>
-				</Suspense>
-			)}
+				)}
+				<form className='my-3 w-full md:hidden'>
+					<input
+						type='search'
+						className='bg-foreground w-full rounded-md py-1 pl-2 placeholder:text-xs'
+						placeholder='Find or start conversation '
+					/>
+				</form>
+
+				{serverSidebarLinks.map((item) => (
+					<ServerSidebarLinkItem {...item} key={item.label} />
+				))}
+				{isLoading ? (
+					<div className='mt-3 flex flex-col gap-5 p-3'>
+						{[1, 2, 3, 4].map((c) => (
+							<div
+								key={c}
+								className='bg-background/25 h-8 w-full rounded-md'
+							></div>
+						))}
+					</div>
+				) : (
+					<Suspense
+						fallback={
+							<div className='bg-secondary h-4 w-full rounded-full'></div>
+						}
+					>
+						<ChannelList
+							channels={data?.channels ?? []}
+							server={data && data.server && (data.server[0] as Servers)}
+							mutate={mutate}
+						/>
+					</Suspense>
+				)}
+			</div>
 			<div
 				className={cn(
-					'absolute bottom-0 left-0 h-16 flex items-center w-full bg-black/40 px-3 text-white',
+					'sticky !bottom-0 left-0 min-h-16 flex items-center w-full bg-[#232428] px-3 text-white',
 					(!isLoaded || !isSignedIn) && 'animate-pulse'
 				)}
 			>

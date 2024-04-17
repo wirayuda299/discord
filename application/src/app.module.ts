@@ -19,6 +19,10 @@ import { MessagesController } from './controllers/messages/messages.controller';
 import { InvitationService } from './services/invitation/invitation.service';
 import { InvitationController } from './controllers/invitation/invitation.controller';
 import { DatabaseService } from './services/database/database.service';
+import { ReactionsService } from './services/reactions/reactions.service';
+import { ReactionsController } from './controllers/reactions/reactions.controller';
+import { ThreadsService } from './services/threads/threads.service';
+import { ThreadsController } from './controllers/threads/threads.controller';
 
 @Module({
   imports: [
@@ -37,6 +41,8 @@ import { DatabaseService } from './services/database/database.service';
     ChannelsController,
     MessagesController,
     InvitationController,
+    ReactionsController,
+    ThreadsController,
   ],
   providers: [
     UserService,
@@ -48,6 +54,8 @@ import { DatabaseService } from './services/database/database.service';
     MessagesService,
     InvitationService,
     DatabaseService,
+    ReactionsService,
+    ThreadsService,
   ],
 })
 export class AppModule {}

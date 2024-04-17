@@ -11,14 +11,11 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { ServersService } from 'src/services/servers/servers.service';
 
 @Controller('/api/v1/servers')
-@UseGuards(AuthGuard)
 export class ServersController {
   constructor(private serverService: ServersService) {}
 

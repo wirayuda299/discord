@@ -1,15 +1,16 @@
 import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
 import type { KeyedMutator } from 'swr';
 
+import { useServerContext } from '@/providers/server';
+
 import {
 	DropdownMenu,
-	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import CreateChannelModals from './modals/create-channel';
-import UserSettingsModals from './modals/user-settings';
-import { useServerContext } from '@/providers/server';
+	DropdownMenuContent,
+} from '../ui/dropdown-menu';
+import CreateChannelModals from '../modals/create-channel';
+import UserSettingsModals from '../modals/user-settings';
 
 export default function ServerMenu<T>({
 	serverName,
@@ -20,12 +21,15 @@ export default function ServerMenu<T>({
 	serverId: string;
 	mutate: KeyedMutator<T>;
 }) {
-	const { setSelectedSetting, setSelectedOption } = useServerContext();
+	const { setServerStates } = useServerContext();
 	if (!serverName) return null;
 
 	const handleClick = (setting: string) => {
-		setSelectedSetting(setting);
-		setSelectedOption('server');
+		setServerStates((prev) => ({
+			...prev,
+			selectedSetting: setting,
+			selectedOption: 'server',
+		}));
 	};
 
 	return (
@@ -36,7 +40,7 @@ export default function ServerMenu<T>({
 			>
 				<div className='border-foreground text-gray-2 bg-background sticky top-0 !flex min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 px-2 text-base font-semibold'>
 					<p className='truncate text-wrap'>{serverName ?? ''}</p>
-					<Ellipsis className='text-gray-2' size={18} />
+					<Ellipsis className='text-gray-2 cursor-pointer' size={18} />
 				</div>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className='hidden w-full min-w-[240px] flex-col gap-3 rounded border-none bg-black p-2 text-white shadow-none md:flex'>

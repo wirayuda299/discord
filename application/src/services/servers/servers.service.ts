@@ -155,6 +155,14 @@ export class ServersService {
         [ownerId],
       );
 
+      for (const server of servers.rows) {
+        const serverProfile = await this.databaseService.pool.query(
+          `select * from server_profile where user_id = $1 and server_id = $2`,
+          [ownerId, server.id],
+        );
+        server.serverProfile = serverProfile.rows[0];
+      }
+
       return {
         data: servers.rows,
         error: false,

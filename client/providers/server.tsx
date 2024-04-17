@@ -1,58 +1,67 @@
 'use client';
-import { Channel } from '@/types/channels';
-import { Servers } from '@/types/server';
 import {
+	useMemo,
 	useState,
-	Dispatch,
 	ReactNode,
 	useContext,
 	createContext,
+	Dispatch,
 	SetStateAction,
 } from 'react';
 
-export type ServerContextType = {
+import { Channel } from '@/types/channels';
+import { Servers } from '@/types/server';
+import { Message } from '@/types/messages';
+
+export type ServerStates = {
 	selectedChannel: Channel | null;
+	selectedServer: Servers | null;
 	selectedSetting: string;
 	selectedOption: string;
-	setSelectedOption: Dispatch<SetStateAction<string>>;
-	setSelectedSetting: Dispatch<SetStateAction<string>>;
-	setSelectedChannel: Dispatch<SetStateAction<Channel | null>>;
-	selectedServer: Servers | null;
-	setSelectedServer: Dispatch<SetStateAction<Servers | null>>;
+	selectedMessage: Message | null;
 };
 
-type ContextProviderProps = {
-	children: ReactNode;
+export type ServerContextType = {
+	serversState: ServerStates;
+	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 };
 
 const ServerContext = createContext<ServerContextType>({
-	selectedChannel: null,
-	selectedServer: null,
-	setSelectedServer: () => {},
-	setSelectedChannel: () => {},
-	selectedSetting: 'my account',
-	setSelectedSetting: () => {},
-	selectedOption: 'user',
-	setSelectedOption: () => {},
+	serversState: {
+		selectedChannel: null,
+		selectedServer: null,
+		selectedSetting: 'my account',
+		selectedOption: 'user',
+		selectedMessage: null,
+	},
+	setServerStates: () => {},
 });
 
-export const ServerContextProvider = ({ children }: ContextProviderProps) => {
-	const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-	const [selectedServer, setSelectedServer] = useState<Servers | null>(null);
-	const [selectedSetting, setSelectedSetting] = useState<string>('my account');
-	const [selectedOption, setSelectedOption] = useState<string>('user');
+export const ServerContextProvider = ({
+	children,
+}: {
+	children: ReactNode;
+}) => {
+	const [serverStates, setServerStates] = useState<ServerStates>({
+		selectedChannel: null,
+		selectedServer: null,
+		selectedSetting: 'my account',
+		selectedOption: 'user',
+		selectedMessage: null,
+	});
+
+	const values = useMemo(() => {
+		return {
+			serverStates,
+			setServerStates,
+		};
+	}, [serverStates]);
 
 	return (
 		<ServerContext.Provider
 			value={{
-				selectedOption,
-				setSelectedOption,
-				selectedSetting,
-				setSelectedSetting,
-				selectedChannel,
-				setSelectedChannel,
-				selectedServer,
-				setSelectedServer,
+				serversState: values.serverStates,
+				setServerStates: values.setServerStates,
 			}}
 		>
 			{children}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import ServerSidebar from '@/components/sidebar/server';
 import Sidebar from '@/components/sidebar/sidebar';
-import Friends from '@/components/friends';
+import FriendHeader from '@/components/friends-header';
 import ChannelDrawerMobile from '@/components/drawer/ChannelMobile';
 import SidebarMobile from '@/components/sidebar/mobile';
 
@@ -18,7 +18,7 @@ export default async function MainLayout({
 				<ServerSidebar />
 				<ChannelDrawerMobile />
 				<div className='w-full'>
-					<Friends />
+					<FriendHeader />
 					{children}
 				</div>
 				<SidebarMobile />

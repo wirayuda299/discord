@@ -16,8 +16,6 @@ export class AuthGuard implements CanActivate {
     try {
       await clerkClient.verifyToken(request.cookies.__session);
     } catch (err) {
-      console.log(err);
-
       this.logger.error(err);
       return false;
     }
