@@ -1,5 +1,8 @@
 import Image from "next/image";
-
+export function generateStaticParams() {
+	return [{ id: '1'}];
+}
+ 
 export default async function ServerDetail() {
   return (
     <div className="hidden size-full sm:block">
