@@ -40,6 +40,7 @@ const nextConfig = {
       },
     ],
   },
+  distDir:'out',
   typescript: {
     ignoreBuildErrors:true
   },

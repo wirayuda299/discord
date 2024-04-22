@@ -1,6 +1,10 @@
 import Image from "next/image";
+
 export function generateStaticParams() {
-	return [{ id: '1'}];
+	return [
+		{ id: 'a', value: '1' },
+		{ channel_id: 'b', value: '2' },
+	];
 }
  
 export default async function ServerDetail() {
