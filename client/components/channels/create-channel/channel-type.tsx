@@ -13,7 +13,7 @@ export default function ChannelTypeItem<T extends FieldValues>({
 }) {
   return (
     <div className="w-full space-y-4">
-      <h3 className="md:text-gray-2 pt-3 uppercase text-white md:pt-0">
+      <h3 className="pt-3 uppercase text-white md:pt-0 md:text-gray-2">
         Channel type
       </h3>
       {channelTypes.map((type) => (
@@ -40,7 +40,7 @@ export default function ChannelTypeItem<T extends FieldValues>({
               alt="hashtag icon"
             />
             <div>
-              <h4 className="text-gray-2 text-lg font-medium capitalize">
+              <h4 className="text-lg font-medium capitalize text-gray-2">
                 {type.label}
               </h4>
               <p className="truncate text-wrap text-[10px] text-[#9fa6ae] sm:text-xs">
