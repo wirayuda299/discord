@@ -5,17 +5,15 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
-import { v2 } from 'cloudinary';
 import { memoryStorage } from 'multer';
-import { cloudinaryConfig } from 'src/config/cloudinary';
+import { ImagehandlerService } from 'src/services/imagehandler/imagehandler.service';
 
 const storage = memoryStorage();
-const configService = new ConfigService();
 
 @Controller('/api/v1/file')
 export class FileUploadController {
+  constructor(private imageService: ImagehandlerService) {}
   @Post('/upload-image')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -27,27 +25,17 @@ export class FileUploadController {
     }),
   )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    v2.config(cloudinaryConfig(configService));
     const b64 = Buffer.from(file.buffer).toString('base64');
     const dataURI = 'data:' + file.mimetype + ';base64,' + b64;
-    const response = await v2.uploader.upload(dataURI, {
-      resource_type: 'auto',
-    });
-
+    const data = await this.imageService.uploadImage(dataURI);
     return {
-      publicId: response?.public_id,
-      url: response?.secure_url,
+      publicId: data?.publicId,
+      url: data?.url,
     };
   }
 
   @Post('/delete-image')
   async deleteImage(@Body('id') id: string) {
-    v2.config(cloudinaryConfig(configService));
-    await v2.uploader.destroy(id);
-    return {
-      message: 'Image deleted',
-      imageId: id,
-      error: false,
-    };
+    return this.imageService.deleteImage(id);
   }
 }

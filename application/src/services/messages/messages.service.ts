@@ -1,38 +1,77 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { DatabaseService } from '../database/database.service';
+import { groupReactionsByEmoji } from '../../utils/groupMessageByEmoji';
+
+export interface Message {
+  message_id: string;
+  message: string;
+  author_id: string;
+  is_read: boolean;
+  media_image: string;
+  media_image_id: string;
+  msg_created_at: string;
+  msg_updated_at: string;
+  author_name: string;
+  username: string;
+  author_image: string;
+  threads: any[];
+  reactions: {
+    emoji: string;
+    unified_emoji: string;
+    count: number;
+  }[];
+  reply_id?: string;
+}
+
+type Props = Message & { shouldAddLabel: boolean };
 
 @Injectable()
 export class MessagesService {
   constructor(private db: DatabaseService) {}
+
+  private async getReactions(messageId: string) {
+    try {
+      const reactions = await this.db.pool.query(
+        `SELECT * FROM reactions WHERE message_id = $1`,
+        [messageId],
+      );
+      return reactions.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async sendMessage(
     @MessageBody()
     payload: {
       content: string;
       is_read: boolean;
       user_id: string;
-      created_at: string;
       username: string;
       channel_id: string;
-      image_url?: string;
-      image_asset_id?: string;
+      imageUrl: string;
+      imageAssetId: string;
     },
   ) {
     try {
+      console.log(payload);
+
       await this.db.pool.query('BEGIN');
 
       try {
         const {
           rows: [message],
         } = await this.db.pool.query(
-          `INSERT INTO messages("content", user_id, image_url, image_asset_id)
-       VALUES($1, $2, $3, $4)
-       RETURNING id`,
+          `INSERT INTO messages(content, user_id, image_url, image_asset_id, type)
+           VALUES($1, $2, $3, $4, $5)
+           RETURNING id`,
           [
             payload.content,
             payload.user_id,
-            payload.image_url ?? '',
-            payload.image_asset_id ?? '',
+            payload.imageUrl ?? '',
+            payload.imageAssetId ?? '',
+            'channel',
           ],
         );
 
@@ -54,13 +93,107 @@ export class MessagesService {
     }
   }
 
-  async replyMessage(messageId: string, content: string, user_id: string) {
+  async replyMessage(
+    parentMessageId: string,
+    content: string,
+    user_id: string,
+    imageUrl: string = '',
+    imageAssetId: string = '',
+    channelId: string,
+  ) {
     try {
-      await this.db.pool.query(
-        `insert into messages_replies (message_id, "content", user_id)
-   values($1,$2,$3)`,
-        [messageId, content, user_id],
+      await this.db.pool.query('begin');
+      const {
+        rows: [message],
+      } = await this.db.pool.query(
+        `INSERT INTO messages("content", user_id, image_url, image_asset_id, type)
+       VALUES($1, $2, $3, $4, 'channel')
+       returning id`,
+        [content, user_id, imageUrl, imageAssetId],
       );
+
+      await this.db.pool.query(
+        `insert into messages_replies (parent_message_id, author, channel_id, message_id)
+        values($1,$2,$3,$4)`,
+        [parentMessageId, user_id, channelId, message.id],
+      );
+      await this.db.pool.query('commit');
+    } catch (error) {
+      await this.db.pool.query('rollback');
+      throw error;
+    }
+  }
+
+  private async getReplies(
+    parentMessageId: string,
+    channelId: string,
+    serverId: string,
+  ): Promise<Props[]> {
+    try {
+      const replies = await this.db.pool.query(
+        `SELECT
+        mr.parent_message_id as parent_message_id,
+        mr.id as reply_id,
+        mr.author as author_id,
+        mr.channel_id as channel_id,
+        m."content" as message,
+        m.id as message_id,
+        m.is_read as is_read,
+        m.user_id as author,
+        m.image_url as media_image,
+        m."type" as message_type,
+        m.image_asset_id as media_image_asset_id,
+        m.created_at as created_at,
+        m.updated_at as update_at,
+        sp.username as username
+      FROM messages_replies as mr 
+      JOIN messages as m ON m.id = mr.message_id
+      JOIN server_profile as sp ON sp.user_id = m.user_id AND  sp.server_id = $3
+      WHERE mr.parent_message_id = $1 AND mr.channel_id = $2
+      ORDER BY m.created_at ASC`,
+        [parentMessageId, channelId, serverId],
+      );
+
+      const allReplies: Props[] = [];
+
+      for await (const reply of replies.rows) {
+        const reactions = await this.getReactions(reply.message_id);
+        reply.reactions = reactions;
+
+        allReplies.push(reply);
+
+        const threads = await this.db.pool.query(
+          `select
+          sp.username as username,
+          sp.user_id as author_id,
+          t.name as thread_name,
+          t.id as thread_id,
+          t.channel_id as channel_id
+          from threads as t
+          join server_profile as sp on sp.user_id = t.author and sp.server_id = $2
+          where t.message_id = $1
+        `,
+          [reply.message_id, serverId],
+        );
+
+        reply.threads = threads.rows || [];
+
+        const subReplies = await this.getReplies(
+          reply.message_id,
+          channelId,
+          serverId,
+        );
+
+        for (const subReply of subReplies) {
+          const reactions = await this.getReactions(subReply.message_id);
+
+          subReply.reactions = reactions;
+        }
+
+        allReplies.push(...subReplies);
+      }
+
+      return allReplies;
     } catch (error) {
       throw error;
     }
@@ -68,122 +201,69 @@ export class MessagesService {
 
   async getMessageByChannelId(channel_id: string, serverId: string) {
     try {
-      const msg = await this.db.pool.query(
-        `SELECT
-          cm.message_id AS message_id,
-          m.content AS message,
-          m.user_id AS author_id,
-          m.is_read AS is_read,
-          m.image_url AS media_image,
-          m.image_asset_id AS media_image_id,
-          m.created_at AS msg_created_at,
-          sp.username AS author_name,
-          sp.user_id AS author_id,
-          sp.avatar AS author_image
-      FROM
-          channel_messages AS cm
-      JOIN
-          messages AS m ON m.id = cm.message_id
-      JOIN
-          server_profile AS sp ON sp.user_id = m.user_id AND sp.server_id = $1
-      WHERE
-          cm.channel_id = $2
-      ORDER BY
-          m.created_at ASC;`,
+      const messagesWithReactions = [];
+
+      const messages = await this.db.pool.query(
+        `
+      SELECT 
+        cm.message_id AS message_id,
+        m."content" AS message,
+        m.is_read AS is_read,
+        m.user_id AS author,
+        m.image_url AS media_image,
+        m."type" AS message_type,
+        m.image_asset_id AS media_image_asset_id,
+        m.created_at AS created_at,
+        m.updated_at AS update_at,
+        sp.username AS username
+        FROM channel_messages AS cm
+        JOIN messages AS m ON m.id = cm.message_id 
+        JOIN server_profile AS sp ON sp.user_id = m.user_id AND sp.server_id = $1
+        WHERE cm.channel_id = $2 AND m.type = 'channel'
+        ORDER BY m.created_at ASC
+      `,
         [serverId, channel_id],
       );
 
-      const messagesWithReactions = [];
-
-      for (const message of msg.rows) {
-        const reactions = await this.db.pool.query(
-          `SELECT * FROM reactions
-        WHERE message_id = $1`,
-          [message.message_id],
+      for await (const message of messages.rows) {
+        const reactions = await this.getReactions(message.message_id);
+        const threads = await this.db.pool.query(
+          `
+          select
+          sp.username as username,
+          sp.user_id as author_id,
+          t.name as thread_name,
+          t.id as thread_id,
+          t.channel_id as channel_id
+          from threads as t
+          join server_profile as sp on sp.user_id = t.author and sp.server_id = $2
+          where t.message_id = $1
+        `,
+          [message.message_id, serverId],
         );
-        message.reactions = reactions.rows;
 
+        message.threads = threads.rows || [];
+        message.reactions = reactions;
         messagesWithReactions.push(message);
-      }
 
-      for (const message of msg.rows) {
-        const replies = await this.db.pool.query(
-          `SELECT
-      mr.id AS reply_id,
-      mr.message_id AS message_id,
-      mr.content AS message,
-      mr.user_id AS author_id,
-      mr.is_read AS is_read,
-      mr.image_url AS media_image,
-      mr.image_asset_id AS media_image_id,
-      mr.created_at AS msg_created_at,
-      sp.username AS author_name,
-      sp.user_id AS author_id,
-      sp.avatar AS author_image
-    FROM
-      messages_replies AS mr
-    JOIN
-      server_profile AS sp ON sp.user_id = mr.user_id AND sp.server_id = $1
-    WHERE mr.message_id = $2
-    ORDER BY msg_created_at ASC`,
-          [serverId, message.message_id],
+        const replies = await this.getReplies(
+          message.message_id,
+          channel_id,
+          serverId,
         );
 
-        for (const reply of replies.rows) {
-          const replyReactions = await this.db.pool.query(
-            `SELECT * FROM reactions
-      WHERE message_id = $1`,
-            [reply.reply_id],
-          );
-          reply.reactions = replyReactions.rows;
-          messagesWithReactions.push(reply);
-        }
-      }
-      for (const message of messagesWithReactions) {
-        if (message.reply_id) {
-          const repliesOfReplies = await this.db.pool.query(
-            `SELECT
-   mr.id AS reply_id,
-   mr.message_id AS message_id,
-   mr.content AS message,
-   mr.user_id AS author_id,
-   mr.is_read AS is_read,
-   mr.image_url AS media_image,
-   mr.image_asset_id AS media_image_id,
-   mr.created_at AS msg_created_at,
-   sp.username AS author_name,
-   sp.user_id AS author_id,
-   sp.avatar AS author_image
- FROM
-   messages_replies AS mr
- JOIN
-   server_profile AS sp ON sp.user_id = mr.user_id AND sp.server_id = $1
- WHERE mr.message_id = $2
- ORDER BY msg_created_at ASC`,
-            [serverId, message.reply_id],
-          );
-          if (repliesOfReplies.rows.length >= 1) {
-            for (const replyOfReply of repliesOfReplies.rows) {
-              const replyOfReplyReactions = await this.db.pool.query(
-                `SELECT * FROM reactions
-     WHERE message_id = $1`,
-                [replyOfReply.reply_id],
-              );
-              replyOfReply.reactions = replyOfReplyReactions.rows;
-              messagesWithReactions.push(replyOfReply);
-            }
-          }
-        }
+        messagesWithReactions.push(...replies);
       }
 
       messagesWithReactions.sort(
         (a, b) =>
-          new Date(a.msg_created_at).getTime() -
-          new Date(b.msg_created_at).getTime(),
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       );
 
+      const groupedMessages = groupReactionsByEmoji(messagesWithReactions);
+
       return {
-        data: messagesWithReactions,
+        data: groupedMessages,
         error: false,
       };
     } catch (error) {
@@ -202,15 +282,16 @@ export class MessagesService {
         `SELECT EXISTS(SELECT 1 FROM messages WHERE id = $1)`,
         [messageId],
       );
+
       if (!channelExists.rows[0].exists || !messageExists.rows[0].exists) {
         throw new HttpException(
-          'Message or channel doesnt exists',
+          "Message or channel doesn't exists",
           HttpStatus.NOT_FOUND,
         );
       }
       const isAlreadyPinned = await this.db.pool.query(
         `select * from channel_pinned_messages
-        where messages_id = $1`,
+        where message_id = $1`,
         [messageId],
       );
 
@@ -221,7 +302,7 @@ export class MessagesService {
         );
       } else {
         await this.db.pool.query(
-          `INSERT INTO channel_pinned_messages(messages_id, channel_id, pinned_by) 
+          `INSERT INTO channel_pinned_messages(message_id, channel_id, pinned_by) 
           VALUES($1,$2, $3)`,
           [messageId, channel_id, pinnedBy],
         );
@@ -239,7 +320,7 @@ export class MessagesService {
     try {
       const pinnedMessages = await this.db.pool.query(
         `select * from channel_pinned_messages as pm
-join messages as m on m.id = pm.messages_id
+join messages as m on m.id = pm.message_id
 join users on users.id = m.user_id 
 where pm.channel_id = $1
 `,
@@ -276,12 +357,10 @@ where pm.channel_id = $1
         throw new HttpException('Message not found', HttpStatus.NOT_FOUND);
       }
       await this.db.pool.query(
-        `
-update messages
-set content = $1,
-    updated_at = NOW()
-where id = $2
-`,
+        `update messages
+        set content = $1,
+        updated_at = NOW()
+        where id = $2`,
         [content, messageId],
       );
       return {

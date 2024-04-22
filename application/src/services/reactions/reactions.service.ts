@@ -15,9 +15,9 @@ export class ReactionsService {
       const existingReaction = await this.db.pool.query(
         `
       select * from reactions as r
-      where r.react_by= $1 and r.unified_emoji = $2
+      where r.react_by= $1 and r.unified_emoji = $2 and r.message_id = $3
       `,
-        [react_by, unified_emoji],
+        [react_by, unified_emoji, message_id],
       );
 
       if (existingReaction.rows.length >= 1) {

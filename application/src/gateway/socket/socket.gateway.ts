@@ -8,6 +8,22 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/services/messages/messages.service';
+import { ThreadsService } from 'src/services/threads/threads.service';
+
+type PayloadTypes = {
+  content: string;
+  is_read: boolean;
+  user_id: string;
+  username: string;
+  channel_id: string;
+  server_id: string;
+  imageUrl: string;
+  imageAssetId: string;
+  type: string;
+  messageId: string;
+  parentMessageId: string;
+  threadId?: string;
+};
 
 @WebSocketGateway({
   cors: {
@@ -18,7 +34,10 @@ export class SocketGateway implements OnModuleInit {
   @WebSocketServer()
   server: Server;
 
-  constructor(private messages: MessagesService) {}
+  constructor(
+    private messages: MessagesService,
+    private threadService: ThreadsService,
+  ) {}
 
   private activeUsers = new Map<string, string>();
 
@@ -56,34 +75,52 @@ export class SocketGateway implements OnModuleInit {
   async handleMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    payload: {
-      content: string;
-      is_read: boolean;
-      user_id: string;
-      created_at: string;
-      username: string;
-      channel_id: string;
-      server_id: string;
-      image_url?: string;
-      image_asset_id?: string;
-      type: string;
-      messageId: string;
-    },
+    payload: PayloadTypes,
   ) {
-    if (payload.type === 'common') {
-      await this.messages.sendMessage(payload);
-    } else {
+    if (payload.type === 'channel') {
+      await this.messages.sendMessage({
+        channel_id: payload.channel_id,
+        content: payload.content,
+        imageAssetId: payload.imageAssetId,
+        imageUrl: payload.imageUrl,
+        user_id: payload.user_id,
+        is_read: payload.is_read,
+        username: payload.username,
+      });
+    }
+
+    if (payload.type === 'reply') {
       await this.messages.replyMessage(
-        payload.messageId,
+        payload.parentMessageId,
         payload.content,
         payload.user_id,
+        payload.imageUrl,
+        payload.imageAssetId,
+        payload.channel_id,
       );
     }
-    const messages = await this.messages.getMessageByChannelId(
-      payload.channel_id,
-      payload.server_id,
-    );
-    client.emit('set-message', messages.data);
+    if (payload.type === 'thread') {
+      await this.threadService.sendThreadMessage(
+        payload.content,
+        payload.user_id,
+        payload.imageUrl,
+        payload.imageAssetId,
+        payload.threadId,
+      );
+    }
+    if (payload.type !== 'thread') {
+      const messages = await this.messages.getMessageByChannelId(
+        payload.channel_id,
+        payload.server_id,
+      );
+      client.emit('set-message', messages.data);
+    } else {
+      const messages = await this.threadService.getThreadMessage(
+        payload.threadId,
+        payload.server_id,
+      );
+      client.emit('set-thread-messages', messages);
+    }
   }
 
   @SubscribeMessage('get-channel-message')
@@ -95,6 +132,23 @@ export class SocketGateway implements OnModuleInit {
       payload.channelId,
       payload.serverId,
     );
+
     client.emit('set-message', messages.data);
+  }
+
+  @SubscribeMessage('thread-messages')
+  async handleThread(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload: {
+      threadId: string;
+      serverId: string;
+    },
+  ) {
+    const messages = await this.threadService.getThreadMessage(
+      payload.threadId,
+      payload.serverId,
+    );
+    client.emit('set-thread-messages', messages);
   }
 }

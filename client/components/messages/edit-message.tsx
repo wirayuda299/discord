@@ -1,75 +1,95 @@
-'use client';
+"use client";
 
-import { FormEvent, useState } from 'react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from "react";
+import { toast } from "sonner";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Socket } from "socket.io-client";
 
-import { editMessage } from '@/helper/message';
-import { Textarea } from '../ui/textarea';
-import { createError } from '@/utils/error';
+import { editMessage } from "@/helper/message";
+import { Textarea } from "../ui/textarea";
+import { createError } from "@/utils/error";
 
 export default function EditMessageForm({
-	message,
-	handleClose,
-	currentUser,
-	messageAuthor,
-	messageId,
-	serverId,
+  message,
+  handleClose,
+  currentUser,
+  messageAuthor,
+  messageId,
+  serverId,
+  socket,
+  channelId,
+  threadId,
 }: {
-	message: string;
-	handleClose: () => void;
-	messageAuthor: string;
-	currentUser: string;
-	messageId: string;
-	serverId: string;
+  socket: Socket | null;
+  message: string;
+  handleClose: () => void;
+  messageAuthor: string;
+  currentUser: string;
+  messageId: string;
+  serverId: string;
+  channelId: string;
+  threadId?: string;
 }) {
-	const [value, setValue] = useState<string>(message);
-	const router = useRouter();
-	async function handleEditMessage(e: FormEvent) {
-		e.preventDefault();
-		if (value === '') return;
+  const [value, setValue] = useState<string>(message);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-		try {
-			if (value === message) {
-				return toast.error('Previous message still same');
-			}
-			await editMessage(
-				messageAuthor,
-				currentUser,
-				messageId,
-				value,
-				serverId
-			).then(() => {
-				router.refresh();
-				handleClose();
-			});
-		} catch (error) {
-			createError(error);
-		}
-	}
-	return (
-		<form onSubmit={handleEditMessage}>
-			<Textarea
-				minLength={1}
-				name='message'
-				value={value}
-				onChange={(e) => setValue(e.target.value)}
-				rows={1}
-				autoComplete='off'
-				className='bg-background flex min-h-[30px] w-full max-w-full  break-before-auto  items-center whitespace-pre-wrap break-all  !border-none px-3 pt-2 text-sm font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse '
-			/>
-			<div className='flex items-center gap-2 pt-1'>
-				<button
-					className='text-xs text-red-600'
-					type='button'
-					onClick={handleClose}
-				>
-					Cancel
-				</button>
-				<button className='text-xs text-blue-600' type='submit'>
-					Submit
-				</button>
-			</div>
-		</form>
-	);
+  async function handleEditMessage(e: FormEvent) {
+    e.preventDefault();
+    if (value === "") return;
+
+    try {
+      if (value === message) {
+        return toast.error("Previous message still same");
+      }
+      await editMessage(
+        messageAuthor,
+        currentUser,
+        messageId,
+        value,
+        serverId,
+      ).then(() => {
+        router.refresh();
+        handleClose();
+        if (searchParams.get("type") === "message") {
+          socket?.emit("thread-messages", {
+            threadId,
+            serverId,
+          });
+        } else {
+          socket?.emit("get-channel-message", {
+            channelId,
+            serverId,
+          });
+        }
+      });
+    } catch (error) {
+      createError(error);
+    }
+  }
+  return (
+    <form onSubmit={handleEditMessage}>
+      <Textarea
+        minLength={1}
+        name="message"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        rows={1}
+        autoComplete="off"
+        className="flex min-h-[30px] w-full max-w-full break-before-auto  items-center  whitespace-pre-wrap break-all !border-none  bg-background px-3 pt-2 text-sm font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse "
+      />
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          className="text-xs text-red-600"
+          type="button"
+          onClick={handleClose}
+        >
+          Cancel
+        </button>
+        <button className="text-xs text-blue-600" type="submit">
+          Submit
+        </button>
+      </div>
+    </form>
+  );
 }

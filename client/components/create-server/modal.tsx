@@ -20,11 +20,11 @@ export default function CreateServerModal() {
   return (
     <Dialog modal onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger asChild>
-        <button className="bg-background ease hover:bg-green-1 group flex size-12 items-center justify-center rounded-full transition-colors duration-300">
+        <button className="ease group flex size-12 items-center justify-center rounded-full bg-background transition-colors duration-300 hover:bg-green-1">
           <Plus className="stroke-green-1 group-hover:stroke-white" size={25} />
         </button>
       </DialogTrigger>
-      <DialogContent className="bg-foreground rounded-lg border-none p-5 text-white">
+      <DialogContent className="rounded-lg border-none bg-foreground p-5 text-white">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold">
             Customize your server server

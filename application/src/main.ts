@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationFilter } from './filter/filter.filter';
 
 import * as cookieParser from 'cookie-parser';
-import { AuthGuard } from './guards/auth/auth.guard';
+// import { AuthGuard } from './guards/auth/auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -16,7 +16,7 @@ async function bootstrap() {
     },
   });
   app.use(cookieParser());
-  app.useGlobalGuards(new AuthGuard());
+  // app.useGlobalGuards(new AuthGuard());
   app.useGlobalFilters(new ValidationFilter());
 
   await app.listen(3001);

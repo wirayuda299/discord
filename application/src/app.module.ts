@@ -23,6 +23,7 @@ import { ReactionsService } from './services/reactions/reactions.service';
 import { ReactionsController } from './controllers/reactions/reactions.controller';
 import { ThreadsService } from './services/threads/threads.service';
 import { ThreadsController } from './controllers/threads/threads.controller';
+import { ImagehandlerService } from './services/imagehandler/imagehandler.service';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ThreadsController } from './controllers/threads/threads.controller';
     DatabaseService,
     ReactionsService,
     ThreadsService,
+    ImagehandlerService,
   ],
 })
 export class AppModule {}

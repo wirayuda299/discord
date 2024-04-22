@@ -77,9 +77,15 @@ export async function POST(req: Request) {
   }
 
   if (eventType === "user.deleted") {
-    const { id } = evt?.data as unknown as UserJSON;
-    const deletedUser = await deleteUser(id!);
-    return NextResponse.json({ deletedUser }, { status: 200 });
+    try {
+      const { id } = evt?.data as unknown as UserJSON;
+      const deletedUser = await deleteUser(id!);
+      return NextResponse.json({ deletedUser }, { status: 200 });
+      
+    } catch (error) {
+      console.log(error);
+      throw error
+    }
   }
 
   return new Response("Success", { status: 201 });
