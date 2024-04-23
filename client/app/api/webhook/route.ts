@@ -3,8 +3,35 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from 'svix';
 
-import { createUser } from "@/actions/user";
-import { deleteUser } from "@/helper/user";
+import { deleteUser } from '@/helper/user';
+
+const serverUrl = process.env.SERVER_URL;
+
+export async function createUser(
+	id: string,
+	username: string,
+	email: string,
+	image: string
+) {
+	try {
+		await fetch(`${serverUrl}/user/create`, {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify({
+				id,
+				username,
+				email,
+				image,
+			}),
+		});
+	} catch (error) {
+		console.log(error);
+
+		throw error;
+	}
+}
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
