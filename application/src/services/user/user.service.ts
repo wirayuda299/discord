@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { createUserSchema, idSchema } from '../../schema/zodSchema/user';
+import { idSchema } from '../../schema/zodSchema/user';
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
 
@@ -17,14 +17,14 @@ export class UserService {
 
   async createUser(id: string, name: string, email: string, image: string) {
     try {
-      const body = {
-        id,
-        name,
-        image,
-        email,
-      };
+      // const body = {
+      //   id,
+      //   name,
+      //   image,
+      //   email,
+      // };
 
-      this.validationService.validate(createUserSchema, body);
+      // this.validationService.validate(createUserSchema, body);
       await this.databaseService.pool.query(
         `INSERT INTO USERS(id, username, image, email) 
         VALUES($1, $2, $3, $4)`,
