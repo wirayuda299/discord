@@ -41,11 +41,11 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
   const [channelMessages, setChannelMessages] = useState<Message[]>([]);
   const { userId } = useAuth();
   useEffect(() => {
-    const clientSocket = io("http://localhost:3001", {
-      query: {
-        userId,
-      },
-    });
+    const clientSocket = io('https://discord-mydn.onrender.com', {
+			query: {
+				userId,
+			},
+		});
     setSocket(clientSocket);
 
     clientSocket.on("connect", () => {
