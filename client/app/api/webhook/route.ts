@@ -1,8 +1,7 @@
 import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Webhook } from "svix";
-import { clerkClient } from "@clerk/nextjs";
+import { Webhook } from 'svix';
 
 import { createUser } from "@/actions/user";
 import { deleteUser } from "@/helper/user";
@@ -59,21 +58,17 @@ export async function POST(req: Request) {
     } = evt?.data as UserJSON;
 
     try {
-      const user = await createUser(
-        id!,
-        username!,
-        email[0].email_address,
-        image,
-      );
+			const user = await createUser(
+				id!,
+				username!,
+				email[0].email_address,
+				image
+			);
 
-      return NextResponse.json({ user }, { status: 201 });
-    } catch (error) {
-      if (id) {
-        await clerkClient.users.deleteUser(id);
-      }
-
-      throw error;
-    }
+			return NextResponse.json({ user }, { status: 201 });
+		} catch (error) {
+			throw error;
+		}
   }
 
   if (eventType === "user.deleted") {

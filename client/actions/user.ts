@@ -25,6 +25,8 @@ export async function createUser(
       }),
     });
   } catch (error) {
+    console.log(error);
+    
     throw error;
   }
 }
