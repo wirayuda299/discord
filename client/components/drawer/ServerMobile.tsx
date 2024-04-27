@@ -1,7 +1,6 @@
 import { Bell, ChevronRight, Cog } from "lucide-react";
 import Image from "next/image";
 import { useSWRConfig } from "swr";
-import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
@@ -9,9 +8,10 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Servers } from "@/types/server";
 import CreateChannelDrawerMobile from "./create-channel";
 import CreateCategoryMobile from "./create-category";
-import AddUserDrawer from "./add-user";
 import DeleteServer from "../modals/delete-server";
 import UpdateServerDrawer from "./update-server";
+import AddUser from "../modals/add-user";
+import { copyText } from "@/utils/copy";
 
 export default function ServerDrawerMobile({ server }: { server: Servers }) {
   const { mutate } = useSWRConfig();
@@ -19,16 +19,7 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
   const [isCopied, setIsCopied] = useState<boolean>(false);
   if (!server) return null;
 
-  function copyText(text: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success("Server id copied");
-      setIsCopied(true);
-
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 4000);
-    });
-  }
+  
 
   return (
     <Drawer>
@@ -52,9 +43,9 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
           </h2>
 
           <div className="mt-1 flex items-center gap-3 text-xs text-white">
-            <div className="bg-green-1 size-2 rounded-full"></div>
+            <div className="size-2 rounded-full bg-green-1"></div>
             <span>0 Online</span>
-            <div className="bg-gray-2 size-2 rounded-full"></div>
+            <div className="size-2 rounded-full bg-gray-2"></div>
             <span>0 Member</span>
           </div>
 
@@ -67,31 +58,31 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
                 alt="boost"
                 className="aspect-auto object-contain"
               />
-              <p className="text-gray-2 text-xs font-semibold capitalize">
+              <p className="text-xs font-semibold capitalize text-gray-2">
                 boost
               </p>
             </li>
             <li className="flex flex-col items-center">
-              <AddUserDrawer size={25} />
-              <p className="text-gray-2 text-xs font-semibold capitalize">
+              <AddUser size={25} />
+              <p className="text-xs font-semibold capitalize text-gray-2">
                 invite
               </p>
             </li>
             <li className="flex flex-col items-center">
               <Bell />
-              <p className="text-gray-2 text-xs font-semibold capitalize">
+              <p className="text-xs font-semibold capitalize text-gray-2">
                 notifications
               </p>
             </li>
             <li className="flex flex-col items-center">
               <Cog />
-              <p className="text-gray-2 text-xs font-semibold capitalize">
+              <p className="text-xs font-semibold capitalize text-gray-2">
                 settings
               </p>
             </li>
           </ul>
 
-          <ul className="bg-background/25 divide-background mt-8  gap-3 divide-y rounded-md p-3 text-white">
+          <ul className="mt-8 gap-3 divide-y  divide-background rounded-md bg-background/25 p-3 text-white">
             <CreateChannelDrawerMobile serverId={server?.id} mutate={mutate} />
             <CreateCategoryMobile />
             <li className="py-3 text-sm font-semibold capitalize">
@@ -99,7 +90,7 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
             </li>
           </ul>
 
-          <ul className="bg-background/25 mt-8  divide-y divide-gray-700 rounded-md p-3 text-white">
+          <ul className="mt-8 divide-y  divide-gray-700 rounded-md bg-background/25 p-3 text-white">
             {userId === server.owner_id && (
               <UpdateServerDrawer
                 logo={server.logo}
@@ -122,8 +113,15 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
             <button
               disabled={isCopied}
               aria-disabled={isCopied}
-              onClick={() => copyText(server.id)}
-              className="bg-background/25 mt-3 w-full p-2 text-left font-semibold capitalize text-white disabled:cursor-not-allowed"
+              onClick={() => copyText(server.id, 'message ID copied', () => {
+                setIsCopied(true)
+                
+                setTimeout(() => {
+                  setIsCopied(false)
+                  
+                }, 2000)
+              }) }
+              className="mt-3 w-full bg-background/25 p-2 text-left font-semibold capitalize text-white disabled:cursor-not-allowed"
             >
               Copy server id
             </button>

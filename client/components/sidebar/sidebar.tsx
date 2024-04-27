@@ -1,11 +1,11 @@
 import { Compass } from "lucide-react";
 import Image from "next/image";
+import Link from 'next/link';
 import { auth } from "@clerk/nextjs";
 
 import ServerList from "./server-list";
 import CreateServerModal from "../create-server/modal";
-import { getAllServerCreatedByCurrentUser } from "@/helper/server";
-import Link from "next/link";
+import { getAllServerCreatedByCurrentUser } from '@/helper/server';
 
 export default async function Sidebar() {
   const { userId } = auth();
@@ -14,10 +14,10 @@ export default async function Sidebar() {
   const servers = await getAllServerCreatedByCurrentUser(userId);
 
   return (
-    <aside className="md:bg-foreground border-r-foreground flex size-full min-h-screen  min-w-[80px] max-w-[80px] shrink flex-col items-center overflow-y-auto border-r-2 bg-black/50 p-4">
+    <aside className="flex size-full min-h-screen min-w-[80px] max-w-[80px]  shrink flex-col items-center overflow-y-auto border-r-2 border-r-foreground bg-black/50 p-4 md:bg-foreground">
       <Link
         href={"/direct-messages"}
-        className="bg-primary hidden rounded-md p-2 md:block"
+        className="hidden rounded-md bg-primary p-2 md:block"
       >
         <Image
           src={"/icons/discord.svg"}
@@ -31,7 +31,7 @@ export default async function Sidebar() {
       <ServerList servers={servers ?? []} />
       <div className="mt-3 flex flex-col gap-4 pb-10">
         <CreateServerModal />
-        <button className="bg-background ease hover:bg-green-1 group flex size-12 items-center justify-center rounded-full transition-colors duration-300">
+        <button className="ease group flex size-12 items-center justify-center rounded-full bg-background transition-colors duration-300 hover:bg-green-1">
           <Compass className="stroke-green-1 group-hover:stroke-white" />
         </button>
       </div>

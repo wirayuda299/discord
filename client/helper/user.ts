@@ -50,10 +50,10 @@ export async function updateUser(
   }
 }
 
-export async function searchUser(name: string, id?: string): Promise<User> {
+export async function searchUser(name: string, id: string): Promise<User[]> {
   try {
     const res = await fetch(
-      `${serverUrl}/user/find?name=${name}${id ? `id=${id}` : ""}`,
+      `${serverUrl}/user/find?name=${name}&id=${id}`,
       {
         method: "GET",
         credentials: "include",
@@ -67,7 +67,7 @@ export async function searchUser(name: string, id?: string): Promise<User> {
   }
 }
 
-export async function getFriends(cookies: string): Promise<User[]> {
+export async function getFriends(): Promise<User[]> {
   try {
     const res = await fetch(`${serverUrl}/friends/list-friend`, {
       method: "GET",
@@ -110,7 +110,7 @@ export async function getPendingInvitation(
     );
 
     const invitations = await res.json();
-    return invitations.data;
+    return invitations.data as UserInvite[]
   } catch (error) {
     throw error;
   }
@@ -132,3 +132,5 @@ export async function getMyInvitation(userId: string): Promise<UserInvite[]> {
     throw error;
   }
 }
+
+

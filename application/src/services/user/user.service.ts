@@ -152,22 +152,13 @@ export class UserService {
     try {
       if (name) {
         const users = await this.databaseService.pool.query(
-          `
-      select * from users 
-      where to_tsvector(username) @@ to_tsquery($1)`,
-          [name],
+          `select * from users 
+           where to_tsvector(username) @@ to_tsquery($1)
+          AND username != (SELECT username FROM users WHERE id = $2)`,
+          [name.toLowerCase(), id],
         );
         return {
-          data: users,
-          error: false,
-        };
-      } else {
-        const users = await this.databaseService.pool.query(
-          `select * from users where id = $1`,
-          [id],
-        );
-        return {
-          data: users,
+          data: users.rows,
           error: false,
         };
       }

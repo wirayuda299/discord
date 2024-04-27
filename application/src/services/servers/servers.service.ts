@@ -236,15 +236,11 @@ GROUP BY
 
   async inviteUser(inviteCode: string, userId: string, server_id: string) {
     try {
-      if (!inviteCode)
+      if (!userId || !server_id || !inviteCode)
         throw new HttpException(
-          'Invite code is missing',
+          'User or server id or invite code is missing',
           HttpStatus.BAD_REQUEST,
         );
-      if (!userId)
-        throw new HttpException('User id is missing', HttpStatus.BAD_REQUEST);
-      if (!server_id)
-        throw new HttpException('server id is missing', HttpStatus.BAD_REQUEST);
 
       const isServerExists = await this.databaseService.pool.query(
         `SELECT * FROM servers WHERE servers.invite_code = $1`,

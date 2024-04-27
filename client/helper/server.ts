@@ -51,7 +51,7 @@ export async function getServerById(
 
 export async function generateNewInviteCode(serverId: string, path: string) {
   try {
-    await fetch(`${serverUrl}/'/servers/new-invite-code`, {
+    await fetch(`${serverUrl}/servers/new-invite-code`, {
       method: "PATCH",
       headers: await prepareHeaders(),
       credentials: "include",

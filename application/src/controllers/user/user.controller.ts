@@ -30,7 +30,7 @@ export class UserController {
   }
 
   @Get('/find')
-  searchUser(@Query('name') name: string, @Query('id') id?: string) {
+  searchUser(@Query('name') name: string, @Query('id') id: string) {
     return this.userService.searchUser(name, id);
   }
 

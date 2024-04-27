@@ -1,17 +1,19 @@
 import SelectedChannel from "@/components/channels/selected-channel";
+import VideoCall from '@/components/channels/video-call';
 
-export function generateStaticParams() {
-	return [
-		{ 'channel_id': '1' },
-	];
-}
 type Props = {
-  searchParams: { channel_type: string };
+	params: {
+		id: string;
+		channel_id: string;
+	};
+	searchParams: { channel_type: string };
 };
 
-
-export default function ChannelId({ searchParams }: Props) {
-  if (searchParams.channel_type === "text") {
-    return <SelectedChannel />;
-  }
+export default function ChannelId({ searchParams, params }: Props) {
+	if (searchParams.channel_type === 'text') {
+		return <SelectedChannel />;
+	}
+	if (searchParams.channel_type === 'audio') {
+		return <VideoCall room={params.channel_id} />;
+	}
 }

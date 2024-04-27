@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import useSWR from "swr";
 
 import {
   DropdownMenu,
@@ -8,9 +7,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { getPinnedMessages } from "@/helper/message";
+import useFetch from "@/hooks/useFetch";
 
 export default function PinnedMessage({ channelId }: { channelId: string }) {
-  const { data, isLoading } = useSWR("pinned-messages", () =>
+  const { data, isLoading } = useFetch("pinned-messages", () =>
     getPinnedMessages(channelId),
   );
 

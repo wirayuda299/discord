@@ -51,86 +51,91 @@ export default function SelectedChannel() {
   );
 
   return (
-    <div
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      className={cn(
-        "fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 h-screen overflow-y-auto overflow-x-hidden bg-black md:bg-background border-l-2 border-l-foreground w-full",
-        serversState.selectedChannel ? "right-0" : "-right-full",
-      )}
-    >
-      <header className="flex min-h-14 w-full items-center justify-between border-b-2 border-b-foreground p-2 ">
-        <div className="flex items-center gap-3">
-          <Link
-            href={"/server/" + params.id}
-            className="md:hidden"
-            onClick={() => {
-              setServerStates((prev) => ({
-                ...prev,
-                selectedChannel: null,
-              }));
-            }}
-          >
-            <MoveLeft className="text-gray-2" />
-          </Link>
-          <div className="flex items-center gap-1 ">
-            <h3 className="text-md flex items-center gap-2 font-medium lowercase text-white">
-              <Image
-                src={"/icons/hashtag.svg"}
-                width={24}
-                height={24}
-                alt={"hashtag"}
-                key={"hashtag"}
-              />
-              {serversState.selectedChannel?.channel_name}
-            </h3>
-            <div className="md:hidden">
-              <ChanelInfo />
-            </div>
-          </div>
-        </div>
-        <div className="hidden items-center gap-4 min-[837px]:flex">
-          <Thread
-            channelId={params.channel_id as string}
-            serverId={params.id as string}
-          />
-          <NotificationSettings />
-          <PinnedMessage channelId={params.id as string}/>
-          <MemberSheet selectedServer={serversState.selectedServer} />
-         <SearchForm/>
-          <Inbox />
-          <Image
-            src={"/icons/ask.svg"}
-            width={24}
-            height={24}
-            alt={"ask"}
-            key={"ask"}
-          />
-        </div>
-      </header>
-      <div className="flex h-[calc(100vh-120px)] max-w-full flex-col">
-        <ul className="ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5" ref={ref}>
-          {messageList.length >= 1 &&
-            messageList?.map((msg) => (
-              <ChatItem
-                socket={socket}
-                serverStates={serversState}
-                messages={channelMessages}
-                setServerStates={setServerStates}
-                userId={userId!!}
-                msg={msg}
-                key={msg.message_id}
-              />
-            ))}
-        </ul>
+		<div
+			onTouchStart={onTouchStart}
+			onTouchMove={onTouchMove}
+			onTouchEnd={onTouchEnd}
+			className={cn(
+				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 h-screen overflow-y-auto overflow-x-hidden bg-black md:bg-background border-l-2 border-l-foreground w-full',
+				serversState.selectedChannel ? 'right-0' : '-right-full'
+			)}
+		>
+			<header className='flex min-h-14 w-full items-center justify-between border-b-2 border-b-foreground p-2 '>
+				<div className='flex items-center gap-3'>
+					<Link
+						href={'/server/' + params.id}
+						className='md:hidden'
+						onClick={() => {
+							setServerStates((prev) => ({
+								...prev,
+								selectedChannel: null,
+							}));
+						}}
+					>
+						<MoveLeft className='text-gray-2' />
+					</Link>
+					<div className='flex items-center gap-1 '>
+						<h3 className='text-md flex items-center gap-2 font-medium lowercase text-white'>
+							<Image
+								src={'/icons/hashtag.svg'}
+								width={24}
+								height={24}
+								alt={'hashtag'}
+								key={'hashtag'}
+							/>
+							{serversState.selectedChannel?.channel_name}
+						</h3>
+						<div className='md:hidden'>
+							<ChanelInfo />
+						</div>
+					</div>
+				</div>
+				<div className='hidden items-center gap-4 min-[837px]:flex'>
+					<Thread
+						channelId={params.channel_id as string}
+						serverId={params.id as string}
+					/>
+					<NotificationSettings />
+					<PinnedMessage channelId={params.id as string} />
+					<MemberSheet selectedServer={serversState.selectedServer} />
+					<SearchForm />
+					<Inbox>
+						<p>channel notifications</p>
+					</Inbox>
+					<Image
+						src={'/icons/ask.svg'}
+						width={24}
+						height={24}
+						alt={'ask'}
+						key={'ask'}
+					/>
+				</div>
+			</header>
+			<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
+				<ul
+					className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
+					ref={ref}
+				>
+					{messageList.length >= 1 &&
+						messageList?.map((msg) => (
+							<ChatItem
+								socket={socket}
+								serverStates={serversState}
+								messages={channelMessages}
+								setServerStates={setServerStates}
+								userId={userId!!}
+								msg={msg}
+								key={msg.message_id}
+							/>
+						))}
+				</ul>
 
-        <ChatForm
-          value={value}
-          serverStates={serversState}
-          setServerStates={setServerStates}
-        />
-      </div>
-    </div>
-  );
+				<ChatForm
+					value={value}
+					serverStates={serversState}
+					setServerStates={setServerStates}
+				/>
+			</div>
+		</div>
+	);
 }

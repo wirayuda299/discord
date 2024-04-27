@@ -4,9 +4,9 @@ import { Search } from "lucide-react";
 
 import ServerMobile from "./ServerMobile";
 import ChannelList from "../channels/list";
-import AddUserDrawer from "./add-user";
 import { Servers } from "@/types/server";
 import { Channel } from "@/types/channels";
+import AddUser from "../modals/add-user";
 
 export default function ChannelDrawerMobile({
   channels,
@@ -34,7 +34,7 @@ export default function ChannelDrawerMobile({
             />
           </div>
         </form>
-        <AddUserDrawer styles="pt-2" size={30} />
+        <AddUser styles="pt-2" size={30} />
       </div>
       <>
         {channels && server && (

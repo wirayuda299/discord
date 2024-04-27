@@ -56,7 +56,7 @@ export default function ServerSidebar({
             />
             <div>
               <h3 className="text-sm capitalize">{user?.username}</h3>
-              <p className="text-gray-2 text-xs">invisible</p>
+              <p className="text-xs text-gray-2">invisible</p>
             </div>
           </div>
         )}

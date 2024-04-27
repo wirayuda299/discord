@@ -69,7 +69,7 @@ export default function CreateChannelForm({
           name="name"
           render={({ field }) => (
             <FormItem className="mt-5">
-              <FormLabel className="text-gray-2 uppercase">
+              <FormLabel className="uppercase text-gray-2">
                 Channel name
               </FormLabel>
               <FormControl>
@@ -77,7 +77,7 @@ export default function CreateChannelForm({
                   onClick={(e) => e.stopPropagation()}
                   autoComplete="off"
                   placeholder="# new-channel"
-                  className="bg-foreground ring-offset-background text-white caret-white focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                  className="bg-foreground text-white caret-white ring-offset-background focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                   required
                   {...field}
                 />

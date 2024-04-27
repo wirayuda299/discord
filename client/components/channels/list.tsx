@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useServerContext } from "@/providers/server";
 
 import CreateChannelModals from "../modals/create-channel";
-import AddUserDrawer from "../drawer/add-user";
+import AddUser from "../modals/add-user";
 
 export default function ChannelList({
   channels,
@@ -69,100 +69,98 @@ export default function ChannelList({
   }, [params.channel_id]);
 
   return (
-    <div className="text-gray-2">
-      {groupedChannels?.map((channel) => (
-        <div className="my-4" key={channel?.category_id}>
-          <div className="flex w-full items-center justify-between pr-2">
-            <div
-              onClick={() =>
-                setSelectedCategory((prev) =>
-                  prev === channel?.category_name ? "" : channel?.category_name,
-                )
-              }
-              className="flex cursor-pointer items-center gap-1 "
-            >
-              <ChevronRight
-                size={18}
-                className={cn(
-                  "transition-all ease duration-300",
-                  selectedCategory === channel?.category_name && "rotate-90",
-                )}
-              />
-              <h3 className="text-xs font-semibold uppercase">
-                {channel?.category_name} channel
-              </h3>
-            </div>
-            <CreateChannelModals
-              serverId={server?.id!}
-              type={channel?.channel_type}
-            >
-              <button>
-                <Plus size={18} />
-              </button>
-            </CreateChannelModals>
-          </div>
-          <ul
-            className={cn(
-              "h-0 flex flex-col gap-1",
-              selectedCategory === channel?.category_name ||
-                selectedChannel?.channel_id === channel.channel_id
-                ? "h-auto overflow-auto [&>*:nth-child(1)]:mt-2 transition-all ease duration-300"
-                : "overflow-hidden",
-            )}
-          >
-            {channel?.channels?.map((c) => (
-              <Link
-                role="listitem"
-                scroll
-                prefetch
-                href={`/server/${server?.id}/${c.channel_id}?channel_type=${c.channel_type}`}
-                key={c?.channel_id}
-                onClick={() => {
-                  setServerStates((prev) => ({
-                    ...prev,
-                    selectedChannel: c,
-                  }));
-                }}
-                className={cn(
-                  "hover:bg-background/80 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm",
-                  c.channel_id === selectedChannel?.channel_id &&
-                    "bg-background/80",
-                )}
-              >
-                <div className="flex h-max items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {c?.channel_type === "audio" && (
-                      <Image
-                        src={"/icons/volume.svg"}
-                        width={18}
-                        height={18}
-                        alt="volume icon"
-                      />
-                    )}
-                    <div className="flex items-center gap-1">
-                      {c.channel_type !== "audio" && (
-                        <Image
-                          src={"/icons/hashtag.svg"}
-                          width={24}
-                          height={24}
-                          alt={"hashtag"}
-                          key={"hashtag"}
-                        />
-                      )}
-                      <span>{c?.channel_name}</span>
-                    </div>
-                  </div>
-                  {userId === server?.owner_id && (
-                    <button className="opacity-0 group-hover:opacity-100">
-                      <AddUserDrawer />
-                    </button>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
+		<div className='text-gray-2'>
+			{groupedChannels?.map((channel) => (
+				<div className='my-4' key={channel?.category_id}>
+					<div className='flex w-full items-center justify-between pr-2'>
+						<div
+							onClick={() =>
+								setSelectedCategory((prev) =>
+									prev === channel?.category_name ? '' : channel?.category_name
+								)
+							}
+							className='flex cursor-pointer items-center gap-1 '
+						>
+							<ChevronRight
+								size={18}
+								className={cn(
+									'transition-all ease duration-300',
+									selectedCategory === channel?.category_name && 'rotate-90'
+								)}
+							/>
+							<h3 className='text-xs font-semibold uppercase'>
+								{channel?.category_name} channel
+							</h3>
+						</div>
+						<CreateChannelModals
+							serverId={server?.id!}
+							type={channel?.channel_type}
+						>
+							<button>
+								<Plus size={18} />
+							</button>
+						</CreateChannelModals>
+					</div>
+					<ul
+						className={cn(
+							'h-0 flex flex-col gap-1',
+							selectedCategory === channel?.category_name ||
+								selectedChannel?.channel_id === channel.channel_id
+								? 'h-auto overflow-auto [&>*:nth-child(1)]:mt-2 transition-all ease duration-300'
+								: 'overflow-hidden'
+						)}
+					>
+						{channel?.channels?.map((c) => (
+							<Link
+								role='listitem'
+								scroll
+								prefetch
+								href={`/server/${server?.id}/${c.channel_id}?channel_type=${c.channel_type}`}
+								key={c?.channel_id}
+								onClick={() => {
+									setServerStates((prev) => ({
+										...prev,
+										selectedChannel: c,
+									}));
+								}}
+								className={cn(
+									'hover:bg-background/80 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm',
+									c.channel_id === selectedChannel?.channel_id &&
+										'bg-background/80'
+								)}
+							>
+								<div className='flex h-max items-center justify-between'>
+									<div className='flex items-center gap-1'>
+										{c?.channel_type === 'audio' && (
+											<Image
+												src={'/icons/volume.svg'}
+												width={18}
+												height={18}
+												alt='volume icon'
+											/>
+										)}
+										<div className='flex items-center gap-1'>
+											{c.channel_type !== 'audio' && (
+												<Image
+													src={'/icons/hashtag.svg'}
+													width={24}
+													height={24}
+													alt={'hashtag'}
+													key={'hashtag'}
+												/>
+											)}
+											<span>{c?.channel_name}</span>
+										</div>
+									</div>
+									{userId === server?.owner_id && (
+										<AddUser size={19} styles='opacity-0 group-hover:opacity-100' />
+									)}
+								</div>
+							</Link>
+						))}
+					</ul>
+				</div>
+			))}
+		</div>
+	);
 }

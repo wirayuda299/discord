@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
-import useSWR from "swr";
 
 import { Button } from "../ui/button";
 import { getUserById } from "@/helper/user";
 import { useServerContext } from "@/providers/server";
+import useFetch from "@/hooks/useFetch";
 
 export default function UserAccount() {
   const { setServerStates } = useServerContext();
@@ -13,9 +13,7 @@ export default function UserAccount() {
     data: user,
     isLoading: userLoading,
     error: userError,
-  } = useSWR("user", async () => {
-    return getUserById(userId!!);
-  });
+  } = useFetch("user", async () =>  getUserById(userId!!));
 
   const handleClick = () => {
     setServerStates((prev) => ({
@@ -35,7 +33,7 @@ export default function UserAccount() {
         <li className="flex flex-wrap items-center justify-between gap-3 ">
           <div className="inline-flex gap-2">
             <Image
-              className="border-background aspect-auto min-h-[90px] min-w-[90px] -translate-y-3 rounded-full border-4 object-cover"
+              className="aspect-auto min-h-[90px] min-w-[90px] -translate-y-3 rounded-full border-4 border-background object-cover"
               src={user.image}
               width={90}
               height={90}
@@ -56,10 +54,10 @@ export default function UserAccount() {
             Edit user profile
           </Button>
         </li>
-        <li className="bg-background flex w-full flex-col gap-5 rounded-lg p-3">
+        <li className="flex w-full flex-col gap-5 rounded-lg bg-background p-3">
           <div className="flex items-center justify-between">
             <div>
-              <h5 className="text-gray-2 text-sm uppercase leading-relaxed">
+              <h5 className="text-sm uppercase leading-relaxed text-gray-2">
                 Display name
               </h5>
               <p className="text-sm text-white">{user.username}</p>
@@ -73,7 +71,7 @@ export default function UserAccount() {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h5 className="text-gray-2 text-sm uppercase leading-relaxed">
+              <h5 className="text-sm uppercase leading-relaxed text-gray-2">
                 Email
               </h5>
               <p className="text-sm text-white">{user.email}</p>
@@ -87,8 +85,8 @@ export default function UserAccount() {
           </div>
         </li>
         <div className="py-5">
-          <h5 className="text-gray-2 text-sm font-normal">Account removal</h5>
-          <p className="text-gray-2 py-1 text-xs">
+          <h5 className="text-sm font-normal text-gray-2">Account removal</h5>
+          <p className="py-1 text-xs text-gray-2">
             Disabling your account means you can recover it at any time after
             taking this action.
           </p>

@@ -14,7 +14,7 @@ export default function CreateCategoryMobile() {
             Create category
           </h3>
           <input
-            className="bg-background/20 flex min-h-[30px] w-full items-center rounded-md border-none p-3 text-sm font-light text-white caret-white brightness-110 focus:outline-none md:bg-transparent"
+            className="flex min-h-[30px] w-full items-center rounded-md border-none bg-background/20 p-3 text-sm font-light text-white caret-white brightness-110 focus:outline-none md:bg-transparent"
             type="text"
             placeholder="create category"
           />

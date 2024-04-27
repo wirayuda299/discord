@@ -8,13 +8,27 @@ export class FriendsService {
   async getFriends(userId: string) {
     try {
       const friends = await this.db.pool.query(
-        `select * from friends as f
-join users as u on u.id = f.friend_id  
-where f.user_id  = $1`,
+        `SELECT
+          u.id as user_id,
+          u.username as username,
+          u.image as image,
+          u.created_at as created_at
+          FROM friends as f
+          join users as u on f.friend_id = u.id
+          WHERE user_id = $1
+          UNION
+          SELECT
+           u.id as user_id,
+          u.username as username,
+          u.image as image,
+          u.created_at as created_at
+          FROM friends as f
+            join users as u on f.user_id = u.id
+          WHERE friend_id = $1;`,
         [userId],
       );
       return {
-        data: friends,
+        data: friends.rows,
         error: false,
       };
     } catch (error) {

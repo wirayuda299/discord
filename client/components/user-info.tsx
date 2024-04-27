@@ -22,7 +22,7 @@ export default function UserInfo({
       <div className="flex items-center justify-between px-5">
         {selectedOption === "user" ? (
           <Image
-            className="border-background aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 object-cover"
+            className="aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 border-background object-cover"
             src={avatar}
             width={90}
             height={90}
@@ -30,7 +30,7 @@ export default function UserInfo({
           />
         ) : (
           <Image
-            className="border-background aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 object-cover"
+            className="aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 border-background object-cover"
             src={avatar}
             width={90}
             height={90}
@@ -43,7 +43,7 @@ export default function UserInfo({
       </div>
       <div className="w-full p-3">
         <div className="w-full rounded-md bg-black p-5 ">
-          <div className="border-b-foreground border-b  pb-4">
+          <div className="border-b border-b-foreground  pb-4">
             <h3 className="text-wrap break-words text-sm font-semibold">
               {username}
             </h3>

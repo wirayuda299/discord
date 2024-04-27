@@ -33,10 +33,10 @@ export async function createUser(
 
 export async function inviteUser(userToInvite: string, id: string) {
   try {
-    await api.post(`/user/invite-user`, {
-      userToInvite,
-      userId: id,
-    });
+   return await api.post(`/invitation/invite-user`, {
+			userToInvite,
+			userId: id,
+		});
   } catch (error) {
     throw error;
   }

@@ -55,7 +55,9 @@ export default function CreateThread({
 			<SheetTrigger asChild>
 				<Link
 					onClick={handleSelectMessage}
-					href={formUrlQuery(searchParams.toString(), 'type', 'threads') as string}
+					href={
+						formUrlQuery(searchParams.toString(), 'type', 'threads') as string
+					}
 					className={cn(
 						'flex w-full justify-between bg-transparent p-2 text-sm hover:bg-primary hover:text-white',
 						styles

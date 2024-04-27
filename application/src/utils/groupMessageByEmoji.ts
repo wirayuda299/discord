@@ -9,7 +9,10 @@ interface ReactionGroup {
 export function groupReactionsByEmoji(messageList: any[]) {
   return messageList.map((message) => {
     const groupedReactions = (message.reactions || []).reduce(
-      (acc: ReactionGroup, reaction) => {
+      (
+        acc: ReactionGroup,
+        reaction: { emoji: string; unified_emoji: string },
+      ) => {
         const emojiKey = reaction.emoji;
         if (!acc[emojiKey]) {
           acc[emojiKey] = {

@@ -18,7 +18,7 @@ export default function FriendHeader() {
     <header className="hidden w-full items-center gap-5 overflow-x-auto p-3 md:flex">
       <div className="flex items-center gap-2">
         <Image src={"/icons/friend.svg"} width={25} height={25} alt="friend" />
-        <h2 className="text-gray-2 text-base font-semibold">Friends</h2>
+        <h2 className="text-base font-semibold text-gray-2">Friends</h2>
       </div>
       <ul className="flex items-center gap-2 lg:gap-3">
         {status.map((status) => (
@@ -33,7 +33,7 @@ export default function FriendHeader() {
             {status}
           </li>
         ))}
-        <button className="bg-green-1 min-w-max truncate rounded-md px-3 py-1 text-xs font-semibold text-white">
+        <button className="min-w-max truncate rounded-md bg-green-1 px-3 py-1 text-xs font-semibold text-white">
           Add friend
         </button>
       </ul>

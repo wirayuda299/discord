@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import Image from "next/image";
 
 import {
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const items = ["for you", "unreads", "mentions"] as const;
 
-export default function Inbox() {
+export default function Inbox({children}:{children:ReactNode}) {
   const [selectedFilter, setSelectedFilter] = useState<string>("for you");
   return (
     <DropdownMenu>
@@ -63,7 +63,7 @@ export default function Inbox() {
             ))}
           </div>
         </header>
-        <div className="p-2">Notifications</div>
+        {children}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -88,3 +88,16 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+:target {
+    animation: highlight 3s ease-in-out;
+}
+@keyframes highlight {
+    from {
+        background-color: rgb(253 224 71);
+    }
+    to {
+        background-color: #fff;
+    }
+}
+

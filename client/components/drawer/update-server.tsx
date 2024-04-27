@@ -92,7 +92,7 @@ export default function UpdateServerDrawer({
       <DrawerTrigger className="py-3 text-sm font-semibold capitalize">
         update server
       </DrawerTrigger>
-      <DrawerContent className="border-foreground top-0 !h-full bg-black p-3 text-white">
+      <DrawerContent className="top-0 !h-full border-foreground bg-black p-3 text-white">
         <DrawerHeader>
           <DrawerTitle className="text-center text-xl font-semibold ">
             Update server
@@ -122,7 +122,7 @@ export default function UpdateServerDrawer({
                     alt="logo"
                   />
                 )}
-                <div className="bg-foreground absolute right-[115px] top-0 flex size-7 items-center justify-center rounded-full">
+                <div className="absolute right-[115px] top-0 flex size-7 items-center justify-center rounded-full bg-foreground">
                   <SquarePen size={16} className="text-gray-1" />
                 </div>
               </Label>
@@ -136,7 +136,7 @@ export default function UpdateServerDrawer({
                     <>
                       <Label
                         htmlFor="server-name"
-                        className="text-gray-2 my-1 block text-sm uppercase"
+                        className="my-1 block text-sm uppercase text-gray-2"
                       >
                         Server name
                       </Label>
@@ -144,7 +144,7 @@ export default function UpdateServerDrawer({
                         id="server-name"
                         autoComplete="off"
                         placeholder="server name"
-                        className="bg-foreground ring-offset-background text-white caret-white focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                        className="bg-foreground text-white caret-white ring-offset-background focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                         required
                         {...field}
                       />

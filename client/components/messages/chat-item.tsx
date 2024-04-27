@@ -52,12 +52,12 @@ export default function ChatItem({
   return (
 		<li
 			id={msg.message_id}
-			className='rounded-md p-1 target:!bg-primary hover:bg-foreground/50 md:hover:bg-background md:hover:brightness-110'
+			className='scroll-mt-5 rounded-md p-1 target:!bg-primary hover:bg-foreground/50 md:hover:bg-background md:hover:brightness-110'
 		>
 			{msg?.shouldAddLabel && <ChatLabel createdAt={msg.created_at} />}
 			{msg.reply_id && (
 				<Link
-					href={`#${msg.message_id}`}
+					href={`#${msg.parent_message_id || msg.message_id}`}
 					className='group flex w-auto items-center pl-5'
 				>
 					<Image

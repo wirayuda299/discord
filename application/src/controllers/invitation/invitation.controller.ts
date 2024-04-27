@@ -29,4 +29,8 @@ export class InvitationController {
   ) {
     return this.invitationService.acceptInvitation(id, friendId);
   }
+  @Post('/cancel')
+  cancelInvitation(@Body('userId') id: string) {
+    return this.invitationService.cancelInvitation(id);
+  }
 }

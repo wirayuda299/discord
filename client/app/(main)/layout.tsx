@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import Sidebar from "@/components/sidebar/sidebar";
-import FriendHeader from "@/components/friends-header";
 import SidebarMobile from "@/components/sidebar/mobile";
 
 export default async function MainLayout({
@@ -14,7 +13,6 @@ export default async function MainLayout({
       <div className="flex h-screen w-full overflow-hidden">
         <Sidebar />
         <div className="w-full">
-          <FriendHeader />
           {children}
         </div>
         <SidebarMobile />
