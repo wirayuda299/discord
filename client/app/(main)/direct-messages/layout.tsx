@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 import { auth } from "@clerk/nextjs";
 
-import ServerSidebarLinksItem from "@/components/sidebar/server-sidebar-links";
+import ServerSidebarLinksItem from "@/components/shared/sidebar/server-sidebar-links";
 import { serverSidebarLinks } from "@/constants/sidebarLinks";
 import { getConversationList } from "@/helper/conversations";
 import Conversation from "@/components/shared/messages/conversation";
-import SearchForm from "@/components/channels/search-form";
+import SearchForm from "@/components/servers/channels/search-form";
 
 export default async function DirectMessagesLayout({
   children,

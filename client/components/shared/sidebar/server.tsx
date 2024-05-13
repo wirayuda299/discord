@@ -3,11 +3,11 @@
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 
-import ChannelList from '../channels/list';
+import ChannelList from '@/components/servers/channels/list';
 import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
-import ServerMenu from '../channels/server-menus';
-import ChannelDrawerMobile from '../drawer/ChannelMobile';
+import ServerMenu from '@/components/servers/channels/server-menus';
+import ChannelDrawerMobile from '@/components/servers/channels/ChannelMobile';
 import { Channel } from '@/types/channels';
 
 export default function ServerSidebar({

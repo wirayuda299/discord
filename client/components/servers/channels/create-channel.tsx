@@ -1,5 +1,5 @@
 
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import CreateChannelForm from "../channels/create-channel/form";
 
 export default function CreateChannelDrawerMobile({

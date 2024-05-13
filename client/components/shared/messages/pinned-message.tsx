@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { memo } from 'react';
 
 import {
 	DropdownMenu,
@@ -8,16 +9,13 @@ import {
 } from '../../ui/dropdown-menu';
 import { getPinnedMessages } from '@/helper/message';
 import useFetch from '@/hooks/useFetch';
-import { memo } from 'react';
 
 function PinnedMessage({ channelId }: { channelId: string }) {
 	const { data, isLoading } = useFetch(
 		'pinned-messages',
 		() => getPinnedMessages(channelId as string),
-		channelId !== '' || channelId === undefined
 	);
 
-	console.log('pinned message rendering');
 
 	return (
 		<DropdownMenu>

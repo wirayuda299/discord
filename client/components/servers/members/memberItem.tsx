@@ -1,6 +1,7 @@
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 import { Member } from '@/types/server';
-import Image from 'next/image';
 
 export default function MemberItem({
 	member,

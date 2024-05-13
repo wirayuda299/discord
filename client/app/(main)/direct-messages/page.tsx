@@ -1,4 +1,4 @@
-import Friends from "@/components/friends/friends";
+import Friends from "@/components/user/friends/friends";
 import { redirect } from "next/navigation";
 
 type AllowedSearchParamsType = "friends" | "shop" | "nitro";

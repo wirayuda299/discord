@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import UserUpdateForm from "../user-update-form";
+import UserUpdateForm from "@/components/user/user-update-form";
 import { getUserById } from "@/helper/user";
 import { getServerProfile } from "@/helper/server";
 import { useServerContext } from "@/providers/server";

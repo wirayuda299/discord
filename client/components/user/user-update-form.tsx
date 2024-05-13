@@ -6,10 +6,10 @@ import { useEffect } from "react";
 import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { updateUser } from "@/helper/user";
 import useUploadFile from "@/hooks/useFileUpload";
 import { deleteImage, uploadFile } from "@/helper/file";

@@ -9,10 +9,10 @@ import { cn } from '@/lib/utils';
 import { formUrlQuery } from '@/utils/form-url-query';
 import { useServerContext } from '@/providers/server';
 
-import ChatForm from '../shared/messages/chat-form';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import ImagePreview from '../modals/image-preview';
+import ChatForm from '../../shared/messages/chat-form';
+import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import useSocket from '@/hooks/useSocket';
+import ImagePreview from '@/components/shared/image-preview';
 
 type Props = {
 	styles?: string;

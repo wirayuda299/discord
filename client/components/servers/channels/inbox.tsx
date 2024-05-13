@@ -5,7 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const items = ["for you", "unreads", "mentions"] as const;

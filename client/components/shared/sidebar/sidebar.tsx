@@ -4,10 +4,10 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs";
 
 import ServerList from "./server-list";
-import CreateServerModal from "../create-server/modal";
+import CreateServerModal from "@/components/servers/create-server/modal";
 import { getAllServerCreatedByCurrentUser } from "@/helper/server";
 import { getConversationList } from "@/helper/conversations";
-import ConversationItem from "../shared/messages/conversation";
+import ConversationItem from "../messages/conversation";
 
 export default async function Sidebar() {
   const { userId } = auth();

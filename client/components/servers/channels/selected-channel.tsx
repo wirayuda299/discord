@@ -10,14 +10,14 @@ import { useAuth } from '@clerk/nextjs';
 import { addLabelsToMessages } from '@/utils/messages';
 import { cn } from '@/lib/utils';
 
-import ChanelInfo from '../drawer/channel-info';
+import ChanelInfo from '@/components/servers/channels/channel-info';
 import Thread from './threads';
 import NotificationSettings from './notification-settings';
-import PinnedMessage from '../shared/messages/pinned-message';
+import PinnedMessage from '@/components/shared/messages/pinned-message';
 import Inbox from './inbox';
 import MemberSheet from '../members/members';
-import ChatForm from '../shared/messages/chat-form';
-import ChatItem from '../shared/messages/chat-item';
+import ChatForm from '@/components/shared/messages/chat-form';
+import ChatItem from '@/components/shared/messages/chat-item';
 import SearchForm from './search-form';
 
 import { useServerContext } from '@/providers/server';

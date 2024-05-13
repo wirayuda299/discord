@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <main className="md:text-gray-2 flex min-h-screen flex-col items-center p-24 text-white">
+    <main className="flex min-h-screen flex-col items-center p-24 text-white md:text-gray-2">
       Home
     </main>
   );

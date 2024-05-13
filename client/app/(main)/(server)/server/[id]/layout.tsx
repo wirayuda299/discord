@@ -1,6 +1,7 @@
-import ServerSidebar from "@/components/sidebar/server";
-import { getServerById } from "@/helper/server";
 import { ReactNode } from "react";
+
+import ServerSidebar from "@/components/shared/sidebar/server";
+import { getServerById } from "@/helper/server";
 
 export default async function ServerDetailLayout({
   children,

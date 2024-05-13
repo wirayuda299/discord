@@ -7,11 +7,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 	DropdownMenuContent,
-} from '../ui/dropdown-menu';
-import CreateChannelModals from '../modals/create-channel';
-import UserSettingsModals from '../modals/user-settings';
-import AddUser from '../modals/add-user';
-import ServerSetting from '../modals/server-setting';
+} from '@/components/ui/dropdown-menu';
+import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
+import UserSettingsModals from '@/components/user/user-settings';
+import ServerSetting from '@/components/servers/server-setting';
+import AddUser from '@/components/user/add-user';
 
 export default function ServerMenu({
 	serverName,

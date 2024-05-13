@@ -5,11 +5,11 @@ import { redirect } from 'next/navigation';
 
 import { isMemberOrAdmin } from '@/helper/server';
 
-const VideoCall = dynamic(() => import('@/components/channels/video-call'), {
+const VideoCall = dynamic(() => import('@/components/servers/channels/video-call'), {
 	ssr: false,
 });
 const SelectedChannel = dynamic(
-	() => import('@/components/channels/selected-channel'),
+	() => import('@/components/servers/channels/selected-channel'),
 	{
 		ssr: false,
 	}

@@ -10,7 +10,7 @@ import {
 	DrawerTitle,
 	DrawerTrigger,
 	DrawerContent,
-} from '../ui/drawer';
+} from '@/components/ui/drawer';
 
 import { cn } from '@/lib/utils';
 import { useServerContext } from '@/providers/server';
@@ -21,8 +21,8 @@ import { getServerMembers } from '@/helper/server';
 import MemberItem from '../members/memberItem';
 import useSocket from '@/hooks/useSocket';
 import { Message } from '@/types/messages';
-import ImagePreview from '../modals/image-preview';
 import { getPinnedMessages } from '@/helper/message';
+import ImagePreview from '@/components/shared/image-preview';
 
 const options = ['members', 'media', 'pins'] as const;
 

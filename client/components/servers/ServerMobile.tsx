@@ -5,11 +5,11 @@ import { useAuth } from "@clerk/nextjs";
 
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Servers } from "@/types/server";
-import CreateChannelDrawerMobile from "./create-channel";
-import DeleteServer from "../modals/delete-server";
+import CreateChannelDrawerMobile from "@/components/servers/channels/create-channel";
+import DeleteServer from "@/components/servers/delete-server";
 import UpdateServerDrawer from "./update-server";
-import AddUser from "../modals/add-user";
 import { copyText } from "@/utils/copy";
+import AddUser from "../user/add-user";
 
 export default function ServerDrawerMobile({ server }: { server: Servers }) {
   const { userId } = useAuth();

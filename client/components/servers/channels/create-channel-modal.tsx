@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CreateChannelForm from "../channels/create-channel/form";
 
 export default function CreateChannelModals({
@@ -15,7 +15,7 @@ export default function CreateChannelModals({
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="md:bg-background border-none bg-black shadow-2xl">
+      <DialogContent className="border-none bg-black shadow-2xl md:bg-background">
         <CreateChannelForm serverId={serverId} type={type} />
       </DialogContent>
     </Dialog>

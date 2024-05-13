@@ -10,13 +10,9 @@ export default function Error({
 	error: Error & { digest?: string };
 	reset: () => void;
 }) {
-  useEffect(() => {
-    toast.error(error.message)
+	useEffect(() => {
+		toast.error(error.message);
 	}, [error]);
 
-	return (
-		<div>
-     
-		</div>
-	);
+	return <div></div>;
 }

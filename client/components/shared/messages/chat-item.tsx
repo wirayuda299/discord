@@ -5,14 +5,14 @@ import type { Socket } from 'socket.io-client';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import queryString from 'query-string';
 
-import ImagePreview from '../../modals/image-preview';
 import { Message } from '@/types/messages';
 import { ServerStates } from '@/providers/server';
-import ThreadMessages from '../../threads/thread-messages';
+import ThreadMessages from '../../servers/threads/thread-messages';
 import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
+import ImagePreview from '../image-preview';
 
 type Props = {
 	socket: Socket | null;
@@ -110,7 +110,7 @@ function ChatItem({
 			/>
 
 			{msg.media_image && !msg.parent_message_id && (
-				<ImagePreview image={msg.media_image} messages={messages}/>
+				<ImagePreview image={msg.media_image} />
 			)}
 			<div className=' mt-1'>
 				{(msg?.threads || []).map((thread) => (

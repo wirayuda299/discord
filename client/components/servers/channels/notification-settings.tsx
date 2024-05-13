@@ -13,7 +13,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 const items = [
   "for 15 minutes",

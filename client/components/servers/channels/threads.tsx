@@ -5,9 +5,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { getAllThreads } from "@/helper/threads";
-import ThreadMessages from "../threads/thread-messages";
+import ThreadMessages from "@/components/servers/threads/thread-messages";
 import { useDebounce } from "@/hooks/useDebounce";
 import useFetch from "@/hooks/useFetch";
 

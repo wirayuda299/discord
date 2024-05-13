@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import Sidebar from "@/components/sidebar/sidebar";
-import SidebarMobile from "@/components/sidebar/mobile";
+import Sidebar from "@/components/shared/sidebar/sidebar";
+import SidebarMobile from "@/components/shared/sidebar/mobile";
 
 export default async function MainLayout({
   children,
