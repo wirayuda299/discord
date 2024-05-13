@@ -9,12 +9,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Message } from "@/types/messages";
 
 export type SocketContextType = {
   socket: Socket | null;
   isConnected: boolean;
-  messages: Message[];
 };
 
 export const SocketContext = createContext<SocketContextType>(
@@ -28,7 +26,6 @@ export const SocketContextProvider = ({
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Message[]>([]);
 
   const { userId } = useAuth();
 
@@ -57,13 +54,8 @@ export const SocketContextProvider = ({
       setIsConnected(false);
     });
 
-    socket?.on("set-personal-messages", (e) => {
-      setMessages((prev) => [...messages, e]);
-    });
-
     return () => {
       socket.disconnect();
-      setMessages([]);
     };
   }, [socket]);
 
@@ -72,7 +64,6 @@ export const SocketContextProvider = ({
       value={{
         isConnected,
         socket,
-        messages,
       }}
     >
       {children}
