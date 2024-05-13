@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { ConfigOptions } from 'cloudinary';
 
 export const cloudinaryConfig = (
-  configService: ConfigService,
+  configService: ConfigService
 ): ConfigOptions => ({
   cloud_name: configService.get<string>('CLOUDINARY_API_CLOUD_NAME'),
   api_key: configService.get<string>('CLOUDINARY_API_KEY'),

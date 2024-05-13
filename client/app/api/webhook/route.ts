@@ -1,36 +1,36 @@
 import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Webhook } from 'svix';
+import { Webhook } from "svix";
 
-import { deleteUser } from '@/helper/user';
+import { deleteUser } from "@/helper/user";
 
 const serverUrl = process.env.SERVER_URL;
 
 export async function createUser(
-	id: string,
-	username: string,
-	email: string,
-	image: string
+  id: string,
+  username: string,
+  email: string,
+  image: string,
 ) {
-	try {
-		await fetch(`${serverUrl}/user/create`, {
-			method: 'POST',
-			headers: {
-				'content-type': 'application/json',
-			},
-			body: JSON.stringify({
-				id,
-				username,
-				email,
-				image,
-			}),
-		});
-	} catch (error) {
-		console.log(error);
+  try {
+    await fetch(`${serverUrl}/user/create`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        id,
+        username,
+        email,
+        image,
+      }),
+    });
+  } catch (error) {
+    console.log(error);
 
-		throw error;
-	}
+    throw error;
+  }
 }
 
 export async function POST(req: Request) {
@@ -85,19 +85,19 @@ export async function POST(req: Request) {
     } = evt?.data as UserJSON;
 
     try {
-			const user = await createUser(
-				id!,
-				username!,
-				email[0].email_address,
-				image
-			);
+      const user = await createUser(
+        id!,
+        username!,
+        email[0].email_address,
+        image,
+      );
 
-			return NextResponse.json({ user }, { status: 201 });
-		} catch (error) {
-			console.log(error);
+      return NextResponse.json({ user }, { status: 201 });
+    } catch (error) {
+      console.log(error);
 
-			throw error;
-		}
+      throw error;
+    }
   }
 
   if (eventType === "user.deleted") {
@@ -105,10 +105,9 @@ export async function POST(req: Request) {
       const { id } = evt?.data as unknown as UserJSON;
       const deletedUser = await deleteUser(id!);
       return NextResponse.json({ deletedUser }, { status: 200 });
-      
     } catch (error) {
       console.log(error);
-      throw error
+      throw error;
     }
   }
 

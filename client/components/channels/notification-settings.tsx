@@ -30,6 +30,7 @@ export default function NotificationSettings() {
     <DropdownMenu modal>
       <DropdownMenuTrigger>
         <Image
+          className="min-w-6"
           src={muted ? "/icons/bell.svg" : "/icons/bell-unmute.svg"}
           width={24}
           height={24}

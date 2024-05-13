@@ -14,7 +14,7 @@ left join messages as m on m.id = cm.message_id
 left join channel_pinned_messages as cpm on cpm.channel_id  = c.id
 
 where c.id = $1`,
-        [id],
+        [id]
       );
 
       if (channel.rows.length < 1) {
@@ -43,7 +43,7 @@ where c.id = $1`,
         `INSERT INTO channels(name, server_id,type)
          VALUES($1, $2, $3)
          RETURNING id`,
-        [name, server_id, type],
+        [name, server_id, type]
       );
 
       const {
@@ -53,13 +53,13 @@ where c.id = $1`,
           insert into categories (name, server_id)
           values($1, $2)
           returning id`,
-        [type, server_id],
+        [type, server_id]
       );
 
       await this.db.pool.query(
         `insert into channels_category (channel_id, category_id)
             values($1, $2)`,
-        [channel.id, category1.id],
+        [channel.id, category1.id]
       );
 
       await this.db.pool.query(`commit`);

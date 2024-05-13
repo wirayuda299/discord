@@ -52,14 +52,11 @@ export async function updateUser(
 
 export async function searchUser(name: string, id: string): Promise<User[]> {
   try {
-    const res = await fetch(
-      `${serverUrl}/user/find?name=${name}&id=${id}`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: await prepareHeaders(),
-      },
-    );
+    const res = await fetch(`${serverUrl}/user/find?name=${name}&id=${id}`, {
+      method: "GET",
+      credentials: "include",
+      headers: await prepareHeaders(),
+    });
     const user = await res.json();
     return user.data;
   } catch (error) {
@@ -110,7 +107,7 @@ export async function getPendingInvitation(
     );
 
     const invitations = await res.json();
-    return invitations.data as UserInvite[]
+    return invitations.data as UserInvite[];
   } catch (error) {
     throw error;
   }
@@ -132,5 +129,3 @@ export async function getMyInvitation(userId: string): Promise<UserInvite[]> {
     throw error;
   }
 }
-
-

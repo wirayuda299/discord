@@ -1,55 +1,65 @@
-import Image from "next/image";
-import { Dispatch, SetStateAction, Suspense, useState } from "react";
-import Link from "next/link";
-import type { Socket } from "socket.io-client";
+import Image from 'next/image';
+import { memo, useMemo } from 'react';
+import Link from 'next/link';
+import type { Socket } from 'socket.io-client';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import queryString from 'query-string';
 
-import ImagePreview from "../modals/image-preview";
-import { Message } from "@/types/messages";
-import { ServerStates } from "@/providers/server";
-import ThreadMessages from "../threads/thread-messages";
-import ChatLabel from "./chat-label";
-import ChatContent from "./chat-content";
-import { useRouter, useSearchParams } from "next/navigation";
-import { formUrlQuery } from "@/utils/form-url-query";
-import CreateThread from "../threads/create-thread";
-import { foundMessage, handleSelectedMessage } from "@/utils/messages";
-import useEmoji from "@/hooks/useEmoji";
+import ImagePreview from '../modals/image-preview';
+import { Message } from '@/types/messages';
+import { ServerStates } from '@/providers/server';
+import ThreadMessages from '../threads/thread-messages';
+import ChatLabel from './chat-label';
+import ChatContent from './chat-content';
+import { foundMessage } from '@/utils/messages';
+import useEmoji from '@/hooks/useEmoji';
 
 type Props = {
-  socket: Socket | null;
-  msg: Message & { shouldAddLabel?: boolean };
-  userId: string;
-  messages: Message[];
-  serverStates: ServerStates;
-  setServerStates: Dispatch<SetStateAction<ServerStates>>;
+	socket: Socket | null;
+	msg: Message & { shouldAddLabel?: boolean };
+	userId: string;
+	replyType: string;
+	styles?: string;
+	messages: Message[];
+	serverStates: ServerStates;
+	reloadMessage: () => void;
 };
 
-export default function ChatItem({
-  msg,
-  userId,
-  setServerStates,
-  messages,
-  serverStates,
-  socket,
+function ChatItem({
+	msg,
+	userId,
+	messages,
+	replyType,
+	serverStates,
+	socket,
+	reloadMessage,
+	styles,
 }: Props) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [value, setValue] = useState<string>("");
-  const { selectedChannel, selectedServer } = serverStates
-  const handleAppendOrRemoveEmoji= useEmoji( selectedServer?.id!!, userId, reloadMessage)
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const params = useParams();
+	const { selectedServer } = serverStates;
+	const handleAppendOrRemoveEmoji = useEmoji(
+		selectedServer?.id!!,
+		userId,
+		reloadMessage
+	);
 
-  function reloadMessage() {
-    	if (socket) {
-				socket?.emit('get-channel-message', {
-					channelId: selectedChannel?.channel_id!!,
-					serverId: selectedServer?.id!!,
-				});
-			}
-  }
+	const getPath = (threadId: string) => {
+		const parsed = queryString.parse(searchParams.toString());
+		parsed.type = 'thread';
+		parsed.threadId = threadId;
+		return queryString.stringify(parsed);
+	};
 
-  const repliedMessage = foundMessage(messages, msg)
+	const repliedMessage = useMemo(
+		() => foundMessage(messages, msg),
+		[messages, msg]
+	);
 
-  return (
+	
+
+	return (
 		<li
 			id={msg.message_id}
 			className='scroll-mt-5 rounded-md p-1 target:!bg-primary hover:bg-foreground/50 md:hover:bg-background md:hover:brightness-110'
@@ -89,55 +99,31 @@ export default function ChatItem({
 				</Link>
 			)}
 			<ChatContent
-				socket={socket}
-				handleSelectedMessage={() =>
-					handleSelectedMessage(
-						msg,
-						router,
-						searchParams,
-						setServerStates,
-						'reply'
-					)
-				}
+				replyType={replyType}
+				styles={styles}
+				reloadMessage={reloadMessage}
 				handleClick={(e) => handleAppendOrRemoveEmoji(e, msg.message_id)}
 				message={msg}
 				serverStates={serverStates}
-				setServerStates={setServerStates}
 				userId={userId}
-			>
-				<CreateThread
-					value={value}
-					setValue={setValue}
-					message={msg}
-					serverState={serverStates}
-					setServerStates={setServerStates}
-				>
-					<span> Create Thread</span>
-				</CreateThread>
-			</ChatContent>
+				socket={socket}
+			/>
 
-			{msg.media_image && (
-				<Suspense
-					fallback={
-						<div className='h-14 w-full animate-pulse rounded-md bg-background brightness-125'></div>
-					}
-				>
-					<ImagePreview image={msg.media_image} />
-				</Suspense>
+			{msg.media_image && !msg.parent_message_id && (
+				<ImagePreview image={msg.media_image} messages={messages}/>
 			)}
 			<div className=' mt-1'>
-				{msg?.threads.map((thread) => (
+				{(msg?.threads || []).map((thread) => (
 					<ThreadMessages
 						username={serverStates.selectedServer?.name!}
 						key={thread.thread_id}
 						threadId={thread.thread_id}
 					>
 						<div
-							onClick={() =>
-								router.push(
-									formUrlQuery(searchParams.toString(), 'type', 'message')!
-								)
-							}
+							onClick={() => {
+								const p = getPath(thread.thread_id);
+								router.push(`/server/${params.id}/${params.channel_id}?${p}`);
+							}}
 							className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
 						>
 							<Image
@@ -161,3 +147,5 @@ export default function ChatItem({
 		</li>
 	);
 }
+
+export default memo(ChatItem);

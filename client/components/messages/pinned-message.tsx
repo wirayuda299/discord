@@ -14,10 +14,12 @@ export default function PinnedMessage({ channelId }: { channelId: string }) {
     getPinnedMessages(channelId),
   );
 
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Image
+          className="min-w-6"
           src={"/icons/pin.svg"}
           width={24}
           height={24}

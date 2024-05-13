@@ -17,7 +17,7 @@ export class InvitationController {
   @Post('/invite-user')
   inviteUser(
     @Body('userToInvite') usertoInvite: string,
-    @Body('userId') id: string,
+    @Body('userId') id: string
   ) {
     return this.invitationService.inviteUser(usertoInvite, id);
   }
@@ -25,7 +25,7 @@ export class InvitationController {
   @Post('/accept')
   acceptInvitation(
     @Body('userId') id: string,
-    @Body('friendId') friendId: string,
+    @Body('friendId') friendId: string
   ) {
     return this.invitationService.acceptInvitation(id, friendId);
   }

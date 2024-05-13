@@ -14,14 +14,14 @@ export default async function ServerDetailLayout({
   const data = await getServerById(params.id as string);
 
   return (
-		<div className='flex w-full'>
-			<ServerSidebar
-				data={{
-					channels: data.channels,
-					server: data.server[0],
-				}}
-			/>
-			{children}
-		</div>
-	);
+    <div className="flex w-full">
+      <ServerSidebar
+        data={{
+          channels: data.channels,
+          server: data.server[0],
+        }}
+      />
+      {children}
+    </div>
+  );
 }

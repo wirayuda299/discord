@@ -3,7 +3,7 @@
 import { ApiRequest } from "@/utils/api";
 import { revalidatePath } from "next/cache";
 
-const api = new ApiRequest(); 
+const api = new ApiRequest();
 
 export async function addOrRemoveReaction(
   messageId: string,

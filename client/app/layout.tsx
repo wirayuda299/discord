@@ -9,6 +9,7 @@ import { ServerContextProvider } from "@/providers/server";
 
 import { Toaster } from "@/components/ui/sonner";
 import { SocketContextProvider } from "@/providers/socket-io";
+import { UserContextProvider } from "@/providers/users";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -29,16 +30,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <ClerkProvider
         signUpUrl="/sign-up"
         signInUrl="/sign-in"
-        afterSignInUrl="/server"
-        afterSignUpUrl="/server"
+        afterSignInUrl="/direct-messages"
+        afterSignUpUrl="/direct-messages"
       >
         <body
           className={`${poppins.className} size-full bg-black md:bg-background`}
         >
           <SocketContextProvider>
             <ServerContextProvider>
-              <div className="mx-auto w-full max-w-[1440px]">{children}</div>
-              <Toaster className="text-white" />
+              <UserContextProvider>
+                <div className="mx-auto w-full max-w-[1440px]">{children}</div>
+                <Toaster className="text-white" />
+              </UserContextProvider>
             </ServerContextProvider>
           </SocketContextProvider>
         </body>

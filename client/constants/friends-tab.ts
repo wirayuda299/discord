@@ -1,1 +1,1 @@
-export const friendtabs = ['online', 'all', 'pending', 'blocked'] as const;
+export const friendtabs = ["online", "all", "pending", "blocked"] as const;

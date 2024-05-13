@@ -24,6 +24,56 @@ const prepareHeaders = async () => {
   };
 };
 
+type Props = {
+  content: string;
+  userId: string;
+  imageAssetId: string;
+  recipientId: string;
+  imageUrl: string;
+  conversationId: string;
+  type: string;
+  channelId?: string;
+  avatar?: string;
+  serverId?: string;
+  username?: string;
+  messageId?: string;
+  parentMessageId?: string;
+  threadId?: string;
+};
+
+export const messageData = ({
+  content,
+  conversationId,
+  imageAssetId,
+  imageUrl,
+  recipientId,
+  userId,
+  type,
+  avatar = "",
+  channelId = "",
+  messageId = "",
+  parentMessageId = "",
+  serverId = "",
+  username = "",
+  threadId=''
+}: Props) => ({
+  content: content.trim(),
+  is_read: false,
+  user_id: userId,
+  type,
+  imageAssetId,
+  imageUrl,
+  conversationId,
+  recipientId,
+  avatar,
+  channelId,
+  messageId,
+  serverId,
+  parentMessageId,
+  username,
+  threadId
+});
+
 export async function getPinnedMessages(
   channelId: string,
 ): Promise<PinnedMessage[]> {

@@ -12,9 +12,7 @@ export default async function MainLayout({
     <div className="size-full">
       <div className="flex h-screen w-full overflow-hidden">
         <Sidebar />
-        <div className="w-full">
-          {children}
-        </div>
+        <div className="w-full">{children}</div>
         <SidebarMobile />
       </div>
     </div>

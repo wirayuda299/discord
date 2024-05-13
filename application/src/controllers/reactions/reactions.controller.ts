@@ -15,7 +15,7 @@ export class ReactionsController {
       message_id,
       emoji,
       unified_emoji,
-      react_by,
+      react_by
     );
   }
 }

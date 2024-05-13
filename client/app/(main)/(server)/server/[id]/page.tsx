@@ -1,8 +1,27 @@
-import Image from "next/image";
+import Image from 'next/image';
+import { currentUser } from '@clerk/nextjs';
+import { redirect } from 'next/navigation';
 
- 
-export default async function ServerDetail() {
-	return (
+import { isMemberOrAdmin } from '@/helper/server';
+
+export default async function ServerDetail({
+	params,
+}: {
+	params: { id: string };
+  }) {
+  
+	const user = await currentUser();
+
+	if (!user || user === null) {
+		return redirect('/sign-in');
+	}
+	const isMemberOrAuthor = await isMemberOrAdmin(user.id, params.id);
+
+	if (!isMemberOrAuthor.isAuthor && !isMemberOrAuthor.isMember) {
+		 redirect('/direct-messages');
+	}
+
+	 (
 		<div className='hidden size-full sm:block'>
 			<div className='flex h-screen flex-col items-center justify-center text-white'>
 				<Image

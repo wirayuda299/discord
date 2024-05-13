@@ -15,7 +15,10 @@ export const formUrlQuery = (
         url: window.location.pathname,
         query: currentUrl,
       },
-      { skipNull: true },
+      {
+        skipNull: true,
+        skipEmptyString: true,
+      },
     );
   }
 };

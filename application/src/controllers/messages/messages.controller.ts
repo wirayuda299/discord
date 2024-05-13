@@ -10,7 +10,7 @@ export class MessagesController {
   pinMessage(
     @Body('messageId') msgId: string,
     @Body('channelId') channelId: string,
-    @Body('pinnedBy') author: string,
+    @Body('pinnedBy') author: string
   ) {
     return this.messageService.pinMessage(msgId, channelId, author);
   }
@@ -23,7 +23,7 @@ export class MessagesController {
   @Get('message-channel')
   getMessageChannelById(
     @Query('channel_id') id: string,
-    @Query('server_id') serverId: string,
+    @Query('server_id') serverId: string
   ) {
     return this.messageService.getMessageByChannelId(id, serverId);
   }
@@ -35,7 +35,7 @@ export class MessagesController {
       messageAuthor,
       currentUser,
       messageId,
-      content,
+      content
     );
   }
 }

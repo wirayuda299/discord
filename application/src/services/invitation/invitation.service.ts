@@ -13,7 +13,7 @@ export class InvitationService {
       await this.db.pool.query(
         `insert into invitations (user_to_invite, invitator, status)
 values($1, $2, 'pending')`,
-        [userToInvite, userId],
+        [userToInvite, userId]
       );
 
       return {
@@ -35,7 +35,7 @@ values($1, $2, 'pending')`,
         select * from invitations as i
         join users as u on i.user_to_invite  = u.id 
         where i.invitator = $1 and i.status = $2`,
-        [userId, 'pending'],
+        [userId, 'pending']
       );
 
       return {
@@ -59,7 +59,7 @@ values($1, $2, 'pending')`,
          select * from invitations as i
          join users as u on i.invitator  = u.id 
          where i.user_to_invite = $1 and i.status = 'pending'`,
-        [userId],
+        [userId]
       );
       return {
         data: pendingInvitation.rows,
@@ -75,7 +75,7 @@ values($1, $2, 'pending')`,
       if (!userId || !friend_id) {
         throw new HttpException(
           'User or friend id is missing',
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
       }
       await this.db.pool.query(`begin`);
@@ -83,14 +83,14 @@ values($1, $2, 'pending')`,
         `
           delete from invitations 
           where invitator = $1 and user_to_invite=$2`,
-        [friend_id, userId],
+        [friend_id, userId]
       );
 
       await this.db.pool.query(
         `
           insert into friends(friend_id, user_id)
           values($1, $2)`,
-        [friend_id, userId],
+        [friend_id, userId]
       );
       await this.db.pool.query(`commit`);
       return {
@@ -111,7 +111,7 @@ values($1, $2, 'pending')`,
       await this.db.pool.query(
         `delete from invitations as i
         where i.invitator = $1 and status = $2`,
-        [userId, 'pending'],
+        [userId, 'pending']
       );
       return {
         message: 'Invitation canceled',

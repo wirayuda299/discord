@@ -1,61 +1,62 @@
-import { Link, UserPlus2 } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+
+import { ReactNode, useState } from "react";
 
 import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogTrigger,
-} from '../ui/dialog';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useServerContext } from "@/providers/server";
+import { Button } from "../ui/button";
+import { copyText } from "@/utils/copy";
 
 export default function AddUser({
-	size = 18,
 	styles,
+	children
 }: {
-	size: number;
-	styles?: string;
+		styles?: string;
+	children:ReactNode
 }) {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
-	return (
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { serversState } = useServerContext()
+  
+  return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger className={styles}>
-				<UserPlus2
-					onClick={(e) => {
-						e.stopPropagation();
-						e.preventDefault();
-						setIsOpen(true);
-					}}
-					stroke='#fff'
-					className='text-base'
-					size={size}
-				/>
+			<DialogTrigger
+				asChild
+				className={styles}
+				onClick={(e) => {
+					e.stopPropagation();
+					e.preventDefault();
+					setIsOpen(true);
+				}}
+			>
+				{children}
 			</DialogTrigger>
-			<DialogContent className='size-full border-none bg-black md:mx-auto md:h-max md:max-h-[500px] md:max-w-[500px] md:overflow-y-auto'>
-				<DialogTitle>
-					<DialogTitle className='text-white'>Invite a friend</DialogTitle>
+			<DialogContent className=' w-full border-none bg-black'>
+				<DialogTitle className='text-sm font-medium text-white'>
+					Invite a friend to {serversState.selectedServer?.name}
 				</DialogTitle>
-
-				<button className='flex size-10 items-center justify-center rounded-full bg-background'>
-					<Link stroke='#fff' size={18} />
-				</button>
-				<ul className='mt-5'>
-					<li className='flex items-center justify-between'>
-						<div className='flex items-center gap-2'>
-							<Image
-								src={'/icons/discord.svg'}
-								width={40}
-								className='aspect-auto object-contain'
-								height={40}
-								alt='user'
-							/>
-							<h3 className='font-semibold text-white'>Username</h3>
-						</div>
-						<button className='rounded-full bg-background px-3 text-sm text-white'>
-							Invite
-						</button>
-					</li>
-				</ul>
+				<div className='flex w-full rounded-md bg-background p-2 text-gray-2 '>
+					<input
+						className='w-full border-none bg-transparent outline-none'
+						type='text'
+						name='invite code'
+						value={`${process.env.NEXT_PUBLIC_ORIGIN}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`}
+					/>
+					<Button
+						onClick={() =>
+							copyText(
+								`${process.env.NEXT_PUBLIC_ORIGIN}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`,
+								'Invite code copied'
+							)
+						}
+						size={'sm'}
+					>
+						Copy
+					</Button>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

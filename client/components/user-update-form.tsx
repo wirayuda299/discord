@@ -155,157 +155,157 @@ export default function UserUpdateForm({
   }
 
   return (
-		<div className='grid w-full gap-5 py-5 md:grid-cols-1 lg:grid-cols-2'>
-			<Form {...form}>
-				<form className='space-y-3' onSubmit={form.handleSubmit(onSubmit)}>
-					<FormField
-						control={form.control}
-						name='username'
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Username</FormLabel>
-								<FormControl>
-									<div>
-										<Input
-											{...field}
-											placeholder='username'
-											className='w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name='bio'
-						render={({ field }) => (
-							<FormItem className='border-b border-b-foreground'>
-								<FormLabel>Bio</FormLabel>
-								<FormControl>
-									<div>
-										<Input
-											{...field}
-											placeholder='Add bio'
-											className='w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name='avatar'
-						render={({ field }) => (
-							<FormItem className='border-b border-b-foreground'>
-								<FormLabel className='pb-2'>Avatar</FormLabel>
-								<FormControl>
-									<div>
-										<Label
-											htmlFor='avatar'
-											className='mt-1 cursor-pointer rounded-md bg-primary p-3'
-										>
-											Change avatar
-										</Label>
-										<Input
-											onChange={(e) => handleChange(e, 'avatar')}
-											name='file'
-											id='avatar'
-											type='file'
-											className='hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name='avatar'
-						render={({ field }) => (
-							<FormItem className='border-b border-b-foreground'>
-								<FormLabel>Avatar Decoration</FormLabel>
-								<FormControl>
-									<div>
-										<Label htmlFor='avatar'>
-											<Button>Change decoration</Button>
-										</Label>
-										<Input
-											disabled
-											name='file'
-											id='avatar'
-											type='file'
-											className='hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name='avatar'
-						render={({ field }) => (
-							<FormItem className='border-b border-b-foreground'>
-								<FormLabel>Profile effect</FormLabel>
-								<FormControl>
-									<div>
-										<Label htmlFor='avatar'>
-											<Button>Change effect</Button>
-										</Label>
-										<Input
-											disabled
-											name='file'
-											id='avatar'
-											type='file'
-											className='hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<FormField
-						control={form.control}
-						name='avatar'
-						render={({ field }) => (
-							<FormItem className='border-b border-b-foreground'>
-								<FormLabel>Avatar Decoration</FormLabel>
-								<FormControl>
-									<div>
-										<Label htmlFor='avatar'>
-											<Button>Change decoration</Button>
-										</Label>
-										<Input
-											disabled
-											name='file'
-											id='avatar'
-											type='file'
-											className='hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
-										/>
-										<div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
-					<Button disabled={isSubmitting} type='submit'>
-						Update
-					</Button>
-				</form>
-			</Form>
-			<UserInfo
-				selectedOption={selectedOption}
-				avatar={preview && preview.avatar ? preview?.avatar : data.avatar}
-				bio={data.bio ?? ''}
-				username={data.username}
-			/>
-		</div>
-	);
+    <div className="grid w-full gap-5 py-5 md:grid-cols-1 lg:grid-cols-2">
+      <Form {...form}>
+        <form className="space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <div>
+                    <Input
+                      {...field}
+                      placeholder="username"
+                      className="w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="bio"
+            render={({ field }) => (
+              <FormItem className="border-b border-b-foreground">
+                <FormLabel>Bio</FormLabel>
+                <FormControl>
+                  <div>
+                    <Input
+                      {...field}
+                      placeholder="Add bio"
+                      className="w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="avatar"
+            render={({ field }) => (
+              <FormItem className="border-b border-b-foreground">
+                <FormLabel className="pb-2">Avatar</FormLabel>
+                <FormControl>
+                  <div>
+                    <Label
+                      htmlFor="avatar"
+                      className="mt-1 cursor-pointer rounded-md bg-primary p-3"
+                    >
+                      Change avatar
+                    </Label>
+                    <Input
+                      onChange={(e) => handleChange(e, "avatar")}
+                      name="file"
+                      id="avatar"
+                      type="file"
+                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="avatar"
+            render={({ field }) => (
+              <FormItem className="border-b border-b-foreground">
+                <FormLabel>Avatar Decoration</FormLabel>
+                <FormControl>
+                  <div>
+                    <Label htmlFor="avatar">
+                      <Button>Change decoration</Button>
+                    </Label>
+                    <Input
+                      disabled
+                      name="file"
+                      id="avatar"
+                      type="file"
+                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="avatar"
+            render={({ field }) => (
+              <FormItem className="border-b border-b-foreground">
+                <FormLabel>Profile effect</FormLabel>
+                <FormControl>
+                  <div>
+                    <Label htmlFor="avatar">
+                      <Button>Change effect</Button>
+                    </Label>
+                    <Input
+                      disabled
+                      name="file"
+                      id="avatar"
+                      type="file"
+                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="avatar"
+            render={({ field }) => (
+              <FormItem className="border-b border-b-foreground">
+                <FormLabel>Avatar Decoration</FormLabel>
+                <FormControl>
+                  <div>
+                    <Label htmlFor="avatar">
+                      <Button>Change decoration</Button>
+                    </Label>
+                    <Input
+                      disabled
+                      name="file"
+                      id="avatar"
+                      type="file"
+                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button disabled={isSubmitting} type="submit">
+            Update
+          </Button>
+        </form>
+      </Form>
+      <UserInfo
+        selectedOption={selectedOption}
+        avatar={preview && preview.avatar ? preview?.avatar : data.avatar}
+        bio={data.bio ?? ""}
+        username={data.username}
+      />
+    </div>
+  );
 }

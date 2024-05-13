@@ -24,7 +24,7 @@ export class ServersController {
     @Body('name') name: string,
     @Body('logo') logo: string,
     @Body('ownerId') owner: string,
-    @Body('logoAssetId') logoAssetId: string,
+    @Body('logoAssetId') logoAssetId: string
   ) {
     return this.serverService.createServer(name, logo, owner, logoAssetId);
   }
@@ -32,7 +32,7 @@ export class ServersController {
   @Get('/server-profile')
   getServerProfile(
     @Query('serverId') id: string,
-    @Query('userId') user_id: string,
+    @Query('userId') user_id: string
   ) {
     return this.serverService.getServerProfile(id, user_id);
   }
@@ -40,16 +40,13 @@ export class ServersController {
   @Patch('/update-server-profile')
   updateServerProfile(@Req() req: Request) {
     const { serverId, userId, username, avatar, avatarAssetId, bio } = req.body;
-
-    console.log(req.body);
-
     return this.serverService.updateServerprofile(
       serverId,
       userId,
       username,
       avatar,
       avatarAssetId,
-      bio,
+      bio
     );
   }
 
@@ -59,17 +56,26 @@ export class ServersController {
       throw new HttpException('User Id is required', HttpStatus.BAD_REQUEST);
     }
     return this.serverService.getAllServerCreatedByCurrentUserOrAsMember(
-      ownerId,
+      ownerId
     );
   }
   @Get('/members')
   getMembers(@Query('serverId') id: string) {
     return this.serverService.getMemberInServer(id);
   }
+
+  @Get('/is-member-or-author')
+  isMemberOrAuthor(
+    @Query('userId') userId: string,
+    @Query('serverId') serverId: string
+  ) {
+    return this.serverService.isMemberOrServerAuthor(userId, serverId);
+  }
+
   @Delete('/delete')
   deleteServer(
     @Body('serverId') serverId: string,
-    @Body('currentSessionId') sessionId: string,
+    @Body('currentSessionId') sessionId: string
   ) {
     return this.serverService.deleteServer(serverId, sessionId);
   }
@@ -92,14 +98,14 @@ export class ServersController {
       currentSessionId,
       name,
       logo,
-      logoAssetId,
+      logoAssetId
     );
   }
 
   @Post('/invite-user')
   inviteUser(@Req() req: Request) {
-    const { inviteCode, userId, server_id } = req.body;
+    const { inviteCode, userId, serverId } = req.body;
 
-    return this.serverService.inviteUser(inviteCode, userId, server_id);
+    return this.serverService.inviteUser(inviteCode, userId, serverId);
   }
 }

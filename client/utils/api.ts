@@ -39,13 +39,14 @@ export class ApiRequest {
         body: JSON.stringify(body),
       });
 
-      if (!res.headers.get("content-type")?.includes("application/json")) return;
-      
+      if (!res.headers.get("content-type")?.includes("application/json"))
+        return;
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.messages);
       }
-      return data
+      return data;
     } catch (error) {
       throw error;
     }

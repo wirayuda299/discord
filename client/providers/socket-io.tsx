@@ -1,61 +1,45 @@
 "use client";
-import { Message } from "@/types/messages";
+
 import { useAuth } from "@clerk/nextjs";
+import { Socket, io } from "socket.io-client";
 import {
-  Dispatch,
-  FC,
   ReactNode,
-  SetStateAction,
   createContext,
   useContext,
   useEffect,
   useState,
 } from "react";
-import { Socket, io } from "socket.io-client";
+import { Message } from "@/types/messages";
 
 export type SocketContextType = {
   socket: Socket | null;
   isConnected: boolean;
-  activeUsers: string[];
-  channelMessages: Message[];
-  setChannelMessages: Dispatch<SetStateAction<Message[]>>;
+  messages: Message[];
 };
 
-type ContextProviderProps = {
-  children: ReactNode;
-};
-export const SocketContext = createContext<SocketContextType>({
-  activeUsers: [],
-  isConnected: false,
-  socket: null,
-  channelMessages: [],
-  setChannelMessages: () => {},
-});
+export const SocketContext = createContext<SocketContextType>(
+  {} as SocketContextType,
+);
 
-export const SocketContextProvider: FC<ContextProviderProps> = ({
+export const SocketContextProvider = ({
   children,
+}: {
+  children: ReactNode;
 }) => {
-  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [activeUsers, setActiveUsers] = useState<string[]>([]);
-  const [channelMessages, setChannelMessages] = useState<Message[]>([]);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+
   const { userId } = useAuth();
+
   useEffect(() => {
-    const serverUrl = 'https://discord-mydn.onrender.com';
-		const clientSocket = io(serverUrl, {
-			query: {
-				userId,
-			},
-		});
+    const serverUrl = process.env.NEXT_PUBLIC_ORIGIN;
+    const clientSocket = io(serverUrl!, {
+      query: {
+        userId,
+      },
+    });
     setSocket(clientSocket);
-
-    clientSocket.on("connect", () => {
-      setIsConnected(true);
-    });
-
-    clientSocket.on("disconnect", () => {
-      setIsConnected(false);
-    });
 
     return () => {
       clientSocket.disconnect();
@@ -64,19 +48,31 @@ export const SocketContextProvider: FC<ContextProviderProps> = ({
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("set-active-users", (data) => {
-      setActiveUsers(data);
+
+    socket.on("connect", () => {
+      setIsConnected(true);
     });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    socket?.on("set-personal-messages", (e) => {
+      setMessages((prev) => [...messages, e]);
+    });
+
+    return () => {
+      socket.disconnect();
+      setMessages([]);
+    };
   }, [socket]);
 
   return (
     <SocketContext.Provider
       value={{
-        setChannelMessages,
-        channelMessages,
-        activeUsers,
         isConnected,
         socket,
+        messages,
       }}
     >
       {children}

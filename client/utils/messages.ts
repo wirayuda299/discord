@@ -6,7 +6,6 @@ import { Message } from "@/types/messages";
 import { formUrlQuery } from "./form-url-query";
 import { ServerStates } from "@/providers/server";
 
-
 export function addLabelsToMessages(messages: Message[]) {
   let currentMonth: number | null = null;
 
@@ -22,22 +21,22 @@ export function addLabelsToMessages(messages: Message[]) {
   });
 }
 
-export const foundMessage = (messages:any[],msg: Message) => {
-		return messages.find(
-			(message) => message.message_id === msg.parent_message_id
-		);
+export const foundMessage = (messages: any[], msg: Message):Message => {
+  return messages.find(
+    (message) => message.message_id === msg.parent_message_id,
+  );
 };
-  
+
 export const handleSelectedMessage = (
-		msg: Message,
-		router: AppRouterInstance,
-		searchParams: ReadonlyURLSearchParams,
+  msg: Message,
+  router: AppRouterInstance,
+  searchParams: ReadonlyURLSearchParams,
   setServerStates: Dispatch<SetStateAction<ServerStates>>,
-    type:string
-	) => {
-		router.push(formUrlQuery(searchParams.toString(), 'type', type)!);
-		setServerStates((prev) => ({
-			...prev,
-			selectedMessage: msg,
-		}));
-	};
+  type: string,
+) => {
+  router.push(formUrlQuery(searchParams.toString(), "type", type)!);
+  setServerStates((prev) => ({
+    ...prev,
+    selectedMessage: msg,
+  }));
+};

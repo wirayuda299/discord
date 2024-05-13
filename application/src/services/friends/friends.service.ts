@@ -25,7 +25,7 @@ export class FriendsService {
           FROM friends as f
             join users as u on f.user_id = u.id
           WHERE friend_id = $1;`,
-        [userId],
+        [userId]
       );
       return {
         data: friends.rows,

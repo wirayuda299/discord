@@ -51,3 +51,13 @@ export interface MessageData {
   parentMessageId: string;
   messageId?: string;
 }
+
+export interface Conversation {
+  created_at: string;
+  conversation_id: string;
+  message_id: string;
+  recipient_id: string;
+  sender_id: string;
+  username: string;
+  image: string;
+}

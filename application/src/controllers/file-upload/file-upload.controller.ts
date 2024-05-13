@@ -22,7 +22,7 @@ export class FileUploadController {
       limits: {
         fileSize: 10000000,
       },
-    }),
+    })
   )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     const b64 = Buffer.from(file.buffer).toString('base64');

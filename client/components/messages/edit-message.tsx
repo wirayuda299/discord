@@ -2,8 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation";
-import type { Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 import { editMessage } from "@/helper/message";
 import { Textarea } from "../ui/textarea";
@@ -16,23 +15,18 @@ export default function EditMessageForm({
   messageAuthor,
   messageId,
   serverId,
-  socket,
-  channelId,
-  threadId,
+  reloadMessage,
 }: {
-  socket: Socket | null;
   message: string;
   handleClose: () => void;
   messageAuthor: string;
   currentUser: string;
   messageId: string;
   serverId: string;
-  channelId: string;
-  threadId?: string;
+  reloadMessage: () => void;
 }) {
   const [value, setValue] = useState<string>(message);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   async function handleEditMessage(e: FormEvent) {
     e.preventDefault();
@@ -51,17 +45,7 @@ export default function EditMessageForm({
       ).then(() => {
         router.refresh();
         handleClose();
-        if (searchParams.get("type") === "message") {
-          socket?.emit("thread-messages", {
-            threadId,
-            serverId,
-          });
-        } else {
-          socket?.emit("get-channel-message", {
-            channelId,
-            serverId,
-          });
-        }
+        reloadMessage();
       });
     } catch (error) {
       createError(error);

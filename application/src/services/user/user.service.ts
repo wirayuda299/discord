@@ -12,7 +12,7 @@ import { DatabaseService } from '../database/database.service';
 export class UserService {
   constructor(
     private validationService: ValidationService,
-    private databaseService: DatabaseService,
+    private databaseService: DatabaseService
   ) {}
 
   async createUser(id: string, name: string, email: string, image: string) {
@@ -28,7 +28,7 @@ export class UserService {
       await this.databaseService.pool.query(
         `INSERT INTO USERS(id, username, image, email) 
         VALUES($1, $2, $3, $4)`,
-        [id, name, image, email],
+        [id, name, image, email]
       );
 
       return {
@@ -46,7 +46,7 @@ export class UserService {
 
       const users = await this.databaseService.pool.query(
         `SELECT * FROM USERS WHERE id != $1 ORDER BY created_at desc`,
-        [id],
+        [id]
       );
 
       return {
@@ -64,7 +64,7 @@ export class UserService {
 
       const user = await this.databaseService.pool.query(
         `select * from users where id = $1`,
-        [id],
+        [id]
       );
 
       if (user.rows.length < 1) throw new NotFoundException('User not found');
@@ -85,7 +85,7 @@ export class UserService {
     id: string,
     bio: string,
     image?: string,
-    imageAssetId?: string,
+    imageAssetId?: string
   ) {
     try {
       const user = await this.getUserById(id);
@@ -102,7 +102,7 @@ export class UserService {
             image_asset_id = $3,
             bio = $4
             where id = $5`,
-          [name, image, imageAssetId, bio, id],
+          [name, image, imageAssetId, bio, id]
         );
 
         return {
@@ -115,7 +115,7 @@ export class UserService {
             set username = $1,
                 bio = $2
             where id = $3`,
-          [name, bio, id],
+          [name, bio, id]
         );
         return {
           message: 'User updated',
@@ -155,7 +155,7 @@ export class UserService {
           `select * from users 
            where to_tsvector(username) @@ to_tsquery($1)
           AND username != (SELECT username FROM users WHERE id = $2)`,
-          [name.toLowerCase(), id],
+          [name.toLowerCase(), id]
         );
         return {
           data: users.rows,

@@ -1,5 +1,19 @@
-import SelectedChannel from "@/components/channels/selected-channel";
-import VideoCall from '@/components/channels/video-call';
+
+import { currentUser } from '@clerk/nextjs';
+import dynamic from 'next/dynamic';
+import { redirect } from 'next/navigation';
+
+import { isMemberOrAdmin } from '@/helper/server';
+
+const VideoCall = dynamic(() => import('@/components/channels/video-call'), {
+	ssr: false,
+});
+const SelectedChannel = dynamic(
+	() => import('@/components/channels/selected-channel'),
+	{
+		ssr: false,
+	}
+);
 
 type Props = {
 	params: {
@@ -9,7 +23,18 @@ type Props = {
 	searchParams: { channel_type: string };
 };
 
-export default function ChannelId({ searchParams, params }: Props) {
+export default async function ChannelId({ searchParams, params }: Props) {
+	const user = await currentUser();
+
+	if (!user || user === null) {
+		return redirect('/sign-in');
+	}
+	const isMemberOrAuthor = await isMemberOrAdmin(user.id, params.id);
+
+	if (!isMemberOrAuthor.isAuthor && !isMemberOrAuthor.isMember) {
+		redirect('/direct-messages');
+	}
+
 	if (searchParams.channel_type === 'text') {
 		return <SelectedChannel />;
 	}

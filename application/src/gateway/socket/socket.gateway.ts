@@ -1,6 +1,5 @@
-import { OnModuleInit } from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
 import {
-  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -15,14 +14,17 @@ type PayloadTypes = {
   is_read: boolean;
   user_id: string;
   username: string;
-  channel_id: string;
-  server_id: string;
+  channelId: string;
+  serverId: string;
   imageUrl: string;
   imageAssetId: string;
   type: string;
   messageId: string;
   parentMessageId: string;
-  threadId?: string;
+  threadId: string;
+  recipientId: string;
+  isNew: boolean;
+  conversationId: string;
 };
 
 @WebSocketGateway({
@@ -31,15 +33,16 @@ type PayloadTypes = {
   },
 })
 export class SocketGateway implements OnModuleInit {
+  private activeUsers = new Map<string, string>();
+  private logger = new Logger();
+
   @WebSocketServer()
   server: Server;
 
   constructor(
     private messages: MessagesService,
-    private threadService: ThreadsService,
+    private threadService: ThreadsService
   ) {}
-
-  private activeUsers = new Map<string, string>();
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
@@ -73,13 +76,13 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(
-    @ConnectedSocket() client: Socket,
     @MessageBody()
-    payload: PayloadTypes,
+    payload: PayloadTypes
   ) {
+    this.logger.log(payload);
     if (payload.type === 'channel') {
       await this.messages.sendMessage({
-        channel_id: payload.channel_id,
+        channelId: payload.channelId,
         content: payload.content,
         imageAssetId: payload.imageAssetId,
         imageUrl: payload.imageUrl,
@@ -87,6 +90,13 @@ export class SocketGateway implements OnModuleInit {
         is_read: payload.is_read,
         username: payload.username,
       });
+
+      const messages = await this.messages.getMessageByChannelId(
+        payload.channelId,
+        payload.serverId
+      );
+
+      this.server.emit('set-message', messages.data);
     }
 
     if (payload.type === 'reply') {
@@ -96,8 +106,34 @@ export class SocketGateway implements OnModuleInit {
         payload.user_id,
         payload.imageUrl,
         payload.imageAssetId,
-        payload.channel_id,
+        payload.type
       );
+
+      if (payload.threadId) {
+        const messages = await this.threadService.getThreadMessage(
+          payload.threadId,
+          payload.serverId,
+          payload.channelId
+        );
+        this.server.emit('set-thread-messages', messages);
+      }
+
+      if (payload.recipientId) {
+        const messages = await this.messages.getPersonalMessage(
+          payload.conversationId,
+          payload.user_id
+        );
+        this.server.emit('set-personal-messages', messages);
+      }
+
+      if (payload.channelId && payload.serverId) {
+        const messages = await this.messages.getMessageByChannelId(
+          payload.channelId,
+          payload.serverId
+        );
+
+        this.server.emit('set-message', messages.data);
+      }
     }
     if (payload.type === 'thread') {
       await this.threadService.sendThreadMessage(
@@ -105,50 +141,74 @@ export class SocketGateway implements OnModuleInit {
         payload.user_id,
         payload.imageUrl,
         payload.imageAssetId,
-        payload.threadId,
+        payload.threadId
       );
-    }
-    if (payload.type !== 'thread') {
-      const messages = await this.messages.getMessageByChannelId(
-        payload.channel_id,
-        payload.server_id,
-      );
-      client.emit('set-message', messages.data);
-    } else {
       const messages = await this.threadService.getThreadMessage(
         payload.threadId,
-        payload.server_id,
+        payload.serverId,
+        payload.channelId
       );
-      client.emit('set-thread-messages', messages);
+      this.server.emit('set-thread-messages', messages);
+    }
+
+    if (payload.type === 'personal') {
+      await this.messages.sendPersonalMessage(
+        payload.content,
+        payload.user_id,
+        payload.imageUrl,
+        payload.imageAssetId,
+        payload.recipientId
+      );
+
+      const messages = await this.messages.getPersonalMessage(
+        payload.conversationId,
+        payload.user_id
+      );
+      this.server.emit('set-personal-messages', messages);
     }
   }
 
   @SubscribeMessage('get-channel-message')
   async getChannelMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { channelId: string; serverId: string },
+    @MessageBody() payload: { channelId: string; serverId: string }
   ) {
     const messages = await this.messages.getMessageByChannelId(
       payload.channelId,
-      payload.serverId,
+      payload.serverId
     );
 
-    client.emit('set-message', messages.data);
+    this.server.emit('set-message', messages.data);
   }
 
   @SubscribeMessage('thread-messages')
   async handleThread(
-    @ConnectedSocket() client: Socket,
     @MessageBody()
     payload: {
       threadId: string;
       serverId: string;
-    },
+      channelId: string;
+    }
   ) {
     const messages = await this.threadService.getThreadMessage(
       payload.threadId,
       payload.serverId,
+      payload.channelId
     );
-    client.emit('set-thread-messages', messages);
+    this.server.emit('set-thread-messages', messages);
+  }
+
+  @SubscribeMessage('personal-message')
+  async getPersonalMessages(
+    @MessageBody()
+    payload: {
+      conversationId: string;
+      userId: string;
+    }
+  ) {
+    const messages = await this.messages.getPersonalMessage(
+      payload.conversationId,
+      payload.userId
+    );
+    this.server.emit('set-personal-messages', messages);
   }
 }

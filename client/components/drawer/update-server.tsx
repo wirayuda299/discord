@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { SquarePen } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -36,7 +35,6 @@ export default function UpdateServerDrawer({
   name: string;
   serverId: string;
 }) {
-  const router = useRouter();
   const { userId } = useAuth();
   const form = useForm<UpdateServerSchemaType>({
     resolver: zodResolver(updateServerSchema),
@@ -68,7 +66,6 @@ export default function UpdateServerDrawer({
           userId,
         ).then(() => {
           toast.success("Server has been updated");
-          router.push("/server");
         });
       } else {
         await updateServer(
@@ -79,7 +76,6 @@ export default function UpdateServerDrawer({
           userId as string,
         ).then(() => {
           toast.success("Server has been updated");
-          router.push("/server");
         });
       }
     } catch (error) {
@@ -111,7 +107,7 @@ export default function UpdateServerDrawer({
             <div className="relative">
               <Label
                 htmlFor="logo"
-                className=" relative my-2 flex cursor-pointer items-center justify-center"
+                className="!relative my-2 flex cursor-pointer items-center justify-center"
               >
                 {(image || (preview && preview.logo)) && (
                   <Image
@@ -122,7 +118,7 @@ export default function UpdateServerDrawer({
                     alt="logo"
                   />
                 )}
-                <div className="absolute right-[115px] top-0 flex size-7 items-center justify-center rounded-full bg-foreground">
+                <div className="absolute right-[260px] top-0 flex size-7 items-center justify-center rounded-full bg-foreground">
                   <SquarePen size={16} className="text-gray-1" />
                 </div>
               </Label>
@@ -144,7 +140,7 @@ export default function UpdateServerDrawer({
                         id="server-name"
                         autoComplete="off"
                         placeholder="server name"
-                        className="bg-foreground text-white caret-white ring-offset-background focus:border-none  focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                        className="border-none bg-foreground text-white caret-white outline-none  ring-offset-background focus:border-none focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                         required
                         {...field}
                       />

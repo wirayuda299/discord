@@ -10,12 +10,13 @@ import { cn } from "@/lib/utils";
 
 const items = ["for you", "unreads", "mentions"] as const;
 
-export default function Inbox({children}:{children:ReactNode}) {
+export default function Inbox({ children }: { children: ReactNode }) {
   const [selectedFilter, setSelectedFilter] = useState<string>("for you");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <Image
+          className="min-w-6"
           src={"/icons/inbox.svg"}
           width={24}
           height={24}

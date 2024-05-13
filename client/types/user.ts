@@ -7,6 +7,7 @@ export type User = {
   image_asset_id: string;
   updated_at: string;
   username: string;
+  user_id: string;
 };
 export interface UserInvite {
   user_to_invite: string;

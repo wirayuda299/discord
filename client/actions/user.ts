@@ -26,17 +26,17 @@ export async function createUser(
     });
   } catch (error) {
     console.log(error);
-    
+
     throw error;
   }
 }
 
 export async function inviteUser(userToInvite: string, id: string) {
   try {
-   return await api.post(`/invitation/invite-user`, {
-			userToInvite,
-			userId: id,
-		});
+    return await api.post(`/invitation/invite-user`, {
+      userToInvite,
+      userId: id,
+    });
   } catch (error) {
     throw error;
   }

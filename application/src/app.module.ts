@@ -24,6 +24,8 @@ import { ReactionsController } from './controllers/reactions/reactions.controlle
 import { ThreadsService } from './services/threads/threads.service';
 import { ThreadsController } from './controllers/threads/threads.controller';
 import { ImagehandlerService } from './services/imagehandler/imagehandler.service';
+import { ConversationsService } from './services/conversations/conversations.service';
+import { ConversationsController } from './controllers/conversations/conversations.controller';
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { ImagehandlerService } from './services/imagehandler/imagehandler.servic
     InvitationController,
     ReactionsController,
     ThreadsController,
+    ConversationsController,
   ],
   providers: [
     UserService,
@@ -58,6 +61,7 @@ import { ImagehandlerService } from './services/imagehandler/imagehandler.servic
     ReactionsService,
     ThreadsService,
     ImagehandlerService,
+    ConversationsService,
   ],
 })
 export class AppModule {}

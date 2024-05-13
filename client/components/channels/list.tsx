@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus, UserPlus } from "lucide-react";
 
 import { Channel } from "@/types/channels";
 import { Servers } from "@/types/server";
@@ -115,7 +115,7 @@ export default function ChannelList({
 								role='listitem'
 								scroll
 								prefetch
-								href={`/server/${server?.id}/${c.channel_id}?channel_type=${c.channel_type}`}
+								href={`/server/${encodeURIComponent(server?.id as string)}/${encodeURIComponent(c.channel_id)}?channel_type=${encodeURIComponent(c.channel_type)}`}
 								key={c?.channel_id}
 								onClick={() => {
 									setServerStates((prev) => ({
@@ -153,7 +153,9 @@ export default function ChannelList({
 										</div>
 									</div>
 									{userId === server?.owner_id && (
-										<AddUser size={19} styles='opacity-0 group-hover:opacity-100' />
+                    <AddUser styles='opacity-0 group-hover:opacity-100'>
+                      <UserPlus size={18}/>
+                    </AddUser>
 									)}
 								</div>
 							</Link>

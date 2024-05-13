@@ -11,7 +11,7 @@ export async function acceptinvitation(friendId: string) {
     throw error;
   }
 }
-export async function cancelInvitation(userId:string) {
+export async function cancelInvitation(userId: string) {
   try {
     await api.post("/invitation/cancel", { userId });
   } catch (error) {

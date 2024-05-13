@@ -13,7 +13,7 @@ export default function UserAccount() {
     data: user,
     isLoading: userLoading,
     error: userError,
-  } = useFetch("user", async () =>  getUserById(userId!!));
+  } = useFetch("user", async () => getUserById(userId!!));
 
   const handleClick = () => {
     setServerStates((prev) => ({

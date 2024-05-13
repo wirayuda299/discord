@@ -90,14 +90,13 @@
 }
 
 :target {
-    animation: highlight 3s ease-in-out;
+  animation: highlight 3s ease-in-out;
 }
 @keyframes highlight {
-    from {
-        background-color: rgb(253 224 71);
-    }
-    to {
-        background-color: #fff;
-    }
+  from {
+    background-color: rgb(253 224 71);
+  }
+  to {
+    background-color: #fff;
+  }
 }
-
