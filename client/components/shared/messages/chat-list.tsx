@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 
 import { useUserContext } from "@/providers/users";
-import SearchForm from "../channels/search-form";
-import Inbox from "../channels/inbox";
+import SearchForm from "../../channels/search-form";
+import Inbox from "../../channels/inbox";
 import ChatForm from "./chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "./chat-item";

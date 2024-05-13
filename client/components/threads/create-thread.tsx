@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { formUrlQuery } from '@/utils/form-url-query';
 import { useServerContext } from '@/providers/server';
 
-import ChatForm from '../messages/chat-form';
+import ChatForm from '../shared/messages/chat-form';
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import ImagePreview from '../modals/image-preview';
 import useSocket from '@/hooks/useSocket';

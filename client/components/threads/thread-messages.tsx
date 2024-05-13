@@ -7,8 +7,8 @@ import { useAuth } from '@clerk/nextjs';
 
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { addLabelsToMessages } from '@/utils/messages';
-import ChatForm from '../messages/chat-form';
-import ChatItem from '../messages/chat-item';
+import ChatForm from '../shared/messages/chat-form';
+import ChatItem from '../shared/messages/chat-item';
 
 import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';

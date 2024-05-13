@@ -5,7 +5,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '../../ui/dropdown-menu';
 import { getPinnedMessages } from '@/helper/message';
 import useFetch from '@/hooks/useFetch';
 import { memo } from 'react';

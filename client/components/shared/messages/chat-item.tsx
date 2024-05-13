@@ -5,10 +5,10 @@ import type { Socket } from 'socket.io-client';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import queryString from 'query-string';
 
-import ImagePreview from '../modals/image-preview';
+import ImagePreview from '../../modals/image-preview';
 import { Message } from '@/types/messages';
 import { ServerStates } from '@/providers/server';
-import ThreadMessages from '../threads/thread-messages';
+import ThreadMessages from '../../threads/thread-messages';
 import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';

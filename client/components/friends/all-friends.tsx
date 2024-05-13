@@ -32,8 +32,7 @@ export default function AllFriends({
 
   const { data: friendList, isLoading: friendListLoading } = useFetch(
     "friend-list",
-    () => getFriendList(userId),
-    !!userId
+    () => getFriendList(userId)
   );
   return (
     <div className="h-auto max-h-screen w-full max-w-xl overflow-y-auto p-3 pb-4">

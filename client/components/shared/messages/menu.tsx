@@ -9,12 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import { pinMessage } from "@/actions/messages";
 import { Message } from "@/types/messages";
 import { createError } from "@/utils/error";
 import { copyText } from "@/utils/copy";
-import CreateThread from "../threads/create-thread";
+import CreateThread from "../../threads/create-thread";
 
 type Props = {
   channelId: string;

@@ -1,4 +1,4 @@
-import ChatList from "@/components/messages/chat-list";
+import ChatList from "@/components/shared/messages/chat-list";
 import { cn } from "@/lib/utils";
 
 type Props = {

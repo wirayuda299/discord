@@ -7,7 +7,7 @@ import ServerList from "./server-list";
 import CreateServerModal from "../create-server/modal";
 import { getAllServerCreatedByCurrentUser } from "@/helper/server";
 import { getConversationList } from "@/helper/conversations";
-import ConversationItem from "../messages/conversation";
+import ConversationItem from "../shared/messages/conversation";
 
 export default async function Sidebar() {
   const { userId } = auth();

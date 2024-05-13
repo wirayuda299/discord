@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { editMessage } from "@/helper/message";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../ui/textarea";
 import { createError } from "@/utils/error";
 
 export default function EditMessageForm({

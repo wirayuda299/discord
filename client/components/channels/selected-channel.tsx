@@ -13,11 +13,11 @@ import { cn } from '@/lib/utils';
 import ChanelInfo from '../drawer/channel-info';
 import Thread from './threads';
 import NotificationSettings from './notification-settings';
-import PinnedMessage from '../messages/pinned-message';
+import PinnedMessage from '../shared/messages/pinned-message';
 import Inbox from './inbox';
 import MemberSheet from '../members/members';
-import ChatForm from '../messages/chat-form';
-import ChatItem from '../messages/chat-item';
+import ChatForm from '../shared/messages/chat-form';
+import ChatItem from '../shared/messages/chat-item';
 import SearchForm from './search-form';
 
 import { useServerContext } from '@/providers/server';

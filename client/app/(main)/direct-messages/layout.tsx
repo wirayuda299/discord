@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs";
 import ServerSidebarLinksItem from "@/components/sidebar/server-sidebar-links";
 import { serverSidebarLinks } from "@/constants/sidebarLinks";
 import { getConversationList } from "@/helper/conversations";
-import Conversation from "@/components/messages/conversation";
+import Conversation from "@/components/shared/messages/conversation";
 import SearchForm from "@/components/channels/search-form";
 
 export default async function DirectMessagesLayout({

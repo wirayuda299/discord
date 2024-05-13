@@ -14,8 +14,8 @@ import { useSWRConfig } from 'swr';
 
 import EmojiPickerButton from './emoji-picker';
 import { cn } from '@/lib/utils';
-import { Form, FormControl, FormField, FormItem } from '../ui/form';
-import { Input } from '../ui/input';
+import { Form, FormControl, FormField, FormItem } from '../../ui/form';
+import { Input } from '../../ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ServerStates } from '@/providers/server';
 import { User } from '@/types/user';
