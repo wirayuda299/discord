@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useState } from 'react';
+import { ReactNode, memo, useCallback, useState } from 'react';
 import Image from 'next/image';
 import type { Socket } from 'socket.io-client';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -42,7 +42,7 @@ const highlightLinks = (text: string) => {
 	});
 };
 
-export default function ChatContent({
+ function ChatContent({
 	handleClick,
 	serverStates,
 	userId,
@@ -184,4 +184,6 @@ export default function ChatContent({
 			)}
 		</div>
 	);
-}
+ }
+
+ export default memo(ChatContent)

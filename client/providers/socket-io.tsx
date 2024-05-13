@@ -30,7 +30,7 @@ export const SocketContextProvider = ({
   const { userId } = useAuth();
 
   useEffect(() => {
-    const serverUrl = process.env.NEXT_PUBLIC_ORIGIN;
+    const serverUrl = process.env.NEXT_PUBLIC_ORIGIN||'http://localhpst:3001';
     const clientSocket = io(serverUrl!, {
       query: {
         userId,

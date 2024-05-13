@@ -1,6 +1,6 @@
 import { getCookies } from "./cookies";
 
-interface PinnedMessage {
+export interface PinnedMessage {
   message_id: string;
   channel_id: string;
   id: string;

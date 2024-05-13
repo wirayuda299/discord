@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
+import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 
 import { Input } from "./ui/input";
@@ -17,7 +18,6 @@ import { ServerProfile } from "@/types/server";
 import { getCookies } from "@/helper/cookies";
 import { updateServerProfile } from "@/helper/server";
 import UserInfo from "./user-info";
-import { useSWRConfig } from "swr";
 
 const schema = z.object({
   username: z.string().min(4),

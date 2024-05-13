@@ -42,13 +42,11 @@ export default function Friends() {
     return activeTab as string;
   };
 
-  const setSelectedUser = (user: User) => {
-    handleSelectUser(user);
-  };
+  const setSelectedUser = (user: User) => handleSelectUser(user);
 
   const { data: myInvitations, isLoading: myInvitationsLoading } = useFetch(
     "my-invitations",
-    () => getMyInvitation(userId!!),
+    () => getMyInvitation(userId!!)
   );
 
   const handleAcceptInvitation = async (friendId: string) => {

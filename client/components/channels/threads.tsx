@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
   );
 }
 
-export default function Thread({
+ function Thread({
   channelId,
   serverId,
 }: {
@@ -116,4 +116,6 @@ export default function Thread({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+ }
+
+ export default memo(Thread)

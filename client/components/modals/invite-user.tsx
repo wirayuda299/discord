@@ -1,4 +1,3 @@
-import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
@@ -18,10 +17,11 @@ import { getCreatedDate } from "@/utils/createdDate";
 import { Button } from "../ui/button";
 import { inviteUser } from "@/actions/user";
 import { createError } from "@/utils/error";
+import { useQuery } from "@tanstack/react-query";
 
 export default function InviteUser() {
   const { userId } = useAuth();
-  const { mutate } = useSWRConfig();
+  const { refetch } = useQuery({ queryKey: ['pending-invitation'] });
   const [value, setValue] = useState<string>("");
   const [result, setResult] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,7 +31,7 @@ export default function InviteUser() {
     try {
       await inviteUser(id, userId!!).then((msg) => {
         toast.success(msg.messages);
-        mutate("pending-invitation");
+        refetch()
       });
     } catch (error) {
       createError(error);

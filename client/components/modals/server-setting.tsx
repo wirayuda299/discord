@@ -80,7 +80,7 @@ export default function ServerSetting({
 			<DialogTrigger asChild>
 				<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
 					<span>Server settings </span>
-					<Cog size={20} className='stroke-gray-2 text-gray-1 group-hover:stroke-white' />
+					<Cog size={20} className=' stroke-gray-2 text-gray-1 group-hover:stroke-white' />
 				</div>
 			</DialogTrigger>
 			<DialogContent className='border-none'>

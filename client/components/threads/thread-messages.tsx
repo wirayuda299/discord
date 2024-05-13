@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { useRef, useMemo, ReactNode } from 'react';
+import { useRef, useMemo, ReactNode, memo } from 'react';
 import { useAuth } from '@clerk/nextjs';
 
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
@@ -20,7 +20,7 @@ type Props = {
 	children: ReactNode;
 };
 
-export default function ThreadMessages({ threadId, children }: Props) {
+ function ThreadMessages({ threadId, children }: Props) {
 	const { userId } = useAuth();
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -124,4 +124,6 @@ export default function ThreadMessages({ threadId, children }: Props) {
 			</SheetContent>
 		</Sheet>
 	);
-}
+ }
+
+ export default memo(ThreadMessages);

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import { memo } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Servers } from '@/types/server';
@@ -8,18 +9,15 @@ import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from './memberItem';
 
-export default function MemberSheet({
-	selectedServer,
-}: {
-	selectedServer: Servers | null;
-}) {
-  const { states } = useSocket();
-  const params=useParams()
-  
-	const { data, error, isLoading} = useFetch('members', () =>
-		getServerMembers(params?.id as string || '')
-);
-if (!selectedServer) return null;
+function MemberSheet({ selectedServer }: { selectedServer: Servers | null }) {
+	const { states } = useSocket();
+	const params = useParams();
+
+	const { data, error, isLoading } = useFetch(
+		'members',
+		() => getServerMembers((params?.id as string) || '')
+	);
+	if (!selectedServer) return null;
 
 	return (
 		<Sheet>
@@ -74,7 +72,11 @@ if (!selectedServer) return null;
 						</div>
 					) : (
 						data?.map((member) => (
-						<MemberItem member={member} activeUsers={states.active_users} key={member.id}/>
+							<MemberItem
+								member={member}
+								activeUsers={states.active_users}
+								key={member.id}
+							/>
 						))
 					)}
 				</div>
@@ -82,3 +84,4 @@ if (!selectedServer) return null;
 		</Sheet>
 	);
 }
+export default memo(MemberSheet);
