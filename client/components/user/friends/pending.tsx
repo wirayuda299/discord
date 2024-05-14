@@ -1,9 +1,11 @@
+'use client'
+
 import Image from "next/image";
 import { useSWRConfig } from "swr";
 
 import { getPendingInvitation } from "@/helper/user";
 import useFetch from "@/hooks/useFetch";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getCreatedDate } from "@/utils/createdDate";
 import { cancelInvitation } from "@/actions/invitation";

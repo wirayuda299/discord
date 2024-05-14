@@ -26,9 +26,8 @@ type Props = {
 export default async function ChannelId({ searchParams, params }: Props) {
 	const user = await currentUser();
 
-	if (!user || user === null) {
-		return redirect('/sign-in');
-	}
+	if (!user || user === null) return null 
+	
 	const isMemberOrAuthor = await isMemberOrAdmin(user.id, params.id);
 
 	if (!isMemberOrAuthor.isAuthor && !isMemberOrAuthor.isMember) {

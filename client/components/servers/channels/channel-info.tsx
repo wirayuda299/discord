@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronRight } from 'lucide-react';
-import { memo, useState } from 'react';
+import {  useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -32,7 +32,7 @@ function filterMedia(messages: Message[]) {
 		.filter((media: string) => Boolean(media));
 }
 
- function ChannelInfo() {
+ export default function ChannelInfo() {
 	const [selectedOption, setSelectedOption] = useState<string>('members');
 	const {
 		serversState: { selectedChannel },
@@ -112,7 +112,6 @@ function filterMedia(messages: Message[]) {
 							<ImagePreview
 								styles='ml-0'
 								image={m}
-								messages={states.channel_messages}
 								key={m}
 							/>
 						))}
@@ -180,4 +179,3 @@ function filterMedia(messages: Message[]) {
 		</Drawer>
 	);
  }
-export default memo(ChannelInfo);

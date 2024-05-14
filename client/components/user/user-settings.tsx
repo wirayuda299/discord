@@ -32,14 +32,14 @@ export default function UserSettingsModals({
       <DialogTrigger asChild className="hidden md:block">
         {children}
       </DialogTrigger>
-      <DialogContent className="bg-background hidden h-screen min-w-full  border-none p-0 text-white md:block">
+      <DialogContent className="hidden h-screen min-w-full border-none  bg-background p-0 text-white md:block">
         <div className="flex size-full justify-center gap-2 lg:gap-5">
           <div className=" bg-[#2b2d31]  py-10 md:min-w-[250px] xl:min-w-[410px]">
             <aside className="sticky top-0 flex h-screen  flex-col overflow-y-auto px-5 pb-16 pt-5 lg:items-end">
               <ul className="flex w-max flex-col gap-3">
                 {settings.map((setting) => (
                   <li key={setting.label}>
-                    <h2 className="text-gray-2 border-b-background mb-3 w-max border-b text-sm font-semibold uppercase">
+                    <h2 className="mb-3 w-max border-b border-b-background text-sm font-semibold uppercase text-gray-2">
                       {setting.label}
                     </h2>
                     <ul className="flex flex-col gap-1">
@@ -68,7 +68,7 @@ export default function UserSettingsModals({
                 ))}
                 <li
                   onClick={() => signOut().then(() => router.push("/sign-in"))}
-                  className="hover:bg-background ease min-w-[200px] cursor-pointer text-nowrap rounded p-2 text-sm font-medium capitalize text-[#b5b8bc] transition hover:text-[#ced0d3]"
+                  className="ease min-w-[200px] cursor-pointer text-nowrap rounded p-2 text-sm font-medium capitalize text-[#b5b8bc] transition hover:bg-background hover:text-[#ced0d3]"
                 >
                   Sign Out
                 </li>
@@ -80,10 +80,10 @@ export default function UserSettingsModals({
             {selectedSetting === "profiles" && <EditProfile />}
           </div>
           <div className=" min-w-24 pt-10">
-            <DialogClose className="border-gray-2 flex size-10 flex-col items-center justify-center rounded-full border">
+            <DialogClose className="flex size-10 flex-col items-center justify-center rounded-full border border-gray-2">
               <X className="text-gray-2" />
             </DialogClose>
-            <p className="text-gray-2 pl-1 font-light">ESC</p>
+            <p className="pl-1 font-light text-gray-2">ESC</p>
           </div>
         </div>
       </DialogContent>

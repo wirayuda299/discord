@@ -57,6 +57,7 @@ export default function EditMessageForm({
         minLength={1}
         name="message"
         value={value}
+        defaultValue={value}
         onChange={(e) => setValue(e.target.value)}
         rows={1}
         autoComplete="off"

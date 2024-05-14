@@ -12,9 +12,7 @@ export default async function ServerDetail({
   
 	const user = await currentUser();
 
-	if (!user || user === null) {
-		return redirect('/sign-in');
-	}
+	if (!user || user === null) return null 
 	const isMemberOrAuthor = await isMemberOrAdmin(user.id, params.id);
 
 	if (!isMemberOrAuthor.isAuthor && !isMemberOrAuthor.isMember) {

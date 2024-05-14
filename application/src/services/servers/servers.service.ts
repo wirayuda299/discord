@@ -178,6 +178,7 @@ export class ServersService {
         `select * from servers where id = $1`,
         [id]
       );
+
       if (server.rows.length < 1) {
         throw new NotFoundException('Server not found');
       }
@@ -207,6 +208,8 @@ export class ServersService {
         error: false,
       };
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }
@@ -301,8 +304,7 @@ export class ServersService {
         ` select * from members as m
           join server_profile as sp on sp.user_id = m.user_id 
           and sp.server_id = $1 
-          where m.server_id = $1
-          `,
+          where m.server_id = $1`,
         [serverId]
       );
       return {

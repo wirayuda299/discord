@@ -4,7 +4,6 @@ import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 
 import ChannelList from '@/components/servers/channels/list';
-import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
 import ServerMenu from '@/components/servers/channels/server-menus';
 import ChannelDrawerMobile from '@/components/servers/channels/ChannelMobile';
@@ -21,12 +20,7 @@ export default function ServerSidebar({
 	const { user, isLoaded, isSignedIn } = useUser();
 
 	return (
-		<ul
-			className={cn(
-				'min-w-[255px] md:min-w-[250px] relative flex-col gap-3 border-r-2 border-r-foreground justify-between no-scrollbar  md:bg-[#2b2d31] h-full md:h-full min-h-screen overflow-y-auto ',
-				data.server && 'flex'
-			)}
-		>
+		<ul className='no-scrollbar relative flex h-full min-h-screen  flex-col justify-between  gap-3 overflow-y-auto md:h-full md:min-w-[200px] md:bg-[#2b2d31] lg:min-w-[255px]'>
 			<div className='size-full p-1'>
 				{data.server && (
 					<ServerMenu serverName={data.server.name} serverId={data.server.id} />
@@ -39,12 +33,8 @@ export default function ServerSidebar({
 
 				<ChannelList channels={data?.channels ?? []} server={data.server} />
 			</div>
-			<div
-				className={cn(
-					'sticky !bottom-0 left-0 min-h-16 flex items-center w-full bg-[#232428] px-3 text-white',
-					(!isLoaded || !isSignedIn) && 'animate-pulse'
-				)}
-			>
+			{isLoaded && isSignedIn && (
+			<div className='sticky !bottom-0 left-0 flex min-h-16 w-full items-center bg-[#232428] px-3 text-white'>
 				{isLoaded && isSignedIn && (
 					<div className='flex items-center gap-3'>
 						<Image
@@ -61,6 +51,8 @@ export default function ServerSidebar({
 					</div>
 				)}
 			</div>
+				
+			)}
 		</ul>
 	);
 }

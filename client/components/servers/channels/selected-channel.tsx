@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { MoveLeft } from 'lucide-react';
 import Image from 'next/image';
-import { memo, useMemo, useRef } from 'react';
+import { Suspense, memo, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 
@@ -51,7 +51,7 @@ function SelectedChannel() {
 			onTouchMove={onTouchMove}
 			onTouchEnd={onTouchEnd}
 			className={cn(
-				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 h-screen overflow-y-auto overflow-x-hidden bg-black md:bg-background border-l-2 border-l-foreground w-full',
+				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 h-screen overflow-y-auto overflow-x-hidden bg-black md:bg-background  w-full',
 				serversState.selectedChannel ? 'right-0' : '-right-full'
 			)}
 		>
@@ -85,16 +85,35 @@ function SelectedChannel() {
 						</div>
 					</div>
 				</div>
-				<div className='hidden items-center gap-4 min-[837px]:flex'>
-					<Thread
-						channelId={params.channel_id as string}
-						serverId={params.id as string}
-					/>
+				<div className='hidden items-center gap-4 md:flex'>
+					<Suspense
+						key={params.channel_id as string}
+						fallback={
+							<div className='size-10 rounded-md bg-background brightness-110'></div>
+						}
+					>
+						<Thread
+							channelId={params.channel_id as string}
+							serverId={params.id as string}
+						/>
+					</Suspense>
 					<NotificationSettings />
-					<PinnedMessage
-						channelId={params.channel_id as string}
-					/>
-					<MemberSheet selectedServer={serversState.selectedServer} />
+					<Suspense
+						key={params.channel_id as string}
+						fallback={
+							<div className='size-10 rounded-md bg-background brightness-110'></div>
+						}
+					>
+						<PinnedMessage channelId={params.channel_id as string} />
+					</Suspense>
+					<Suspense
+						key={params.channel_id as string}
+						fallback={
+							<div className='size-10 rounded-md bg-background brightness-110'></div>
+						}
+					>
+						<MemberSheet selectedServer={serversState.selectedServer} />
+					</Suspense>
 					<SearchForm />
 					<Inbox>
 						<p>channel notifications</p>

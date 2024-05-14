@@ -20,7 +20,7 @@ export default function ConversationItem({
 	const { handleSelectUser } = useUserContext();
 
 	return (
-		<ul className='py-3'>
+		<ul className='w-full py-3'>
 			<li
 				onClick={() =>
 					handleSelectUser({
@@ -37,7 +37,7 @@ export default function ConversationItem({
 			>
 				<Link
 					href={`/direct-messages?chat=${encodeURIComponent(conversation.recipient_id)}&conversationId=${encodeURIComponent(conversation.conversation_id)}&message_type=personal`}
-					className='flex w-full items-center justify-between gap-3 p-1'
+					className='flex w-auto items-center justify-between gap-3 p-1'
 				>
 					<div className='flex items-center gap-3'>
 						<Image

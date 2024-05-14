@@ -1,12 +1,14 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ZodError } from 'zod';
 
-@Catch(ZodError, HttpException)
+@Catch(ZodError, HttpException, NotFoundException, BadRequestException)
 export class ValidationFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
@@ -17,11 +19,20 @@ export class ValidationFilter implements ExceptionFilter {
         error: true,
         code: exception.getStatus(),
       });
-    } else if (exception instanceof ZodError) {
+    } else if (
+      exception instanceof ZodError ||
+      exception instanceof BadRequestException
+    ) {
       return response.status(400).json({
         messages: 'Invalid data',
         error: true,
         code: 400,
+      });
+    } else if (exception instanceof NotFoundException) {
+      return response.status(404).json({
+        code: 404,
+        messages: exception.message,
+        error: true,
       });
     } else {
       return response.status(500).json({

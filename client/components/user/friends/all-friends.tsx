@@ -1,3 +1,5 @@
+'use client'
+
 import Image from "next/image";
 import { EllipsisVertical, MessageCircle } from "lucide-react";
 import Link from "next/link";
@@ -10,7 +12,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import useSocket from "@/hooks/useSocket";
 
 type User = {
   user_id: string;
@@ -21,13 +24,13 @@ type User = {
 
 export default function AllFriends({
   userId,
-  activeUsers,
   handleSelectUser,
 }: {
   userId: string;
-  activeUsers: string[];
   handleSelectUser: (user: User) => void;
-}) {
+  }) {
+  const { states } = useSocket();
+  
   const setSelectedUser = (user: User) => handleSelectUser(user);
 
   const { data: friendList, isLoading: friendListLoading } = useFetch(
@@ -72,10 +75,10 @@ export default function AllFriends({
                 <p
                   className={cn(
                     "text-xs text-gray-2",
-                    activeUsers.includes(friend.user_id) && "text-green-600",
+                    states.active_users.includes(friend.user_id) && "text-green-600",
                   )}
                 >
-                  {activeUsers.includes(friend.user_id) ? "online" : "offline"}
+                  {states.active_users.includes(friend.user_id) ? "online" : "offline"}
                 </p>
               </div>
             </div>

@@ -20,7 +20,7 @@ export default async function DirectMessagesLayout({
 
   return (
     <div className="flex w-full md:w-auto md:items-start">
-      <aside className="no-scrollbar hidden size-full min-h-screen min-w-[255px] max-w-[255px]  gap-3 overflow-y-auto border-r-2 border-r-foreground md:block md:h-full md:bg-[#2b2d31]">
+      <aside className="no-scrollbar hidden size-full min-h-screen min-w-[255px] max-w-[255px] gap-3  overflow-y-auto border-r-2 border-r-foreground md:block md:h-full md:min-w-[200px] md:bg-[#2b2d31]">
         <div className="flex w-full flex-col ">
           <form className="w-full border-b border-b-foreground p-3">
             <input
@@ -52,7 +52,7 @@ export default async function DirectMessagesLayout({
           </ul>
         </div>
       </aside>
-      <div className=" w-full grow p-3 md:hidden">
+      <div className=" w-full p-3 md:hidden">
         <SearchForm styles="max-w-full" />
         {conversations?.map((conversation) => (
           <Conversation
@@ -62,7 +62,7 @@ export default async function DirectMessagesLayout({
         ))}
       </div>
       <div className="w-auto md:w-full">
-        <div className="hidden md:block">{children}</div>
+        <div className="hidden overflow-x-auto md:block">{children}</div>
         {messages}
       </div>
     </div>

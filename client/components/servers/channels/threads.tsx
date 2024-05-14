@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { memo, useState } from "react";
+import {  useState } from "react";
 
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
   );
 }
 
- function Thread({
+ export default function Thread({
   channelId,
   serverId,
 }: {
@@ -80,6 +80,7 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
             <input
               type="search"
               id="search"
+              defaultValue={value}
               onChange={(e) => setValue(e.target.value)}
               autoComplete="off"
               className="w-full bg-transparent placeholder:text-sm focus-visible:outline-none"
@@ -118,4 +119,3 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
   );
  }
 
- export default memo(Thread)

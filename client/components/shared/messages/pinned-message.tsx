@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo } from 'react';
 
 import {
 	DropdownMenu,
@@ -10,7 +9,7 @@ import {
 import { getPinnedMessages } from '@/helper/message';
 import useFetch from '@/hooks/useFetch';
 
-function PinnedMessage({ channelId }: { channelId: string }) {
+export default function PinnedMessage({ channelId }: { channelId: string }) {
 	const { data, isLoading } = useFetch(
 		'pinned-messages',
 		() => getPinnedMessages(channelId as string),
@@ -90,4 +89,3 @@ function PinnedMessage({ channelId }: { channelId: string }) {
 	);
 }
 
-export default memo(PinnedMessage);

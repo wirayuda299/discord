@@ -20,7 +20,7 @@ export const serverSidebarLinks = [
 
 export const navItemsMobile = [
   {
-    path: "/direct-messages",
+    path: "/server",
     icon: <LayoutGrid color="#fff" size={30} />,
   },
   {

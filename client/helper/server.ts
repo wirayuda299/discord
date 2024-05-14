@@ -38,9 +38,12 @@ export async function getAllServerCreatedByCurrentUser(
 }
 
 export async function getServerById(
-	id: string
+	id: string,
 ): Promise<{ server: Servers[]; channels: Channel[] }> {
 	try {
+
+		if (!id ) return { channels: [], server: [] }
+		
 		const res = await fetch(`${serverUrl}/servers/${id}`, {
 			headers: await prepareHeaders(),
 			method: 'GET',

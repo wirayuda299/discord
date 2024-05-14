@@ -112,6 +112,7 @@ export default function CreateThread({
 
 							<input
 								required
+								defaultValue={threadName}
 								value={threadName}
 								onChange={(e) => setThreadName(e.target.value)}
 								type='text'
@@ -153,7 +154,7 @@ export default function CreateThread({
 										<div className='h-14 w-full animate-pulse rounded-md bg-background brightness-125'></div>
 									}
 								>
-									<ImagePreview image={message.media_image} messages={[]} />
+									<ImagePreview image={message.media_image}  />
 								</Suspense>
 							)}
 						</div>
