@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
 import UserSettingsModals from '@/components/user/user-settings';
-import ServerSetting from '@/components/servers/server-setting';
+import ServerSetting from '@/components/servers/settings/server-setting';
 import AddUser from '@/components/user/add-user';
 
 export default function ServerMenu({

@@ -31,6 +31,10 @@ export async function getAllServerCreatedByCurrentUser(
 		);
 
 		const servers = await res.json();
+		if (servers.error) {
+			throw new Error(servers.messages)
+		}
+
 		return servers.data;
 	} catch (error) {
 		throw error;

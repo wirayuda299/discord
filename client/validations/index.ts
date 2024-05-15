@@ -13,8 +13,8 @@ export const createChannelSchema = z.object({
 });
 
 export const createServerSchema = z.object({
-  name: z.string(),
-  logo: z.string(),
+  name: z.string().min(4, "Min character is 4").max(30, "Max character for server name is 30"),
+  logo: z.string().min(10),
 });
 
 export const updateServerSchema = z.object({

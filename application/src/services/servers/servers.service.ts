@@ -5,11 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { z } from 'zod';
+
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
 
 const schema = z.object({
-  name: z.string().min(3),
+  name: z
+    .string()
+    .min(4, 'Min character is 4')
+    .max(30, 'Max character for server name is 30'),
   logo: z.string().min(10),
   owner_id: z.string().min(10),
   logo_asset_id: z.string().min(10),
@@ -29,30 +33,22 @@ export class ServersService {
     logo_asset_id: string
   ) {
     try {
-      const data = {
-        name,
+      const {
+        logo: serverLogo,
+        logo_asset_id: assetId,
+        name: serverName,
+        owner_id: authorId,
+      } = this.validationService.validate(schema, {
         logo,
-        owner_id,
         logo_asset_id,
-      };
+        name,
+        owner_id,
+      });
 
       const author = await this.databaseService.pool.query(
         `select * from users where id = $1`,
-        [owner_id]
+        [authorId]
       );
-      this.validationService.validate(schema, data);
-
-      const existingChannel = await this.databaseService.pool.query(
-        `SELECT * FROM servers WHERE name = $1`,
-        [name]
-      );
-
-      if (existingChannel.rows.length >= 1) {
-        throw new HttpException(
-          'Server name already exists, please choose another name',
-          HttpStatus.BAD_REQUEST
-        );
-      }
 
       await this.databaseService.pool.query('BEGIN');
 
@@ -63,7 +59,7 @@ export class ServersService {
           `insert into servers (name, logo, logo_asset_id, owner_id)
          VALUES($1, $2, $3, $4)
          RETURNING id`,
-          [name, logo, logo_asset_id, owner_id]
+          [serverName, serverLogo, assetId, authorId]
         );
 
         const serverId = server.id;
@@ -162,7 +158,6 @@ export class ServersService {
         );
         server.serverProfile = serverProfile.rows[0];
       }
-
       return {
         data: servers.rows,
         error: false,
