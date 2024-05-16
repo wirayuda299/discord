@@ -16,13 +16,9 @@ import AddUser from '@/components/user/add-user';
 export default function ServerMenu({
 	serverName,
 	serverId,
-	banner,
-	showBanner,
 }: {
 	serverName: string;
 	serverId: string;
-	banner: string | null;
-	showBanner: boolean;
 }) {
 	const { setServerStates, serversState } = useServerContext();
 	if (!serverName) return null;
@@ -80,7 +76,7 @@ export default function ServerMenu({
 							serversState.selectedServer.settings.show_banner_background
 						}
 						showProgressBar={
-							serversState.selectedServer.settings.show_banner_background
+							serversState.selectedServer.settings.show_progress_bar
 						}
 						logo={serversState.selectedServer?.logo || ''}
 						logoAssetId={serversState.selectedServer?.logo_asset_id || ''}

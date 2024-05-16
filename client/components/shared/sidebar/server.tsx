@@ -18,7 +18,7 @@ export default function ServerSidebar({
 	};
 }) {
 	const { user, isLoaded, isSignedIn } = useUser();
-	console.log(data);
+	
 
 	return (
 		<ul className='no-scrollbar relative flex h-full min-h-screen  max-w-[255px] flex-col  justify-between gap-3 overflow-y-auto md:h-full md:min-w-[200px] md:bg-[#2b2d31] lg:min-w-[255px]'>
@@ -33,14 +33,28 @@ export default function ServerSidebar({
 					/>
 				)}
 				{data.server && (
-					<ServerMenu
-						banner={data.server.banner}
-						showBanner={data.server.settings.show_banner_background}
-						serverName={data.server.name}
-						serverId={data.server.id}
-					/>
+					<ServerMenu serverName={data.server.name} serverId={data.server.id} />
 				)}
-
+				{data.server.settings.show_progress_bar && (
+					<div className='w-full p-2'>
+						<div className='flex w-full justify-between'>
+							<p className='text-sm font-semibold uppercase text-white'>
+								LVL {data.server.level}
+							</p>
+							<p className='text-xs text-gray-2'>
+								{data.server.boost_count} boost
+							</p>
+						</div>
+						<div className='mt-1 h-1 w-full bg-gray-2'>
+							<div
+								className='h-1 rounded-full bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600'
+								style={{
+									width: data.server.level_progress + '%',
+								}}
+							></div>
+						</div>
+					</div>
+				)}
 				<ChannelDrawerMobile
 					channels={data?.channels ?? []}
 					server={data?.server!}

@@ -8,9 +8,6 @@ export interface ServerProfile {
   user_id: string;
   username: string;
   avatar_asset_id: string;
-  banner: string | null,
-  banner_asset_id: string | null,
-  level:number
   bio: string;
   avatar: string;
 }
@@ -21,10 +18,13 @@ export type Servers = {
 	name: string;
 	logo: string;
 	owner_id: string;
+	level_progress: number;
+	level: number;
+	boost_count:number;
 	created_at: string;
 	updated_at: string;
-	banner: string | null,
-	banner_asset_id:string|null
+	banner: string | null;
+	banner_asset_id: string | null;
 	logo_asset_id: string;
 	invite_code: string;
 	serverProfile: ServerProfile;
