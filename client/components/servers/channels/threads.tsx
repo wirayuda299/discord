@@ -1,5 +1,5 @@
 import Image from "next/image";
-import {  useState } from "react";
+import {  memo, useState } from "react";
 
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
   );
 }
 
- export default function Thread({
+ function Thread({
   channelId,
   serverId,
 }: {
@@ -48,11 +48,7 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
 
   return (
     <DropdownMenu
-      onOpenChange={(isOpen) => {
-        if (isOpen) {
-          setValue("");
-        }
-      }}
+      onOpenChange={(isOpen) => isOpen && setValue("")}
     >
       <DropdownMenuTrigger>
         <Image
@@ -118,4 +114,6 @@ function ThreadItem({ thread }: { thread: ThreadType }) {
     </DropdownMenu>
   );
  }
+
+  export default memo(Thread)
 

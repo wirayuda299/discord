@@ -69,7 +69,11 @@ export default function ServerMenu({
 					</DropdownMenuItem>
 				</AddUser>
         {serversState.selectedServer && (
-          <ServerSetting
+					<ServerSetting
+						banner={serversState.selectedServer.banner}
+						bannerAssetId={serversState.selectedServer.banner_asset_id}
+						showBanner={serversState.selectedServer.settings.show_banner_background}
+						showProgressBar={serversState.selectedServer.settings.show_banner_background}
             logo={serversState.selectedServer?.logo || ''}
             logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
             name={serversState.selectedServer?.name || ''}

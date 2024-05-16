@@ -20,9 +20,7 @@ export default function ServerList({ servers }: { servers: Servers[] }) {
 		}));
 	};
 
-	const serverList = useMemo(() => {
-		return servers;
-	}, [servers]);
+	const serverList = useMemo(() =>  servers, [servers]);
 
 	useEffect(() => {
 		const server = servers.find((server) => server.id === params.id);

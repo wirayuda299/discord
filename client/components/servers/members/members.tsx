@@ -1,6 +1,5 @@
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
-import { memo } from 'react';
+import {  memo } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Servers } from '@/types/server';
@@ -9,13 +8,17 @@ import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from './memberItem';
 
-function MemberSheet({ selectedServer }: { selectedServer: Servers | null }) {
+function MemberSheet({
+	selectedServer,
+	serverId,
+}: {
+	selectedServer: Servers | null;
+	serverId:string;
+}) {
 	const { states } = useSocket();
-	const params = useParams();
 
-	const { data, error, isLoading } = useFetch(
-		'members',
-		() => getServerMembers((params?.id as string) || '')
+	const { data, error, isLoading } = useFetch('members', () =>
+		getServerMembers(serverId)
 	);
 	if (!selectedServer) return null;
 
@@ -79,6 +82,7 @@ function MemberSheet({ selectedServer }: { selectedServer: Servers | null }) {
 							/>
 						))
 					)}
+			
 				</div>
 			</SheetContent>
 		</Sheet>

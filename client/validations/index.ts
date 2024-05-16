@@ -20,6 +20,9 @@ export const createServerSchema = z.object({
 export const updateServerSchema = z.object({
   name: z.string().min(3).max(50),
   logo: z.string(),
+  showProgressBar:z.boolean(),
+  showBanner: z.boolean(),
+  banner:z.string().optional().nullable()
 });
 
 export const createThreadSchema = z.object({

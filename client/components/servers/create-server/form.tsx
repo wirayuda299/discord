@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { CreateServerSchemaType, createServerSchema } from '@/validations';
 import { createError } from '@/utils/error';
+import { useState } from 'react';
 
 export default function CreateServerForm({
 	handleClose,
@@ -27,35 +28,43 @@ export default function CreateServerForm({
 	handleClose: () => void;
 }) {
 	const { user, isLoaded, isSignedIn } = useUser();
+	const [status, setStatus] = useState<string>('Create')
 	const form = useForm<CreateServerSchemaType>({
 		defaultValues: {
 			name: isLoaded && isSignedIn ? `${user?.username}'s server` : '',
+			logo:''
 		},
 		resolver: zodResolver(createServerSchema),
 	});
 
   const { handleChange, preview, files } = useUploadFile(form);
   
-	const isValid = form.formState.isValid;
 	const isSubmitting = form.formState.isSubmitting;
 
 	async function onSubmit(data: CreateServerSchemaType) {
 		if (!files || !user) return;
+
 		let file: { publicId: string; url: string } | null = null;
 
+		setStatus('Uploading image...')
 		try {
 			file = await uploadFile(files.logo);
+			setStatus('Image uploaded')
+			
+		
 
 			if (!file)
 				throw new Error('Please add server logo', {
 					cause: 'file is not defined',
 				});
+			setStatus('Creating server...')
 
 			await createServer(data.name, file.url, file.publicId, user?.id).then(
 				() => {
 					toast.success('Server has been created 🥳', {
 						className: 'text-white',
 					});
+						setStatus('Done');
 					handleClose();
 				}
 			);
@@ -151,25 +160,21 @@ export default function CreateServerForm({
 				<div className='flex items-center justify-between'>
 					<Button
 						onClick={handleClose}
-            type='button'
+						type='button'
 						className='!bg-transparent text-gray-2'
 					>
 						Back
 					</Button>
 					<Button
-						aria-disabled={!isValid || isSubmitting}
-						disabled={!isValid || isSubmitting}
+						aria-disabled={isSubmitting}
+						disabled={isSubmitting}
 						type='submit'
-						className='bg-primary text-white disabled:cursor-not-allowed disabled:opacity-80'
+						className='flex items-center gap-2 bg-primary text-white disabled:cursor-not-allowed disabled:opacity-80'
 					>
-						{isSubmitting ? (
-							<div className='flex items-center gap-2'>
+							{isSubmitting && (
 								<div className='ease size-5 animate-spin rounded-full border-t-2 border-t-white transition-all duration-500'></div>
-								<p>Please wait...</p>
-							</div>
-						) : (
-							'Create'
-						)}
+							)}
+							{status}
 					</Button>
 				</div>
 			</form>

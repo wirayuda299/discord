@@ -15,7 +15,8 @@ export default async function ServerDetailLayout({
 }) {
 
   
-  const data = await getServerById(params.id as string);
+	const data = await getServerById(params.id as string);
+	
   if(!data) return notFound()
 
 	return (

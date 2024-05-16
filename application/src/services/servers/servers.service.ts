@@ -122,6 +122,12 @@ export class ServersService {
             values($1, $2)`,
           [audioChannel.id, category2.id]
         );
+        await this.databaseService.pool.query(
+          `insert into server_settings (server_id)
+            values($1)`,
+          [serverId]
+        );
+
         await this.databaseService.pool.query('COMMIT');
       } catch (e) {
         await this.databaseService.pool.query('ROLLBACK');
@@ -140,10 +146,10 @@ export class ServersService {
   async getAllServerCreatedByCurrentUserOrAsMember(ownerId: string) {
     try {
       const servers = await this.databaseService.pool.query(
-        `select name, logo, created_at, updated_at, id, logo_asset_id, invite_code from servers
+        `select name, logo, created_at, updated_at, id, logo_asset_id, invite_code, banner, banner_asset_id from servers
         where servers.owner_id = $1
         union all
-        select name, logo, created_at, updated_at, servers.id, logo_asset_id, invite_code from servers
+        select name, logo, created_at, updated_at, servers.id, logo_asset_id, invite_code, banner, banner_asset_id from servers
         join members as m on m.user_id = $1 
         where m.user_id = $1 and m.server_id = servers.id
         order by created_at asc
@@ -156,6 +162,11 @@ export class ServersService {
           `select * from server_profile where user_id = $1 and server_id = $2`,
           [ownerId, server.id]
         );
+        const serverSettings = await this.databaseService.pool.query(
+          `select * from server_settings where server_id = $1`,
+          [server.id]
+        );
+        server.settings = serverSettings.rows[0];
         server.serverProfile = serverProfile.rows[0];
       }
       return {
@@ -194,6 +205,11 @@ export class ServersService {
       );
 
       const channels = channelsQuery.rows;
+      const serverSettings = await this.databaseService.pool.query(
+        `select * from server_settings where server_id=$1`,
+        [server.rows[0].id]
+      );
+      server.rows[0].settings = serverSettings.rows[0];
 
       return {
         data: {

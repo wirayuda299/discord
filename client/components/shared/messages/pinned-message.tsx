@@ -8,8 +8,9 @@ import {
 } from '../../ui/dropdown-menu';
 import { getPinnedMessages } from '@/helper/message';
 import useFetch from '@/hooks/useFetch';
+import { memo } from 'react';
 
-export default function PinnedMessage({ channelId }: { channelId: string }) {
+ function PinnedMessage({ channelId }: { channelId: string }) {
 	const { data, isLoading } = useFetch(
 		'pinned-messages',
 		() => getPinnedMessages(channelId as string),
@@ -87,5 +88,6 @@ export default function PinnedMessage({ channelId }: { channelId: string }) {
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
-}
+ }
+export default memo(PinnedMessage)
 

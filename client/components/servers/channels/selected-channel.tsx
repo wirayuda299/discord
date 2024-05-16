@@ -19,7 +19,6 @@ import MemberSheet from '../members/members';
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
 import SearchForm from './search-form';
-
 import { useServerContext } from '@/providers/server';
 import useSwipe from '@/hooks/useSwipe';
 import useSocket from '@/hooks/useSocket';
@@ -34,9 +33,10 @@ function SelectedChannel() {
 	const { serversState, setServerStates } = useServerContext();
 	const { reloadChannelMessage, states, socket } = useSocket();
   const { onTouchEnd, onTouchMove, onTouchStart } = useSwipe(setServerStates);
-  
 	const { selectedChannel } = serversState;
 	const path = `/server/${params?.id}/${params?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
+
+
   
 
 	const messageList = useMemo(
@@ -89,7 +89,7 @@ function SelectedChannel() {
 					<Suspense
 						key={params.channel_id as string}
 						fallback={
-							<div className='size-10 rounded-md bg-background brightness-110'></div>
+							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
 						}
 					>
 						<Thread
@@ -101,7 +101,7 @@ function SelectedChannel() {
 					<Suspense
 						key={params.channel_id as string}
 						fallback={
-							<div className='size-10 rounded-md bg-background brightness-110'></div>
+							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
 						}
 					>
 						<PinnedMessage channelId={params.channel_id as string} />
@@ -109,10 +109,11 @@ function SelectedChannel() {
 					<Suspense
 						key={params.channel_id as string}
 						fallback={
-							<div className='size-10 rounded-md bg-background brightness-110'></div>
+							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
 						}
 					>
-						<MemberSheet selectedServer={serversState.selectedServer} />
+						<MemberSheet serverId={params.id as string} selectedServer={serversState.selectedServer}/>
+						
 					</Suspense>
 					<SearchForm />
 					<Inbox>

@@ -1,21 +1,34 @@
+type Settings = {
+  server_id: string;
+  show_progress_bar: boolean;
+  show_banner_background:boolean
+};
 export interface ServerProfile {
   server_id: string;
   user_id: string;
   username: string;
   avatar_asset_id: string;
+  banner: string | null,
+  banner_asset_id: string | null,
+  level:number
   bio: string;
   avatar: string;
 }
+
+
 export type Servers = {
-  id: string;
-  name: string;
-  logo: string;
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-  logo_asset_id: string;
-  invite_code: string;
-  serverProfile: ServerProfile;
+	id: string;
+	name: string;
+	logo: string;
+	owner_id: string;
+	created_at: string;
+	updated_at: string;
+	banner: string | null,
+	banner_asset_id:string|null
+	logo_asset_id: string;
+	invite_code: string;
+	serverProfile: ServerProfile;
+	settings: Settings;
 };
 
 export type Member = {

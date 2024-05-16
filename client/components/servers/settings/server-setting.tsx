@@ -17,18 +17,24 @@ export default function ServerSetting({
 	name,
 	logoAssetId,
 	serverId,
+	showProgressBar,
+	showBanner,
+	banner,
+	bannerAssetId
 }: {
 	logo: string;
 	logoAssetId: string;
 	name: string;
 	serverId: string;
+	showProgressBar: boolean;
+	showBanner: boolean;
+	banner: string | null;
+	bannerAssetId: string | null;
 }) {
 	const [selectedSetting, setSelectedSetting] = useState<string>('overview');
-	
 
 	const serverSettings = useCallback(() => getServerSettings(name), [name]);
 
-	
 	return (
 		<Dialog modal>
 			<DialogTrigger asChild>
@@ -72,7 +78,16 @@ export default function ServerSetting({
 					</div>
 					<div className='no-scrollbar h-screen w-full overflow-y-auto px-6 py-10'>
 						{selectedSetting === 'overview' && (
-							<ServerOverview logo={ logo} logoAssetId={logoAssetId} name={name} serverId={serverId} />
+							<ServerOverview
+								banner={banner}
+								bannerAssetId={bannerAssetId}
+								logo={logo}
+								logoAssetId={logoAssetId}
+								name={name}
+								serverId={serverId}
+								showBanner={showBanner}
+								showProgressBar={showProgressBar}
+							/>
 						)}
 					</div>
 					<div className=' min-w-24 pt-10'>
