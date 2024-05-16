@@ -92,13 +92,30 @@ export class ServersController {
 
   @Patch('/update')
   updateServer(@Req() req: Request) {
-    const { serverId, currentSessionId, name, logo, logoAssetId } = req.body;
+    const {
+      serverId,
+      currentSessionId,
+      name,
+      logo,
+      logoAssetId,
+      banner,
+      bannerAssetId,
+      showBanner,
+      showProgressBar,
+    } = req.body;
+
+    console.log(req.body);
+
     return this.serverService.updateServer(
       serverId,
       currentSessionId,
       name,
       logo,
-      logoAssetId
+      logoAssetId,
+      banner,
+      bannerAssetId,
+      showProgressBar,
+      showBanner
     );
   }
 

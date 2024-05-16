@@ -371,7 +371,11 @@ export class ServersService {
     currentSessionId: string,
     name: string,
     logo: string,
-    logo_asset_id: string
+    logo_asset_id: string,
+    banner: string,
+    bannerAssetId: string,
+    showProgressBar: boolean,
+    showBanner: boolean
   ) {
     try {
       const { rows } = await this.databaseService.pool.query(
@@ -391,11 +395,22 @@ export class ServersService {
       }
       await this.databaseService.pool.query(
         `UPDATE servers
-   SET name = $2,
-       logo = $3,
-       logo_asset_id = $4
-   WHERE id = $1`,
-        [rows[0].id, name, logo, logo_asset_id]
+        SET name = $1,
+       logo = $2,
+       logo_asset_id = $3,
+       banner = $4,
+       banner_asset_id= $5
+       WHERE id = $6`,
+        [name, logo, logo_asset_id, banner, bannerAssetId, rows[0].id]
+      );
+      await this.databaseService.pool.query(
+        `
+      update server_settings 
+      set show_progress_bar = $1,
+       show_banner_background = $2
+      where server_id = $3
+      `,
+        [showProgressBar, showBanner, serverId]
       );
 
       return {

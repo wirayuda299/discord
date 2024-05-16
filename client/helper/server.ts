@@ -32,7 +32,7 @@ export async function getAllServerCreatedByCurrentUser(
 
 		const servers = await res.json();
 		if (servers.error) {
-			throw new Error(servers.messages)
+			throw new Error(servers.messages);
 		}
 
 		return servers.data;
@@ -42,12 +42,11 @@ export async function getAllServerCreatedByCurrentUser(
 }
 
 export async function getServerById(
-	id: string,
+	id: string
 ): Promise<{ server: Servers[]; channels: Channel[] }> {
 	try {
+		if (!id) return { channels: [], server: [] };
 
-		if (!id ) return { channels: [], server: [] }
-		
 		const res = await fetch(`${serverUrl}/servers/${id}`, {
 			headers: await prepareHeaders(),
 			method: 'GET',
@@ -100,7 +99,11 @@ export async function updateServer(
 	name: string,
 	logo: string,
 	logoAssetId: string,
-	currentSessionId: string
+	banner:string,
+	bannerAssetId:string,
+	currentSessionId: string,
+	showBanner: boolean,
+	showProgressBar: boolean
 ) {
 	try {
 		await fetch(`${serverUrl}/servers/update`, {
@@ -113,6 +116,10 @@ export async function updateServer(
 				name,
 				logo,
 				logoAssetId,
+				showBanner,
+				showProgressBar,
+				banner,
+				bannerAssetId,
 			}),
 		});
 		revalidate('/server');

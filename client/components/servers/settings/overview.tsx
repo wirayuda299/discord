@@ -66,49 +66,76 @@ export default function ServerOverview({
 		try {
 			if (!userId) return;
 
-			if (editedFields.logo && files && files.logo) {
-				const [, logo] = await Promise.all([
-					deleteImage(logoAssetId),
-					await uploadFile(files.logo),
-				]);
+			const updateServerData = async (
+				logo: { url: string; id: string },
+				banner: { url: string; id: string }
+			) => {
 				await updateServer(
 					serverId,
 					data.name,
-					logo?.url,
-					logo?.publicId,
-					userId
-				).then(() => {
-					toast.success('Server has been updated');
-				});
-			} else if (editedFields.banner && files && files.banner) {
-				const [, banner] = await Promise.all([
-					deleteImage(bannerAssetId!),
-					await uploadFile(files.banner),
+					logo.url!,
+					logo.id!,
+					banner.url,
+					banner.id,
+					userId,
+					data.showBanner,
+					data.showProgressBar
+				);
+				toast.success('Server has been updated');
+			};
+
+			const handleFileUpload = async (fileKey: string, assetId?: string) => {
+				if (files && files[fileKey]) {
+					const [, uploadedFile] = await Promise.all([
+						assetId ? deleteImage(assetId) : Promise.resolve(),
+						uploadFile(files[fileKey]),
+					]);
+					return uploadedFile;
+				}
+			};
+
+			if (editedFields.logo) {
+				const logo = await handleFileUpload('logo', logoAssetId);
+				await updateServerData(
+					{
+						url: logo?.url,
+						id: logo?.publicId,
+					},
+					{ id: bannerAssetId!!, url: data?.banner!! }
+				);
+			} else if (editedFields.banner) {
+				const banner = await handleFileUpload('banner', bannerAssetId!);
+				await updateServerData(
+					{ id: logoAssetId, url: data.logo },
+					{
+						url: banner?.url,
+						id:banner?.publicId
+					}
+				);
+			} else if (editedFields.logo && editedFields.banner) {
+				const [logo, banner] = await Promise.all([
+					editedFields.logo
+						? handleFileUpload('logo', logoAssetId)
+						: Promise.resolve(null),
+					editedFields.banner
+						? handleFileUpload('banner', bannerAssetId!)
+						: Promise.resolve(null),
 				]);
-				await updateServer(
-					serverId,
-					data.name,
-					banner?.url,
-					banner?.publicId,
-					userId
-				).then(() => {
-					toast.success('Server has been updated');
-				});
+				await updateServerData(
+					{ id: logo?.publicId, url: logo?.url },
+					{ id: banner?.publicId, url: banner?.url }
+				);
 			} else {
-				await updateServer(
-					serverId,
-					data.name,
-					logo,
-					logoAssetId,
-					userId as string
-				).then(() => {
-					toast.success('Server has been updated');
-				});
+				await updateServerData(
+					{ id: logoAssetId, url: data.logo },
+					{ id: bannerAssetId!!, url: data?.banner!! }
+				);
 			}
 		} catch (error) {
 			createError(error);
 		}
 	}
+
 	return (
 		<Form {...form}>
 			<form

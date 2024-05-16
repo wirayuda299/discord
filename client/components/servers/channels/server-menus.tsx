@@ -16,9 +16,13 @@ import AddUser from '@/components/user/add-user';
 export default function ServerMenu({
 	serverName,
 	serverId,
+	banner,
+	showBanner,
 }: {
 	serverName: string;
 	serverId: string;
+	banner: string | null;
+	showBanner: boolean;
 }) {
 	const { setServerStates, serversState } = useServerContext();
 	if (!serverName) return null;
@@ -68,18 +72,22 @@ export default function ServerMenu({
 						/>
 					</DropdownMenuItem>
 				</AddUser>
-        {serversState.selectedServer && (
+				{serversState.selectedServer && (
 					<ServerSetting
 						banner={serversState.selectedServer.banner}
 						bannerAssetId={serversState.selectedServer.banner_asset_id}
-						showBanner={serversState.selectedServer.settings.show_banner_background}
-						showProgressBar={serversState.selectedServer.settings.show_banner_background}
-            logo={serversState.selectedServer?.logo || ''}
-            logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
-            name={serversState.selectedServer?.name || ''}
-            serverId={serverId}
-          />
-        )}
+						showBanner={
+							serversState.selectedServer.settings.show_banner_background
+						}
+						showProgressBar={
+							serversState.selectedServer.settings.show_banner_background
+						}
+						logo={serversState.selectedServer?.logo || ''}
+						logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
+						name={serversState.selectedServer?.name || ''}
+						serverId={serverId}
+					/>
+				)}
 				<CreateChannelModals serverId={serverId} type='text'>
 					<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
 						<span>create channel </span>
