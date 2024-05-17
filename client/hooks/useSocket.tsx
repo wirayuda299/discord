@@ -37,16 +37,15 @@ export default function useSocket() {
     });
   };
 
-  const reloadThreadMessages = 
-    (threadId: string) => {
-      if (socket) {
-        socket.emit("thread-messages", {
-          threadId,
-          serverId: params.id as string,
-          channelId:params.channel_id
-        });
-      }
+  const reloadThreadMessages = (threadId: string) => {
+    if (socket) {
+      socket.emit("thread-messages", {
+        threadId,
+        serverId: params.id as string,
+        channelId: params.channel_id,
+      });
     }
+  };
 
   useEffect(() => {
     if (!socket) return;

@@ -20,7 +20,7 @@ import { inviteUser } from "@/actions/user";
 import { createError } from "@/utils/error";
 
 export default function InviteUser() {
-  const {mutate}=useSWRConfig()
+  const { mutate } = useSWRConfig();
   const { userId } = useAuth();
   const [value, setValue] = useState<string>("");
   const [result, setResult] = useState<User[]>([]);
@@ -31,7 +31,7 @@ export default function InviteUser() {
     try {
       await inviteUser(id, userId!!).then((msg) => {
         toast.success(msg.messages);
-        mutate('pending-invitations')
+        mutate("pending-invitations");
       });
     } catch (error) {
       createError(error);

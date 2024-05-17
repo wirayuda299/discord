@@ -21,7 +21,7 @@ export function addLabelsToMessages(messages: Message[]) {
   });
 }
 
-export const foundMessage = (messages: any[], msg: Message):Message => {
+export const foundMessage = (messages: any[], msg: Message): Message => {
   return messages.find(
     (message) => message.message_id === msg.parent_message_id,
   );

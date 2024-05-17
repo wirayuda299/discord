@@ -7,7 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import { useUserContext } from "@/providers/users";
 import SearchForm from "@/components/servers/channels/search-form";
-import Inbox from '@/components/servers/channels/inbox';
+import Inbox from "@/components/servers/channels/inbox";
 import ChatForm from "./chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "./chat-item";

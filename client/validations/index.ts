@@ -13,16 +13,19 @@ export const createChannelSchema = z.object({
 });
 
 export const createServerSchema = z.object({
-  name: z.string().min(4, "Min character is 4").max(30, "Max character for server name is 30"),
+  name: z
+    .string()
+    .min(4, "Min character is 4")
+    .max(30, "Max character for server name is 30"),
   logo: z.string().min(10),
 });
 
 export const updateServerSchema = z.object({
   name: z.string().min(3).max(50),
   logo: z.string(),
-  showProgressBar:z.boolean(),
+  showProgressBar: z.boolean(),
   showBanner: z.boolean(),
-  banner:z.string().optional().nullable()
+  banner: z.string().optional().nullable(),
 });
 
 export const createThreadSchema = z.object({

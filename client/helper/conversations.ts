@@ -19,7 +19,7 @@ export async function getConversationList(
         method: "GET",
         credentials: "include",
         headers: await prepareHeaders(),
-        cache:"no-store"
+        cache: "no-store",
       },
     );
 

@@ -55,7 +55,7 @@ export const messageData = ({
   parentMessageId = "",
   serverId = "",
   username = "",
-  threadId=''
+  threadId = "",
 }: Props) => ({
   content: content.trim(),
   is_read: false,
@@ -71,7 +71,7 @@ export const messageData = ({
   serverId,
   parentMessageId,
   username,
-  threadId
+  threadId,
 });
 
 export async function getPinnedMessages(

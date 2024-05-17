@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import { EllipsisVertical, MessageCircle } from "lucide-react";
@@ -28,14 +28,14 @@ export default function AllFriends({
 }: {
   userId: string;
   handleSelectUser: (user: User) => void;
-  }) {
+}) {
   const { states } = useSocket();
-  
+
   const setSelectedUser = (user: User) => handleSelectUser(user);
 
   const { data: friendList, isLoading: friendListLoading } = useFetch(
     "friend-list",
-    () => getFriendList(userId)
+    () => getFriendList(userId),
   );
   return (
     <div className="h-auto max-h-screen w-full max-w-xl overflow-y-auto p-3 pb-4">
@@ -75,10 +75,13 @@ export default function AllFriends({
                 <p
                   className={cn(
                     "text-xs text-gray-2",
-                    states.active_users.includes(friend.user_id) && "text-green-600",
+                    states.active_users.includes(friend.user_id) &&
+                      "text-green-600",
                   )}
                 >
-                  {states.active_users.includes(friend.user_id) ? "online" : "offline"}
+                  {states.active_users.includes(friend.user_id)
+                    ? "online"
+                    : "offline"}
                 </p>
               </div>
             </div>

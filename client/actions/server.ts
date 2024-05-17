@@ -32,13 +32,12 @@ export async function inviteUser(
   inviteCode: string,
 ) {
   try {
-     await api.post("/servers/invite-user", {
+    await api.post("/servers/invite-user", {
       inviteCode,
       userId,
       serverId,
     });
-        revalidate('/')
-
+    revalidate("/");
   } catch (error) {
     throw error;
   }
