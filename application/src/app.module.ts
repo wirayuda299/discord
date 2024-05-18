@@ -24,6 +24,10 @@ import { ThreadsController } from './controllers/threads/threads.controller';
 import { ImagehandlerService } from './services/imagehandler/imagehandler.service';
 import { ConversationsService } from './services/conversations/conversations.service';
 import { ConversationsController } from './controllers/conversations/conversations.controller';
+import { MembersService } from './services/members/members.service';
+import { MembersController } from './controllers/members/members.controller';
+import { RolesService } from './services/roles/roles.service';
+import { RolesController } from './controllers/roles/roles.controller';
 
 @Module({
   imports: [
@@ -44,6 +48,8 @@ import { ConversationsController } from './controllers/conversations/conversatio
     ReactionsController,
     ThreadsController,
     ConversationsController,
+    MembersController,
+    RolesController,
   ],
   providers: [
     UserService,
@@ -59,6 +65,8 @@ import { ConversationsController } from './controllers/conversations/conversatio
     ThreadsService,
     ImagehandlerService,
     ConversationsService,
+    MembersService,
+    RolesService,
   ],
 })
 export class AppModule {}

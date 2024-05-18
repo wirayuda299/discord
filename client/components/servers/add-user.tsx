@@ -19,6 +19,7 @@ export default function AddUser({
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { serversState } = useServerContext();
+  const path = `${process.env.NEXT_PUBLIC_CLIENT_URL}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -41,16 +42,13 @@ export default function AddUser({
           <input
             className="w-full border-none bg-transparent outline-none"
             type="text"
+            disabled
+            autoFocus={false}
             name="invite code"
-            value={`${process.env.NEXT_PUBLIC_ORIGIN}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`}
+            value={path}
           />
           <Button
-            onClick={() =>
-              copyText(
-                `${process.env.NEXT_PUBLIC_ORIGIN}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`,
-                "Invite code copied",
-              )
-            }
+            onClick={() => copyText(path, "Invite code copied")}
             size={"sm"}
           >
             Copy

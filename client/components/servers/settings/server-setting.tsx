@@ -91,9 +91,7 @@ export default function ServerSetting({
               />
             )}
 
-            {selectedSetting === 'roles' && (
-              <Roles/>
-            )}
+            {selectedSetting === "roles" && <Roles serverId={serverId} />}
           </div>
           <div className=" min-w-24 pt-10">
             <DialogClose className="flex size-10 flex-col items-center justify-center rounded-full border border-gray-2">

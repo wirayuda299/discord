@@ -33,9 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         afterSignInUrl="/direct-messages"
         afterSignUpUrl="/direct-messages"
       >
-        <body
-          className={`size-full bg-black md:bg-background`}
-        >
+        <body className={`size-full bg-black md:bg-background`}>
           <SocketContextProvider>
             <ServerContextProvider>
               <UserContextProvider>

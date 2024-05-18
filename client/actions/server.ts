@@ -30,6 +30,7 @@ export async function inviteUser(
   serverId: string,
   userId: string,
   inviteCode: string,
+  path: string,
 ) {
   try {
     await api.post("/servers/invite-user", {
@@ -37,7 +38,7 @@ export async function inviteUser(
       userId,
       serverId,
     });
-    revalidate("/");
+    revalidate(path);
   } catch (error) {
     throw error;
   }

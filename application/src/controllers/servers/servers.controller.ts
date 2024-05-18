@@ -59,18 +59,6 @@ export class ServersController {
       ownerId
     );
   }
-  @Get('/members')
-  getMembers(@Query('serverId') id: string) {
-    return this.serverService.getMemberInServer(id);
-  }
-
-  @Get('/is-member-or-author')
-  isMemberOrAuthor(
-    @Query('userId') userId: string,
-    @Query('serverId') serverId: string
-  ) {
-    return this.serverService.isMemberOrServerAuthor(userId, serverId);
-  }
 
   @Delete('/delete')
   deleteServer(
@@ -104,8 +92,6 @@ export class ServersController {
       showProgressBar,
     } = req.body;
 
-    console.log(req.body);
-
     return this.serverService.updateServer(
       serverId,
       currentSessionId,
@@ -122,7 +108,6 @@ export class ServersController {
   @Post('/invite-user')
   inviteUser(@Req() req: Request) {
     const { inviteCode, userId, serverId } = req.body;
-
     return this.serverService.inviteUser(inviteCode, userId, serverId);
   }
 }

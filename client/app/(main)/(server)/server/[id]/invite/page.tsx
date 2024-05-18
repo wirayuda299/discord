@@ -11,7 +11,12 @@ type Props = {
 export default async function Invite({ params, searchParams }: Props) {
   const user = await currentUser();
   if (user) {
-    await inviteUser(params.id, user.id, searchParams.inviteCode)
+    await inviteUser(
+      params.id,
+      user.id,
+      searchParams.inviteCode,
+      `/server/${params.id}`,
+    )
       .then(() => {
         redirect(`/server/${params.id}`);
       })

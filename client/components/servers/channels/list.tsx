@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useServerContext } from "@/providers/server";
 
 import CreateChannelModals from "@/components/servers/channels/create-channel-modal";
-import AddUser from "@/components/user/add-user";
+import AddUser from "@/components/servers/add-user";
 
 export default function ChannelList({
   channels,

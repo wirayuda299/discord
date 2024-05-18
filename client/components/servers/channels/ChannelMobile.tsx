@@ -6,7 +6,7 @@ import ServerMobile from "@/components/servers/ServerMobile";
 import ChannelList from "../channels/list";
 import { Servers } from "@/types/server";
 import { Channel } from "@/types/channels";
-import AddUser from "@/components/user/add-user";
+import AddUser from "@/components/servers/add-user";
 
 export default function ChannelDrawerMobile({
   channels,

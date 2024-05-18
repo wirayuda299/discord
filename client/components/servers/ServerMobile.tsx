@@ -9,7 +9,7 @@ import CreateChannelDrawerMobile from "@/components/servers/channels/create-chan
 import DeleteServer from "@/components/servers/delete-server";
 import UpdateServerDrawer from "./update-server";
 import { copyText } from "@/utils/copy";
-import AddUser from "../user/add-user";
+import AddUser from "./add-user";
 
 export default function ServerDrawerMobile({ server }: { server: Servers }) {
   const { userId } = useAuth();

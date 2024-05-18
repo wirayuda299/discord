@@ -78,14 +78,11 @@ export async function generateNewInviteCode(serverId: string, path: string) {
 
 export async function getServerMembers(serverId: string): Promise<Member[]> {
   try {
-    const res = await fetch(
-      `${serverUrl}/servers/members?serverId=${serverId}`,
-      {
-        headers: await prepareHeaders(),
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const res = await fetch(`${serverUrl}/members/list?serverId=${serverId}`, {
+      headers: await prepareHeaders(),
+      method: "GET",
+      credentials: "include",
+    });
 
     const members = await res.json();
     return members.data;
@@ -202,7 +199,7 @@ export async function isMemberOrAdmin(
 }> {
   try {
     const res = await fetch(
-      `${serverUrl}/servers/is-member-or-author?userId=${userId}&serverId=${serverId}`,
+      `${serverUrl}/members/is-member-or-author?userId=${userId}&serverId=${serverId}`,
       {
         headers: await prepareHeaders(),
         method: "GET",

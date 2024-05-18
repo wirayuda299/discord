@@ -11,7 +11,7 @@ import {
 import CreateChannelModals from "@/components/servers/channels/create-channel-modal";
 import UserSettingsModals from "@/components/user/user-settings";
 import ServerSetting from "@/components/servers/settings/server-setting";
-import AddUser from "@/components/user/add-user";
+import AddUser from "@/components/servers/add-user";
 
 export default function ServerMenu({
   serverName,

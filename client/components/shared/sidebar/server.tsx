@@ -63,21 +63,19 @@ export default function ServerSidebar({
       </div>
       {isLoaded && isSignedIn && (
         <div className="sticky !bottom-0 left-0 flex min-h-16 w-full items-center bg-[#232428] px-3 text-white">
-          {isLoaded && isSignedIn && (
-            <div className="flex items-center gap-3">
-              <Image
-                src={user?.imageUrl}
-                width={40}
-                className="aspect-auto min-h-10 min-w-10 rounded-full  object-cover "
-                height={40}
-                alt="user"
-              />
-              <div>
-                <h3 className="text-sm capitalize">{user?.username}</h3>
-                <p className="text-xs text-gray-2">invisible</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <Image
+              src={user?.imageUrl}
+              width={40}
+              className="aspect-auto min-h-10 min-w-10 rounded-full  object-cover "
+              height={40}
+              alt="user"
+            />
+            <div>
+              <h3 className="text-sm capitalize">{user?.username}</h3>
+              <p className="text-xs text-gray-2">invisible</p>
             </div>
-          )}
+          </div>
         </div>
       )}
     </ul>

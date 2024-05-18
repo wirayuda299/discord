@@ -11,7 +11,7 @@ export function groupReactionsByEmoji(messageList: any[]) {
     const groupedReactions = (message.reactions || []).reduce(
       (
         acc: ReactionGroup,
-        reaction: { emoji: string; unified_emoji: string },
+        reaction: { emoji: string; unified_emoji: string }
       ) => {
         const emojiKey = reaction.emoji;
         if (!acc[emojiKey]) {
@@ -24,7 +24,7 @@ export function groupReactionsByEmoji(messageList: any[]) {
         acc[emojiKey].count += 1;
         return acc;
       },
-      {},
+      {}
     );
 
     return {
