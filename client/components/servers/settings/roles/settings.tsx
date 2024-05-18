@@ -6,6 +6,7 @@ import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useSWRConfig } from "swr";
 
 import { cn } from "@/lib/utils";
 import {
@@ -24,7 +25,6 @@ import { Switch } from "@/components/ui/switch";
 import { createRole } from "@/actions/roles";
 import { deleteImage, uploadFile } from "@/helper/file";
 import { Role, updateRole } from "@/helper/roles";
-import { useSWRConfig } from "swr";
 import { createError } from "@/utils/error";
 
 const schema = z.object({
