@@ -26,8 +26,8 @@ import { createRole } from '@/actions/roles';
 import { deleteImage, uploadFile } from '@/helper/file';
 import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
-import SearchForm from '../../channels/search-form';
-import AssignRole from './AssignRole';
+
+import MemberWithRole from './MemberWithRole';
 
 const schema = z.object({
 	name: z.string().min(4).max(20),
@@ -188,7 +188,7 @@ export default function RolesSettings({
 			selectType('create');
 			selectRole(null);
 		}
-		selectTab('display')
+		selectTab('display');
 	}, [selectedRole, type]);
 
 	return (
@@ -567,28 +567,9 @@ export default function RolesSettings({
 						</form>
 					</Form>
 				) : (
-					type !== 'create' && <div className='w-full '>
-						<div className='flex gap-3 py-3'>
-							<SearchForm styles='max-w-full py-2.5' />
-							<AssignRole serverId={serverId} role={selectedRole} >
-								<Button>Add Members</Button>
-							</AssignRole>
-						</div>
-						<div className='flex gap-2'>
-							<Image
-								src={'/icons/members.svg'}
-								width={20}
-								height={20}
-								alt='members'
-							/>
-							<p className='text-sm text-gray-2'>No members were found.</p>
-							<AssignRole serverId={serverId} role={selectedRole} >
-								<p className='cursor-pointer text-sm font-semibold text-blue-400'>
-									Add member to this role
-								</p>
-							</AssignRole>
-						</div>
-					</div>
+					type !== 'create' && (
+							<MemberWithRole serverId={serverId }  selectedRole={selectedRole} />
+					)
 				)}
 			</div>
 		</div>

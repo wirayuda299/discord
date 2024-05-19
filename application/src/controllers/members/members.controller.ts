@@ -5,7 +5,7 @@ import { MembersService } from 'src/services/members/members.service';
 export class MembersController {
   constructor(private memberService: MembersService) {}
 
-  @Get('/list')
+  @Get()
   getMembers(@Query('serverId') id: string) {
     return this.memberService.getMemberInServer(id);
   }
@@ -16,5 +16,18 @@ export class MembersController {
     @Query('serverId') serverId: string
   ) {
     return this.memberService.isMemberOrServerAuthor(userId, serverId);
+  }
+
+  @Get('/by-role')
+  getMemberWithRole(
+    @Query('roleName') roleName: string,
+    @Query('serverId') serverId: string
+  ) {
+    return this.memberService.getMembersFromSpesificRole(serverId, roleName);
+  }
+
+  @Get('/without-role')
+  getMemberWithNoRole(@Query('serverId') serverId: string) {
+    return this.memberService.getMembersHasNoRole(serverId);
   }
 }

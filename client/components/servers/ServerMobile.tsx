@@ -88,7 +88,7 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
 					</ul>
 
 					<ul className='mt-8 gap-3 divide-y  divide-background rounded-md bg-background/25 p-2 text-white'>
-						<CreateChannelDrawerMobile serverId={server?.id} />
+						<CreateChannelDrawerMobile serverId={server?.id} serverAuthor={ server.owner_id} />
 					</ul>
 
 					<ul className='mt-8 divide-y  divide-gray-700 rounded-md bg-background/25 p-2 text-white'>

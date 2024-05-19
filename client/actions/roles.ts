@@ -1,7 +1,6 @@
 'use server';
 
 import { ApiRequest } from '@/utils/api';
-import { revalidatePath } from 'next/cache';
 
 const api = new ApiRequest();
 
@@ -43,7 +42,6 @@ export async function assignRole(
 	userId: string,
 	roleId: string,
 	permissionId: string,
-	path: string,
 ) {
 	try {
 		await api.post('/roles/assign-role', {
@@ -51,7 +49,6 @@ export async function assignRole(
 			user_id: userId,
 			permission_id: permissionId,
     });
-    revalidatePath(path)
 	} catch (error) {
 		throw error;
 	}

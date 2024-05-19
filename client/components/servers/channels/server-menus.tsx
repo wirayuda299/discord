@@ -64,7 +64,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 						/>
 					</DropdownMenuItem>
 				</AddUser>
-				{serversState.selectedServer && server.owner_id ===userId && (
+				{serversState.selectedServer && server.owner_id === userId && (
 					<ServerSetting
 						banner={serversState.selectedServer.banner}
 						bannerAssetId={serversState.selectedServer.banner_asset_id}
@@ -82,7 +82,11 @@ export default function ServerMenu({ server }: { server: Servers }) {
 				)}
 				{(serverOwnerId === userId ||
 					(states.user_roles && states.user_roles.manage_channel)) && (
-					<CreateChannelModals serverId={server.id} type='text'>
+					<CreateChannelModals
+						serverId={server.id}
+						serverAuthor={server.owner_id!}
+						type='text'
+					>
 						<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
 							<span>create channel </span>
 							<div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>

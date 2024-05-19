@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 
 import { useUserContext } from "@/providers/users";
 import SearchForm from "@/components/servers/channels/search-form";
@@ -11,17 +9,14 @@ import Inbox from "@/components/servers/channels/inbox";
 import ChatForm from "./chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "./chat-item";
-import { addLabelsToMessages } from "@/utils/messages";
 import useSocket from "@/hooks/useSocket";
+import { Message } from "@/types/messages";
 
 export default function ChatList() {
-  const { userId } = useAuth();
   const { selectedUser, handleSelectUser } = useUserContext();
   const { setServerStates, serversState } = useServerContext();
-  const { states, reloadPersonalMessage, socket } = useSocket();
-  const searchParams = useSearchParams();
+  const { states, reloadPersonalMessage, socket, params, searchParams, userId } = useSocket();
 
-  const messageList = addLabelsToMessages(states.personal_messages);
 
   if (!searchParams.get("chat")) return null;
 
@@ -52,8 +47,10 @@ export default function ChatList() {
       </header>
       <div className="flex h-[calc(100vh-50px)] flex-col justify-end overflow-y-auto">
         <ul className="h-full overflow-y-auto p-3">
-          {messageList?.map((message) => (
+          {states.personal_messages?.map((message:Message) => (
             <ChatItem
+              params={params} 
+              searchParams={searchParams}
               replyType="personal"
               key={message.created_at}
               styles="hidden"

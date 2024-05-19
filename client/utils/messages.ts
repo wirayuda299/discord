@@ -6,20 +6,7 @@ import { Message } from "@/types/messages";
 import { formUrlQuery } from "../lib/utils/form-url-query";
 import { ServerStates } from "@/providers/server";
 
-export function addLabelsToMessages(messages: Message[]) {
-  let currentMonth: number | null = null;
 
-  return messages?.map((message) => {
-    const messageDate = new Date(message.created_at);
-    const messageMonth = messageDate.getMonth();
-
-    const shouldAddLabel = currentMonth !== messageMonth;
-
-    currentMonth = messageMonth;
-
-    return { ...message, shouldAddLabel };
-  });
-}
 
 export const foundMessage = (messages: any[], msg: Message): Message => {
   return messages.find(

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { RolesService } from 'src/services/roles/roles.service';
 
@@ -80,5 +89,9 @@ export class RolesController {
       manage_role,
       manage_thread
     );
+  }
+  @Delete('/remove-role')
+  removeRoleFromUser(@Body('userId') id: string) {
+    return this.roleService.removeRole(id);
   }
 }

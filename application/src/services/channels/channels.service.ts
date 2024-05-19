@@ -1,19 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class ChannelsService {
   constructor(private db: DatabaseService) {}
 
+  async isAllowedToCreateChannel(serverId: string, userId: string) {
+    const isallowed = await this.db.pool.query(
+      `SELECT p.manage_channel
+        FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        JOIN user_roles ur ON rp.role_id = ur.role_id
+        JOIN members m ON ur.user_id = m.user_id
+        WHERE m.user_id = $1
+        AND m.server_id = $2
+        AND p.manage_channel = true`,
+      [serverId, userId]
+    );
+    return isallowed.rows;
+  }
+
   async getChannelById(id: string) {
     try {
       const channel = await this.db.pool.query(
         `select * from channels as c
-left join channel_messages as cm on cm.channel_id = c.id 
-left join messages as m on m.id = cm.message_id 
-left join channel_pinned_messages as cpm on cpm.channel_id  = c.id
-
-where c.id = $1`,
+          left join channel_messages as cm on cm.channel_id = c.id 
+          left join messages as m on m.id = cm.message_id 
+          left join channel_pinned_messages as cpm on cpm.channel_id  = c.id
+          where c.id = $1`,
         [id]
       );
 
@@ -34,8 +53,23 @@ where c.id = $1`,
     }
   }
 
-  async createChannel(name: string, server_id: string, type: string) {
+  async createChannel(
+    name: string,
+    server_id: string,
+    type: string,
+    userId: string,
+    serverAuthor: string
+  ) {
     try {
+      const isallowed = await this.isAllowedToCreateChannel(server_id, userId);
+
+      if (isallowed.length < 1 && userId !== serverAuthor) {
+        throw new HttpException(
+          'You are not allowed to create channel',
+          HttpStatus.FORBIDDEN
+        );
+      }
+
       await this.db.pool.query(`begin`);
       const {
         rows: [channel],

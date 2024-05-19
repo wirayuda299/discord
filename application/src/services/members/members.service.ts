@@ -63,4 +63,45 @@ export class MembersService {
       throw error;
     }
   }
+
+  async getMembersFromSpesificRole(serverId: string, roleName: string) {
+    try {
+      const members = await this.db.pool.query(
+        ` SELECT *
+          FROM members m
+          JOIN user_roles ur ON m.user_id = ur.user_id
+          JOIN roles r ON ur.role_id = r.id
+          join server_profile as sp on sp.server_id = $1 and sp.user_id = ur.user_id
+          WHERE m.server_id = $1 AND r.name = $2`,
+        [serverId, roleName]
+      );
+
+      return {
+        data: members.rows,
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getMembersHasNoRole(serverId: string) {
+    try {
+      const members = await this.db.pool.query(
+        ` SELECT *
+        FROM members m
+        LEFT JOIN user_roles ur ON m.user_id = ur.user_id
+        join server_profile as sp on sp.server_id = $1 and sp.user_id = ur.user_id
+          WHERE ur.role_id IS NULL
+          AND m.server_id = $1`,
+        [serverId]
+      );
+      return {
+        data: members.rows,
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }

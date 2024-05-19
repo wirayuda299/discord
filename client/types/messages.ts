@@ -1,3 +1,5 @@
+import { Role } from "@/helper/roles";
+
 export type Thread = {
   username: string;
   author_id: string;
@@ -35,6 +37,7 @@ export interface Message {
   }[];
   reply_id?: string;
   thread_name?: string;
+  role:Role|undefined
 }
 
 export interface MessageData {

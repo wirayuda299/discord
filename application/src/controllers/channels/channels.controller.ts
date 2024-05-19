@@ -27,8 +27,14 @@ export class ChannelsController {
   }
   @Post('/create')
   createChannel(@Req() req: Request) {
-    const { name, server_id, type } = req.body;
+    const { name, server_id, type, userId, serverAuthor } = req.body;
 
-    return this.channelService.createChannel(name, server_id, type);
+    return this.channelService.createChannel(
+      name,
+      server_id,
+      type,
+      userId,
+      serverAuthor
+    );
   }
 }

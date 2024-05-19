@@ -179,4 +179,17 @@ export class RolesService {
       throw error;
     }
   }
+
+  async removeRole(userId: string) {
+    try {
+      await this.db.pool.query(
+        `delete from user_roles
+        where user_id = $1
+        `,
+        [userId]
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
 }

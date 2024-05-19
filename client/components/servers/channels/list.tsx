@@ -95,7 +95,8 @@ export default function ChannelList({
 						</div>
 						{(serverOwnerId === userId ||
 					(states.user_roles && states.user_roles.manage_channel)) &&  (
-								<CreateChannelModals
+							<CreateChannelModals
+								serverAuthor={server?.owner_id!}
 									serverId={server?.id!}
 									type={channel?.channel_type}
 								>

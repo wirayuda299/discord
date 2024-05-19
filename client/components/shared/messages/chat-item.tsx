@@ -2,7 +2,7 @@ import Image from "next/image";
 import { memo, useMemo } from "react";
 import Link from "next/link";
 import type { Socket } from "socket.io-client";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { ReadonlyURLSearchParams, useRouter } from "next/navigation";
 import queryString from "query-string";
 
 import { Message } from "@/types/messages";
@@ -13,16 +13,19 @@ import ChatContent from "./chat-content";
 import { foundMessage } from "@/utils/messages";
 import useEmoji from "@/hooks/useEmoji";
 import ImagePreview from "../image-preview";
+import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
 type Props = {
-  socket: Socket | null;
-  msg: Message & { shouldAddLabel?: boolean };
-  userId: string;
-  replyType: string;
-  styles?: string;
-  messages: Message[];
-  serverStates: ServerStates;
-  reloadMessage: () => void;
+	socket: Socket | null;
+	msg: Message & { shouldAddLabel?: boolean };
+	userId: string;
+	replyType: string;
+	styles?: string;
+	messages: Message[];
+	serverStates: ServerStates;
+	reloadMessage: () => void;
+	searchParams: ReadonlyURLSearchParams;
+	params: Params;
 };
 
 function ChatItem({
@@ -34,10 +37,11 @@ function ChatItem({
   socket,
   reloadMessage,
   styles,
+  searchParams,
+  params
+
 }: Props) {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const params = useParams();
   const { selectedServer } = serverStates;
   const handleAppendOrRemoveEmoji = useEmoji(
     selectedServer?.id!!,

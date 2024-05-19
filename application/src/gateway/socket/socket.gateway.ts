@@ -218,7 +218,6 @@ export class SocketGateway implements OnModuleInit {
   async getMemberRole(
     @MessageBody() payload: { userId: string; serverId: string }
   ) {
-    this.logger.log(payload);
     const role = await this.roles.getCurrentUserRole(
       payload.userId,
       payload.serverId

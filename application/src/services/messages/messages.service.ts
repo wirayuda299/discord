@@ -2,33 +2,94 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from '../../utils/groupMessageByEmoji';
+import { RolesService } from '../roles/roles.service';
+
+export type Permission = {
+  role_id: string;
+  permission_id: string;
+  id: string;
+  manage_channel: boolean;
+  manage_role: boolean;
+  kick_member: boolean;
+  ban_member: boolean;
+  attach_file: boolean;
+  manage_thread: boolean;
+  manage_message: boolean;
+};
+export interface Role {
+  id: string;
+  name: string;
+  serverId: string;
+  role_color: string;
+  icon: string;
+  icon_asset_id: string;
+  members: any[];
+  permissions: Permission;
+}
+
+export type Thread = {
+  username: string;
+  author_id: string;
+  thread_name: string;
+  thread_id: string;
+  channel_id: string;
+  message: string;
+  is_read: boolean;
+  author: string;
+  media_image: string;
+  message_type: string;
+  media_image_asset_id: string;
+  created_at: string;
+  update_at: string;
+};
 
 export interface Message {
   message_id: string;
   message: string;
-  author_id: string;
   is_read: boolean;
+  author: string;
   media_image: string;
-  media_image_id: string;
-  msg_created_at: string;
-  msg_updated_at: string;
-  author_name: string;
+  message_type: string;
+  media_image_asset_id: string;
+  created_at: string;
+  update_at: string;
   username: string;
-  author_image: string;
-  threads: any[];
+  shouldAddLabel: boolean;
+  parent_message_id: string;
+  threads: Thread[];
   reactions: {
     emoji: string;
     unified_emoji: string;
     count: number;
   }[];
   reply_id?: string;
+  thread_name?: string;
+  role: Role | undefined;
 }
 
 type Props = Message & { shouldAddLabel: boolean };
 
 @Injectable()
 export class MessagesService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private roleService: RolesService
+  ) {}
+
+  addLabelsToMessages(messages: Message[]) {
+    let currentMonth: number | null = null;
+
+    return messages?.map((message) => {
+      const messageDate = new Date(message.created_at);
+      const messageMonth = messageDate.getMonth();
+
+      const shouldAddLabel = currentMonth !== messageMonth;
+
+      currentMonth = messageMonth;
+
+      return { ...message, shouldAddLabel };
+    });
+  }
 
   async getReactions(messageId: string) {
     try {
@@ -76,6 +137,12 @@ export class MessagesService {
       for await (const reply of replies.rows) {
         const reactions = await this.getReactions(reply.message_id);
         reply.reactions = reactions;
+        const role = await this.roleService.getCurrentUserRole(
+          reply.user_id,
+          serverId
+        );
+
+        reply.role = role;
 
         allReplies.push(reply);
 
@@ -214,6 +281,15 @@ export class MessagesService {
         `,
         [messageId, serverId]
       );
+
+      for await (const thread of threads.rows) {
+        const role = await this.roleService.getCurrentUserRole(
+          thread.author_id,
+          serverId
+        );
+
+        thread.role = role;
+      }
       return threads.rows;
     } catch (error) {
       throw error;
@@ -253,6 +329,12 @@ export class MessagesService {
           serverId
         );
 
+        const role = await this.roleService.getCurrentUserRole(
+          message.author,
+          serverId
+        );
+
+        message.role = role;
         message.threads = threads || [];
         message.reactions = reactions;
         messagesWithReactions.push(message);
@@ -272,9 +354,9 @@ export class MessagesService {
       );
 
       const groupedMessages = groupReactionsByEmoji(messagesWithReactions);
-
+      const allMessages = this.addLabelsToMessages(groupedMessages);
       return {
-        data: groupedMessages,
+        data: allMessages,
         error: false,
       };
     } catch (error) {
@@ -515,8 +597,8 @@ export class MessagesService {
       );
 
       const groupedMessages = groupReactionsByEmoji(messages);
-
-      return groupedMessages;
+      const allMessages = this.addLabelsToMessages(groupedMessages);
+      return allMessages;
     } catch (error) {
       throw error;
     }

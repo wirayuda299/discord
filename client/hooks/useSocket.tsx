@@ -99,5 +99,7 @@ export default function useSocket() {
 		searchParams,
 		socket,
 		userId,
+		getUserRole,
+		params,
 	};
 }

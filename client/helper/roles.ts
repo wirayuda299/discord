@@ -76,3 +76,16 @@ export async function updateRole(
     throw error;
   }
 }
+
+export async function removeRoleFromUser(userId:string) {
+  try {
+    await fetch(`${serverUrl}/roles/remove-role`, {
+			method: 'DELETE',
+			headers: await prepareHeaders(),
+      credentials: 'include',
+      body:JSON.stringify({userId})
+    });
+  } catch (error) {
+    throw error
+  }
+}

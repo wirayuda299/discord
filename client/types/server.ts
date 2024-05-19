@@ -59,6 +59,15 @@ export type Member = {
 	avatar: string;
 };
 
+export interface MemberWithRole extends Member {
+	role_id: string;
+	permission_id: string;
+	name: string;
+	role_color: string;
+	icon: string;
+	icon_asset_id: string;
+}
+
 
 export type Permission = {
 	role_id: string;
