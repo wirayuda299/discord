@@ -13,7 +13,7 @@ export default function ServerSidebarLinksItem({
   return (
 		<li
 			key={label}
-			className='ease hover:bg-background flex h-10 items-center rounded-md p-2 transition-colors duration-300'
+			className='ease flex h-10 items-center rounded-md p-2 transition-colors duration-300 hover:bg-background'
 		>
 			<Link
 				href={path}
@@ -27,7 +27,7 @@ export default function ServerSidebarLinksItem({
 					loading='lazy'
 					alt={label}
 				/>
-				<h3 className='text-gray-2 font-semibold group-hover:text-white'>
+				<h3 className='font-semibold text-gray-2 group-hover:text-white'>
 					{label}
 				</h3>
 			</Link>

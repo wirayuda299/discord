@@ -18,6 +18,7 @@ import useSocket from '@/hooks/useSocket';
 export default function ServerMenu({ server }: { server: Servers }) {
 	const { setServerStates, serversState } = useServerContext();
 	const { states, userId } = useSocket();
+	
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
 			...prev,
@@ -29,11 +30,11 @@ export default function ServerMenu({ server }: { server: Servers }) {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<div className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
+			<DropdownMenuTrigger  asChild>
+				<button className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
 					<p className='truncate text-wrap'>{server.name ?? ''}</p>
 					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
-				</div>
+				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className=' flex w-full min-w-[240px] flex-col gap-3 rounded border-none bg-black p-2 text-white shadow-none'>
 				<DropdownMenuItem className='flex cursor-pointer items-center justify-between border-b border-b-foreground !bg-black text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>

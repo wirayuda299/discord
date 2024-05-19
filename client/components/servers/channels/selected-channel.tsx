@@ -1,40 +1,41 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { MoveLeft } from "lucide-react";
-import Image from "next/image";
-import { Suspense, memo, useRef } from "react";
+import Link from 'next/link';
+import { MoveLeft } from 'lucide-react';
+import Image from 'next/image';
+import { Suspense, memo, useRef } from 'react';
 
-import { cn } from "@/lib/utils/mergeStyle";
+import { cn } from '@/lib/utils/mergeStyle';
 
-import ChanelInfo from "@/components/servers/channels/channel-info";
-import Thread from "./threads";
-import NotificationSettings from "./notification-settings";
-import PinnedMessage from "@/components/shared/messages/pinned-message";
-import Inbox from "./inbox";
-import MemberSheet from "../members/members";
-import ChatForm from "@/components/shared/messages/chat-form";
-import ChatItem from "@/components/shared/messages/chat-item";
-import SearchForm from "./search-form";
-import { useServerContext } from "@/providers/server";
-import useSwipe from "@/hooks/useSwipe";
-import useSocket from "@/hooks/useSocket";
-import useScroll from "@/hooks/useScroll";
-import { Message } from "@/types/messages";
+import ChanelInfo from '@/components/servers/channels/channel-info';
+import Thread from './threads';
+import NotificationSettings from './notification-settings';
+import PinnedMessage from '@/components/shared/messages/pinned-message';
+import Inbox from './inbox';
+import MemberSheet from '../members/members';
+import ChatForm from '@/components/shared/messages/chat-form';
+import ChatItem from '@/components/shared/messages/chat-item';
+import SearchForm from './search-form';
+import { useServerContext } from '@/providers/server';
+import useSwipe from '@/hooks/useSwipe';
+import useSocket from '@/hooks/useSocket';
+import useScroll from '@/hooks/useScroll';
+import { Message } from '@/types/messages';
 
 function SelectedChannel() {
-  const ref = useRef<HTMLUListElement>(null);
+	const ref = useRef<HTMLUListElement>(null);
 
-  const { serversState, setServerStates } = useServerContext();
-  const { reloadChannelMessage, states, socket, params, searchParams, userId} = useSocket();
-  const { onTouchEnd, onTouchMove, onTouchStart } = useSwipe(setServerStates);
-  const { selectedChannel } = serversState;
+	const { serversState, setServerStates } = useServerContext();
+	const { reloadChannelMessage, states, socket, params, searchParams, userId } =
+		useSocket();
+	const { onTouchEnd, onTouchMove, onTouchStart } = useSwipe(setServerStates);
+	const { selectedChannel } = serversState;
 
-  const path = `/server/${params?.id}/${params?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
+	const path = `/server/${params?.id}/${params?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
-  useScroll(ref, states.channel_messages);
+	useScroll(ref, states.channel_messages);
 
-  return (
+	return (
 		<div
 			onTouchStart={onTouchStart}
 			onTouchMove={onTouchMove}
@@ -122,7 +123,7 @@ function SelectedChannel() {
 					ref={ref}
 				>
 					{states.channel_messages.length >= 1 &&
-						states.channel_messages?.map((msg:Message) => (
+						states.channel_messages?.map((msg: Message) => (
 							<ChatItem
 								params={params}
 								searchParams={searchParams}

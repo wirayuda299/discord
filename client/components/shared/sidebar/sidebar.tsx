@@ -25,10 +25,10 @@ export default async function Sidebar() {
 	const [conversations, servers] = results;
 
 	return (
-		<aside className='border-r-foreground md:bg-foreground flex size-full min-h-screen  min-w-[80px] max-w-[80px] shrink flex-col items-center overflow-y-auto overflow-x-hidden border-r-2 bg-black/50 p-4'>
+		<aside className='flex size-full min-h-screen min-w-[80px] max-w-[80px]  shrink flex-col items-center overflow-y-auto overflow-x-hidden border-r-2 border-r-foreground bg-black/50 p-4 md:bg-foreground'>
 			<Link
 				href={'/direct-messages'}
-				className='bg-primary hidden rounded-md p-2 md:block'
+				className='hidden rounded-md bg-primary p-2 md:block'
 			>
 				<Image
 					src={'/icons/discord.svg'}
@@ -39,7 +39,7 @@ export default async function Sidebar() {
 					alt='logo'
 				/>
 			</Link>
-			<div className=' border-background border-b'>
+			<div className=' border-b border-background'>
 				{(conversations || [])?.map((conversation) => (
 					<ConversationItem
 						innerStyles='!bg-transparent'
@@ -54,7 +54,7 @@ export default async function Sidebar() {
 				<CreateServerModal />
 				<button
 					title='Explore'
-					className='ease bg-background hover:bg-green-1 group flex size-12 items-center justify-center rounded-full transition-colors duration-300'
+					className='ease group flex size-12 items-center justify-center rounded-full bg-background transition-colors duration-300 hover:bg-green-1'
 				>
 					<Compass className='stroke-green-1 group-hover:stroke-white' />
 				</button>

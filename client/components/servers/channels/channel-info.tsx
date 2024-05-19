@@ -15,7 +15,6 @@ import {
 import { cn } from "@/lib/utils/mergeStyle";
 import { useServerContext } from "@/providers/server";
 
-import { useParams } from "next/navigation";
 import useFetch from "@/hooks/useFetch";
 import { getServerMembers } from "@/helper/server";
 import MemberItem from "../members/memberItem";
@@ -37,8 +36,7 @@ export default function ChannelInfo() {
   const {
     serversState: { selectedChannel },
   } = useServerContext();
-  const { states } = useSocket();
-  const params = useParams();
+  const { states, params } = useSocket();
   const media = filterMedia(states.channel_messages);
 
   const { data, error, isLoading } = useFetch("members", () =>

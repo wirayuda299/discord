@@ -27,8 +27,10 @@ export default function ServerSidebar({
 						src={data.server.banner}
 						width={500}
 						height={300}
-						className='w-full object-cover'
+						className='aspect-auto w-full object-cover'
 						alt='banner'
+						priority
+						fetchPriority="high"
 					/>
 				)}
 				{data.server && (

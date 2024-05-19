@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
@@ -27,9 +26,8 @@ export default function ChannelList({
 		serversState: { selectedChannel },
 		setServerStates,
 	} = useServerContext();
-	const { states, userId } = useSocket();
+	const { states, userId, params } = useSocket();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
-	const params = useParams();
 
 	const groupedChannels = useMemo(() => {
 		const grouped = channels?.reduce((acc: Channel[], channel) => {
@@ -67,12 +65,12 @@ export default function ChannelList({
 			selectedChannel: channel || null,
 		}));
 	}, [params.channel_id]);
-		const serverOwnerId = server?.owner_id;
+	const serverOwnerId = server?.owner_id;
 
 	return (
-		<div className='text-gray-2'>
+		<ul className='text-gray-2'>
 			{groupedChannels?.map((channel) => (
-				<div className='my-4' key={channel?.category_id}>
+				<li className='my-4' key={channel?.category_id}>
 					<div className='flex w-full items-center justify-between pr-2'>
 						<div
 							onClick={() =>
@@ -94,17 +92,17 @@ export default function ChannelList({
 							</h3>
 						</div>
 						{(serverOwnerId === userId ||
-					(states.user_roles && states.user_roles.manage_channel)) &&  (
+							(states.user_roles && states.user_roles.manage_channel)) && (
 							<CreateChannelModals
 								serverAuthor={server?.owner_id!}
-									serverId={server?.id!}
-									type={channel?.channel_type}
-								>
-									<button title='create channel'>
-										<Plus size={18} />
-									</button>
-								</CreateChannelModals>
-							)}
+								serverId={server?.id!}
+								type={channel?.channel_type}
+							>
+								<button title='create channel'>
+									<Plus size={18} />
+								</button>
+							</CreateChannelModals>
+						)}
 					</div>
 					<ul
 						className={cn(
@@ -164,8 +162,8 @@ export default function ChannelList({
 							</Link>
 						))}
 					</ul>
-				</div>
+				</li>
 			))}
-		</div>
+		</ul>
 	);
 }

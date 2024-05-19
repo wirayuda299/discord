@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ReactNode, Suspense, useState } from "react";
 import type { Socket } from "socket.io-client";
 
@@ -34,8 +34,7 @@ export default function CreateThread({
   const router = useRouter();
   const [threadName, setThreadName] = useState<string>("");
   const { serversState, setServerStates } = useServerContext();
-  const searchParams = useSearchParams();
-  const { reloadChannelMessage } = useSocket();
+  const { reloadChannelMessage, searchParams } = useSocket();
 
   function setSelectedMessage(message: Message | null) {
     setServerStates((prev) => ({

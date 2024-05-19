@@ -13,19 +13,19 @@ import AddUser from './add-user';
 import { getServerMembers } from '@/helper/server';
 
 export default function ServerDrawerMobile({ server }: { server: Servers }) {
- 
-  const { userId } = useAuth();
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [members, setMembers] = useState<Member[]>([])
-  
+	const { userId } = useAuth();
+	const [isCopied, setIsCopied] = useState<boolean>(false);
+	const [members, setMembers] = useState<Member[]>([]);
 
 	return (
-    <Drawer onOpenChange={async (isOpen) => {
-      if (isOpen) {
-        const members = await getServerMembers(server.id);
-				setMembers(members);
-  }
-    }}>
+		<Drawer
+			onOpenChange={async (isOpen) => {
+				if (isOpen) {
+					const members = await getServerMembers(server.id);
+					setMembers(members);
+				}
+			}}
+		>
 			<DrawerTrigger>
 				<ChevronRight className='text-gray-2' size={18} />
 			</DrawerTrigger>
@@ -49,7 +49,7 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
 						<div className='size-2 rounded-full bg-green-1'></div>
 						<span>0 Online</span>
 						<div className='size-2 rounded-full bg-gray-2'></div>
-            <span>{ members.length ||0} Member</span>
+						<span>{members.length || 0} Member</span>
 					</div>
 
 					<ul className='mt-5 flex justify-between text-white'>
@@ -88,7 +88,10 @@ export default function ServerDrawerMobile({ server }: { server: Servers }) {
 					</ul>
 
 					<ul className='mt-8 gap-3 divide-y  divide-background rounded-md bg-background/25 p-2 text-white'>
-						<CreateChannelDrawerMobile serverId={server?.id} serverAuthor={ server.owner_id} />
+						<CreateChannelDrawerMobile
+							serverId={server?.id}
+							serverAuthor={server.owner_id}
+						/>
 					</ul>
 
 					<ul className='mt-8 divide-y  divide-gray-700 rounded-md bg-background/25 p-2 text-white'>

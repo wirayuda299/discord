@@ -1,18 +1,17 @@
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useRef, useMemo, ReactNode, memo } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useRef, ReactNode, memo } from "react";
 
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
-import { addLabelsToMessages } from "@/utils/messages";
 import ChatForm from "../../shared/messages/chat-form";
 import ChatItem from "../../shared/messages/chat-item";
 
 import useSocket from "@/hooks/useSocket";
 import { useServerContext } from "@/providers/server";
 import useScroll from "@/hooks/useScroll";
+import { Message } from "@/types/messages";
 
 type Props = {
   threadId: string;
@@ -21,22 +20,17 @@ type Props = {
 };
 
 function ThreadMessages({ threadId, children }: Props) {
-  const { userId } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { states, reloadThreadMessages, socket } = useSocket();
+  const { states, reloadThreadMessages, socket, userId, searchParams, params } = useSocket();
   const { serversState, setServerStates } = useServerContext();
   const { selectedServer, selectedChannel, selectedMessage } = serversState;
 
   const messageRef = useRef<HTMLDivElement>(null);
   const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
-  const threadMessage = useMemo(
-    () => addLabelsToMessages(states.thread_messages),
-    [states.thread_messages],
-  );
 
-  useScroll(messageRef, threadMessage);
+
+  useScroll(messageRef, states.thread_messages);
 
   return (
     <Sheet
@@ -65,13 +59,15 @@ function ThreadMessages({ threadId, children }: Props) {
             <h3 className="text-base font-semibold text-gray-2">
               Thread -{" "}
               <span className=" uppercase text-gray-2">
-                {threadMessage?.[0]?.thread_name}
+                {states.thread_messages?.[0]?.thread_name}
               </span>
             </h3>
           </header>
           <ul className="flex h-auto w-full flex-col gap-5 overflow-y-auto p-3">
-            {threadMessage?.map((message) => (
+            {states.thread_messages?.map((message:Message) => (
               <ChatItem
+                params={params}
+                searchParams={searchParams}
                 replyType="thread"
                 reloadMessage={() => reloadThreadMessages(threadId)}
                 socket={socket}
