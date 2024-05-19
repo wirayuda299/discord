@@ -2,7 +2,7 @@ import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 // import { Poppins } from "next/font/google";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from "react";
 
 import { ServerContextProvider } from "@/providers/server";
@@ -22,6 +22,13 @@ import { UserContextProvider } from "@/providers/users";
 export const metadata: Metadata = {
   title: "Discord",
   description: "Discord clone",
+};
+
+export const viewport: Viewport = {
+	maximumScale: 1,
+  userScalable: false,
+  initialScale: 1,
+  
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
