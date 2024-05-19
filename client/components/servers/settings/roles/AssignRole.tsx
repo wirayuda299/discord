@@ -79,15 +79,22 @@ console.log(members);
 										{member.username}
 									</h4>
 									<div className='flex items-center gap-2'>
-										<div className='size-2 rounded-full' style={{
-											backgroundColor:role?.role_color
-										}}></div>
-										<p className='text-sm capitalize text-gray-2'>{member.role.name}</p>
+										<div
+											className='size-2 rounded-full'
+											style={{
+												backgroundColor: role?.role_color,
+											}}
+										></div>
+										{member.role && (
+											<p className='text-sm capitalize text-gray-2'>
+												{member?.role?.name}
+											</p>
+										)}
 									</div>
 								</div>
 							</div>
 							<Button>
-								{member.role.user_id === member.user_id ? 'Remove' : 'Add'}
+								{member.role && member.role.user_id === member.user_id ? 'Remove' : 'Add'}
 							</Button>
 						</li>
 					))}
