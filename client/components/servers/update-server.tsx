@@ -23,24 +23,19 @@ import { deleteImage, uploadFile } from "@/helper/file";
 import { updateServer } from "@/helper/server";
 import { UpdateServerSchemaType, updateServerSchema } from "@/validations";
 import { createError } from "@/utils/error";
+import { Servers } from "@/types/server";
 
 export default function UpdateServerDrawer({
-  logo,
-  name,
-  logoAssetId,
-  serverId,
+  server
 }: {
-  logo: string;
-  logoAssetId: string;
-  name: string;
-  serverId: string;
+server:Servers
 }) {
   const { userId } = useAuth();
   const form = useForm<UpdateServerSchemaType>({
     resolver: zodResolver(updateServerSchema),
     defaultValues: {
-      logo,
-      name,
+      logo:server.logo,
+      name:server.name,
     },
   });
   const { handleChange, preview, files } = useUploadFile(form);
@@ -52,31 +47,39 @@ export default function UpdateServerDrawer({
   async function onSubmit(data: UpdateServerSchemaType) {
     try {
       if (!userId) return;
-
+      
       if (files && files.logo) {
         const [, file] = await Promise.all([
-          deleteImage(logoAssetId),
+          deleteImage(server.logo_asset_id),
           await uploadFile(files.logo),
         ]);
         await updateServer(
-          serverId,
-          data.name,
-          file.url,
+					server.id,
+					data.name,
+					file.url,
           file.publicId,
-          userId,
-        ).then(() => {
-          toast.success("Server has been updated");
-        });
+          server?.banner ||'',
+          server?.banner_asset_id ||'',
+					userId,
+					server.settings.show_banner_background,
+					server.settings.show_progress_bar
+				).then(() => {
+					toast.success('Server has been updated');
+				});
       } else {
         await updateServer(
-          serverId,
-          data.name,
-          logo,
-          logoAssetId,
-          userId as string,
-        ).then(() => {
-          toast.success("Server has been updated");
-        });
+					server.id,
+					data.name,
+					server.logo,
+					server.logo_asset_id,
+					server?.banner ||'',
+					server?.banner_asset_id || '',
+					userId as string,
+					server.settings.show_banner_background,
+					server.settings.show_progress_bar
+				).then(() => {
+					toast.success('Server has been updated');
+				});
       }
     } catch (error) {
       createError(error);

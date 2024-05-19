@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 
 import { addLabelsToMessages } from "@/utils/messages";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 
 import ChanelInfo from "@/components/servers/channels/channel-info";
 import Thread from "./threads";
@@ -83,7 +83,6 @@ function SelectedChannel() {
         </div>
         <div className="hidden items-center gap-4 md:flex">
           <Suspense
-            key={params.channel_id as string}
             fallback={
               <div className="aspect-square h-6 w-12 rounded-md bg-background brightness-110"></div>
             }
@@ -95,7 +94,6 @@ function SelectedChannel() {
           </Suspense>
           <NotificationSettings />
           <Suspense
-            key={params.channel_id as string}
             fallback={
               <div className="aspect-square h-6 w-12 rounded-md bg-background brightness-110"></div>
             }
@@ -103,7 +101,6 @@ function SelectedChannel() {
             <PinnedMessage channelId={params.channel_id as string} />
           </Suspense>
           <Suspense
-            key={params.channel_id as string}
             fallback={
               <div className="aspect-square h-6 w-12 rounded-md bg-background brightness-110"></div>
             }

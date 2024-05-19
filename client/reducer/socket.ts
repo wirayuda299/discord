@@ -1,17 +1,20 @@
 import { Message } from "@/types/messages";
+import { Permission } from "@/types/server";
 
 export type SocketStates = {
   channel_messages: Message[];
   active_users: string[];
   personal_messages: Message[];
   thread_messages: Message[];
+  user_roles: Permission
 };
 
 type AllowedActionType =
   | "CHANNEL_MESSAGES"
   | "ACTIVE_USERS"
   | "PERSONAL_MESSAGES"
-  | "THREAD_MESSAGES";
+  | "THREAD_MESSAGES"
+  | 'SET_USER_ROLES'
 
 type ActionType = {
   type: AllowedActionType;
@@ -40,6 +43,11 @@ export function socketReducer(states: SocketStates, action: ActionType) {
       return {
         ...states,
         thread_messages: action.payload,
+      };
+    case "SET_USER_ROLES":
+      return {
+        ...states,
+        user_roles: action.payload,
       };
 
     default:

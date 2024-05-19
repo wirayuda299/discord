@@ -9,7 +9,7 @@ import {
 } from "../../ui/dialog";
 
 import { getServerSettings } from "@/constants/settings";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import ServerOverview from "./overview";
 import Roles from "./roles/roles";
 

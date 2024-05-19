@@ -12,7 +12,7 @@ import {
   DrawerContent,
 } from "@/components/ui/drawer";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import { useServerContext } from "@/providers/server";
 
 import { useParams } from "next/navigation";

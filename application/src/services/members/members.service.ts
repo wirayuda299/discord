@@ -41,6 +41,20 @@ export class MembersService {
           where m.server_id = $1`,
         [serverId]
       );
+
+      for await (const member of members.rows) {
+        const role = await this.db.pool.query(
+          `
+        select * from role_permissions as rp
+        join roles as r on r.id = rp.role_id 
+        join permissions as p on p.id = rp.permission_id 
+        join user_roles as ur on ur.role_id = r.id 
+        where ur.user_id = $1 and r.server_id = $2
+      `,
+          [member.user_id, serverId]
+        );
+        member.role = role.rows[0];
+      }
       return {
         data: members.rows,
         error: false,

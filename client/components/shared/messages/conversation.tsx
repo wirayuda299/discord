@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Conversation } from "@/types/messages";
 import { useUserContext } from "@/providers/users";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 
 export default function ConversationItem({
   conversation,

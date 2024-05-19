@@ -8,8 +8,8 @@ import { useSWRConfig } from "swr";
 import dynamic from "next/dynamic";
 
 import { friendtabs } from "@/constants/friends-tab";
-import { formUrlQuery } from "@/utils/form-url-query";
-import { cn } from "@/lib/utils";
+import { formUrlQuery } from "@/lib/utils/form-url-query";
+import { cn } from "@/lib/utils/mergeStyle";
 import InviteUser from "@/components/user/invite-user";
 import useFetch from "@/hooks/useFetch";
 import { getMyInvitation } from "@/helper/user";

@@ -17,7 +17,7 @@ export default function ServerSidebar({
     channels: Channel[];
   };
 }) {
-  const { user, isLoaded, isSignedIn } = useUser();
+	const { user, isLoaded, isSignedIn } = useUser();
 
   return (
 		<ul className='no-scrollbar relative flex h-full min-h-screen  max-w-[255px] flex-col  justify-between gap-3 overflow-y-auto md:h-full md:min-w-[200px] md:bg-[#2b2d31] lg:min-w-[255px]'>
@@ -32,7 +32,7 @@ export default function ServerSidebar({
 					/>
 				)}
 				{data.server && (
-					<ServerMenu serverName={data.server.name} serverId={data.server.id} />
+					<ServerMenu server={data.server} />
 				)}
 				{data.server.settings.show_progress_bar && (
 					<div className='w-full p-2'>
@@ -40,11 +40,11 @@ export default function ServerSidebar({
 							<p className='text-sm font-semibold uppercase text-white'>
 								LVL {data.server.level}
 							</p>
-							<p className='text-gray-2 text-xs'>
+							<p className='text-xs text-gray-2'>
 								{data.server.boost_count} boost
 							</p>
 						</div>
-						<div className='bg-gray-2 mt-1 h-1 w-full'>
+						<div className='mt-1 h-1 w-full bg-gray-2'>
 							<div
 								className='h-1 rounded-full bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600'
 								style={{
@@ -73,7 +73,7 @@ export default function ServerSidebar({
 						/>
 						<div>
 							<h3 className='text-sm capitalize'>{user?.username}</h3>
-							<p className='text-gray-2 text-xs'>invisible</p>
+							<p className='text-xs text-gray-2'>invisible</p>
 						</div>
 					</div>
 				</div>

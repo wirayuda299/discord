@@ -226,7 +226,7 @@ export class MessagesService {
 
       const messages = await this.db.pool.query(
         `
-      SELECT 
+        SELECT 
         cm.message_id AS message_id,
         m."content" AS message,
         m.is_read AS is_read,
@@ -473,6 +473,7 @@ export class MessagesService {
       await this.fetchReplies(reply.message_id, messages);
     }
   }
+
   async getPersonalMessage(
     conversationId: string | null,
     userId: string | null

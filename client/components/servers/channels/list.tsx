@@ -1,74 +1,75 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Plus, UserPlus } from "lucide-react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
-import { Channel } from "@/types/channels";
-import { Servers } from "@/types/server";
+import { Channel } from '@/types/channels';
+import { Servers } from '@/types/server';
 
-import { cn } from "@/lib/utils";
-import { useServerContext } from "@/providers/server";
+import { cn } from '@/lib/utils/mergeStyle';
+import { useServerContext } from '@/providers/server';
 
-import CreateChannelModals from "@/components/servers/channels/create-channel-modal";
-import AddUser from "@/components/servers/add-user";
+import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
+import AddUser from '@/components/servers/add-user';
+import useSocket from '@/hooks/useSocket';
 
 export default function ChannelList({
-  channels,
-  server,
+	channels,
+	server,
 }: {
-  channels: Channel[];
-  server: Servers | null | undefined;
+	channels: Channel[];
+	server: Servers | null | undefined;
 }) {
-  const { userId } = useAuth();
-  const {
-    serversState: { selectedChannel },
-    setServerStates,
-  } = useServerContext();
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const params = useParams();
+	const {
+		serversState: { selectedChannel },
+		setServerStates,
+	} = useServerContext();
+	const { states, userId } = useSocket();
+	const [selectedCategory, setSelectedCategory] = useState<string>('');
+	const params = useParams();
 
-  const groupedChannels = useMemo(() => {
-    const grouped = channels?.reduce((acc: Channel[], channel) => {
-      const category = acc.find((c) => c.channel_type === channel.channel_type);
-      if (category) {
-        category.channels.push(channel);
-      } else {
-        acc.push({
-          category_id: channel.category_id,
-          category_name: channel.category_name,
-          channels: [channel],
-          channel_id: channel.channel_id,
-          channel_name: channel.channel_name,
-          channel_type: channel.channel_type,
-        });
-      }
-      return acc;
-    }, []);
+	const groupedChannels = useMemo(() => {
+		const grouped = channels?.reduce((acc: Channel[], channel) => {
+			const category = acc.find((c) => c.channel_type === channel.channel_type);
+			if (category) {
+				category.channels.push(channel);
+			} else {
+				acc.push({
+					category_id: channel.category_id,
+					category_name: channel.category_name,
+					channels: [channel],
+					channel_id: channel.channel_id,
+					channel_name: channel.channel_name,
+					channel_type: channel.channel_type,
+				});
+			}
+			return acc;
+		}, []);
 
-    return grouped?.sort((a, b) => {
-      if (a.channel_type === "text" && b.channel_type !== "text") {
-        return -1;
-      } else if (a.channel_type !== "text" && b.channel_type === "text") {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-  }, [channels]);
+		return grouped?.sort((a, b) => {
+			if (a.channel_type === 'text' && b.channel_type !== 'text') {
+				return -1;
+			} else if (a.channel_type !== 'text' && b.channel_type === 'text') {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+	}, [channels]);
 
-  useEffect(() => {
-    const channel = channels.find((c) => c.channel_id === params.channel_id);
-    setServerStates((prev) => ({
-      ...prev,
-      selectedChannel: channel || null,
-    }));
-  }, [params.channel_id]);
+	useEffect(() => {
+		const channel = channels.find((c) => c.channel_id === params.channel_id);
+		setServerStates((prev) => ({
+			...prev,
+			selectedChannel: channel || null,
+		}));
+	}, [params.channel_id]);
+		const serverOwnerId = server?.owner_id;
 
-  return (
+	return (
 		<div className='text-gray-2'>
 			{groupedChannels?.map((channel) => (
 				<div className='my-4' key={channel?.category_id}>
@@ -92,14 +93,17 @@ export default function ChannelList({
 								{channel?.category_name} channel
 							</h3>
 						</div>
-						<CreateChannelModals
-							serverId={server?.id!}
-							type={channel?.channel_type}
-						>
-							<button title='create channel'>
-								<Plus size={18} />
-							</button>
-						</CreateChannelModals>
+						{(serverOwnerId === userId ||
+					(states.user_roles && states.user_roles.manage_channel)) &&  (
+								<CreateChannelModals
+									serverId={server?.id!}
+									type={channel?.channel_type}
+								>
+									<button title='create channel'>
+										<Plus size={18} />
+									</button>
+								</CreateChannelModals>
+							)}
 					</div>
 					<ul
 						className={cn(

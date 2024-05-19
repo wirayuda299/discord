@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import { Member } from "@/types/server";
 
 export default function MemberItem({

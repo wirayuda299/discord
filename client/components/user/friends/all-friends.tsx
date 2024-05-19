@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import useFetch from "@/hooks/useFetch";
 import { getFriendList } from "@/helper/friends";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import {
   DropdownMenu,
   DropdownMenuContent,

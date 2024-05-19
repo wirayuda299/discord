@@ -6,7 +6,7 @@ import { useSWRConfig } from "swr";
 import { getPendingInvitation } from "@/helper/user";
 import useFetch from "@/hooks/useFetch";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import { getCreatedDate } from "@/utils/createdDate";
 import { cancelInvitation } from "@/actions/invitation";
 import { createError } from "@/utils/error";

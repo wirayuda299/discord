@@ -160,4 +160,23 @@ export class RolesService {
       throw error;
     }
   }
+
+  async getCurrentUserRole(userId: string, serverId: string) {
+    try {
+      const role = await this.db.pool.query(
+        `
+        select * from role_permissions as rp
+        join roles as r on r.id = rp.role_id 
+        join permissions as p on p.id = rp.permission_id 
+        join user_roles as ur on ur.role_id = r.id 
+        where ur.user_id = $1 and r.server_id = $2
+      `,
+        [userId, serverId]
+      );
+
+      return role.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
 }

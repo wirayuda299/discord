@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "../ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import UserAccount from "../settings/user-account";
 import EditProfile from "../settings/edit-profile";
 import { settings } from "@/constants/settings";

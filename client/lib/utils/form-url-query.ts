@@ -22,16 +22,3 @@ export const formUrlQuery = (
     );
   }
 };
-export const deleteQuery = (params: string, key: string) => {
-  const currentUrl = queryString.parse(params as string);
-
-  queryString.exclude(window.location.pathname, (name) => name === key);
-
-  return queryString.stringifyUrl(
-    {
-      url: window.location.pathname,
-      query: currentUrl,
-    },
-    { skipNull: true },
-  );
-};

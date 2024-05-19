@@ -3,7 +3,7 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 import type { ReadonlyURLSearchParams } from "next/dist/client/components/navigation.react-server";
 
 import { Message } from "@/types/messages";
-import { formUrlQuery } from "./form-url-query";
+import { formUrlQuery } from "../lib/utils/form-url-query";
 import { ServerStates } from "@/providers/server";
 
 export function addLabelsToMessages(messages: Message[]) {

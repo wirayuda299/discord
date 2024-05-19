@@ -2,7 +2,7 @@ import Image from "next/image";
 import { FieldValues, Path, PathValue, UseFormReturn } from "react-hook-form";
 
 import { channelTypes } from "@/constants/channel-type";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 
 export default function ChannelTypeItem<T extends FieldValues>({
   value,

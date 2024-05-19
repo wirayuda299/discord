@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 import UserUpdateForm from "@/components/user/user-update-form";
 import { getUserById } from "@/helper/user";
 import { getServerProfile } from "@/helper/server";

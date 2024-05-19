@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/services/messages/messages.service';
+import { RolesService } from 'src/services/roles/roles.service';
 import { ThreadsService } from 'src/services/threads/threads.service';
 
 type PayloadTypes = {
@@ -41,7 +42,8 @@ export class SocketGateway implements OnModuleInit {
 
   constructor(
     private messages: MessagesService,
-    private threadService: ThreadsService
+    private threadService: ThreadsService,
+    private roles: RolesService
   ) {}
 
   onModuleInit() {
@@ -210,5 +212,17 @@ export class SocketGateway implements OnModuleInit {
       payload.userId
     );
     this.server.emit('set-personal-messages', messages);
+  }
+
+  @SubscribeMessage('member-roles')
+  async getMemberRole(
+    @MessageBody() payload: { userId: string; serverId: string }
+  ) {
+    this.logger.log(payload);
+    const role = await this.roles.getCurrentUserRole(
+      payload.userId,
+      payload.serverId
+    );
+    this.server.emit('set-current-user-role', role);
   }
 }

@@ -1,18 +1,8 @@
+import { Permission } from "@/types/server";
 import { getCookies } from "./cookies";
 
 const serverUrl = process.env.SERVER_URL;
-type Permission = {
-  role_id: string;
-  permission_id: string;
-  id: string;
-  manage_channel: boolean;
-  manage_role: boolean;
-  kick_member: boolean;
-  ban_member: boolean;
-  attach_file: boolean;
-  manage_thread: boolean;
-  manage_message: boolean;
-};
+
 export interface Role {
   id: string;
   name: string;

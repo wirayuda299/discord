@@ -30,13 +30,45 @@ export type Servers = {
   settings: Settings;
 };
 
-export type Member = {
+interface UserRole {
+  role_id: string;
+  permission_id: string;
   id: string;
+  name: string;
   server_id: string;
+  role_color: string;
+  icon: string;
+  icon_asset_id: string;
+  manage_channel: boolean;
+  manage_role: boolean;
+  kick_member: boolean;
+  ban_member: boolean;
+  attach_file: boolean;
+  manage_thread: boolean;
+  manage_message: boolean;
   user_id: string;
-  role: string;
-  username: string;
-  avatar_asset_id: string | null;
-  bio: string | null;
-  avatar: string;
+}
+export type Member = {
+	id: string;
+	server_id: string;
+	user_id: string;
+	role: UserRole;
+	username: string;
+	avatar_asset_id: string | null;
+	bio: string | null;
+	avatar: string;
+};
+
+
+export type Permission = {
+	role_id: string;
+	permission_id: string;
+	id: string;
+	manage_channel: boolean;
+	manage_role: boolean;
+	kick_member: boolean;
+	ban_member: boolean;
+	attach_file: boolean;
+	manage_thread: boolean;
+	manage_message: boolean;
 };

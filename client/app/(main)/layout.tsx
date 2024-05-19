@@ -13,7 +13,7 @@ export default async function MainLayout({
 			<div className='flex h-screen w-full overflow-hidden'>
 				<Suspense
 					fallback={
-						<div className='bg-foreground h-screen min-w-[80px] max-w-[80px] animate-pulse'></div>
+						<div className='h-screen min-w-[80px] max-w-[80px] animate-pulse bg-foreground'></div>
 					}
 				>
 					<Sidebar />

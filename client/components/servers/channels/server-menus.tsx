@@ -1,46 +1,42 @@
-import { Ellipsis, Pencil, Plus, UserRoundPlus } from "lucide-react";
+import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
 
-import { useServerContext } from "@/providers/server";
+import { useServerContext } from '@/providers/server';
 
 import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
-import CreateChannelModals from "@/components/servers/channels/create-channel-modal";
-import UserSettingsModals from "@/components/user/user-settings";
-import ServerSetting from "@/components/servers/settings/server-setting";
-import AddUser from "@/components/servers/add-user";
+	DropdownMenu,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+} from '@/components/ui/dropdown-menu';
+import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
+import UserSettingsModals from '@/components/user/user-settings';
+import ServerSetting from '@/components/servers/settings/server-setting';
+import AddUser from '@/components/servers/add-user';
+import { Servers } from '@/types/server';
+import useSocket from '@/hooks/useSocket';
 
-export default function ServerMenu({
-  serverName,
-  serverId,
-}: {
-  serverName: string;
-  serverId: string;
-}) {
-  const { setServerStates, serversState } = useServerContext();
-  if (!serverName) return null;
+export default function ServerMenu({ server }: { server: Servers }) {
+	const { setServerStates, serversState } = useServerContext();
+	const { states, userId } = useSocket();
+	const handleClick = (setting: string) => {
+		setServerStates((prev) => ({
+			...prev,
+			selectedSetting: setting,
+			selectedOption: 'server',
+		}));
+	};
+	const serverOwnerId = server.owner_id;
 
-  const handleClick = (setting: string) => {
-    setServerStates((prev) => ({
-      ...prev,
-      selectedSetting: setting,
-      selectedOption: "server",
-    }));
-  };
-
-  return (
+	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<div className='border-foreground text-gray-2 sticky  top-0 z-10 hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 bg-black px-2 text-base font-semibold md:!flex md:bg-[#2b2d31]'>
-					<p className='truncate text-wrap'>{serverName ?? ''}</p>
-					<Ellipsis className='text-gray-2 cursor-pointer' size={18} />
+				<div className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
+					<p className='truncate text-wrap'>{server.name ?? ''}</p>
+					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
 				</div>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className=' flex w-full min-w-[240px] flex-col gap-3 rounded border-none bg-black p-2 text-white shadow-none'>
-				<DropdownMenuItem className='border-b-foreground text-gray-2 hover:!bg-primary flex cursor-pointer items-center justify-between border-b !bg-black text-xs font-semibold capitalize hover:!text-white'>
+				<DropdownMenuItem className='flex cursor-pointer items-center justify-between border-b border-b-foreground !bg-black text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
 					<span>server boost</span>
 					<svg
 						aria-hidden='true'
@@ -60,7 +56,7 @@ export default function ServerMenu({
 					</svg>
 				</DropdownMenuItem>
 				<AddUser>
-					<DropdownMenuItem className='hover:!bg-primary group flex cursor-pointer items-center justify-between !bg-black text-xs font-semibold capitalize !text-[#878ee0] hover:!text-white'>
+					<DropdownMenuItem className='group flex cursor-pointer items-center justify-between !bg-black text-xs font-semibold capitalize !text-[#878ee0] hover:!bg-primary hover:!text-white'>
 						<span>invite people</span>
 						<UserRoundPlus
 							size={20}
@@ -68,7 +64,7 @@ export default function ServerMenu({
 						/>
 					</DropdownMenuItem>
 				</AddUser>
-				{serversState.selectedServer && (
+				{serversState.selectedServer && server.owner_id ===userId && (
 					<ServerSetting
 						banner={serversState.selectedServer.banner}
 						bannerAssetId={serversState.selectedServer.banner_asset_id}
@@ -81,21 +77,25 @@ export default function ServerMenu({
 						logo={serversState.selectedServer?.logo || ''}
 						logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
 						name={serversState.selectedServer?.name || ''}
-						serverId={serverId}
+						serverId={server.id}
 					/>
 				)}
-				<CreateChannelModals serverId={serverId} type='text'>
-					<div className='text-gray-2 hover:!bg-primary group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize hover:!text-white'>
-						<span>create channel </span>
-						<div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
-							<Plus size={15} className='text-gray-1 ' />
+				{(serverOwnerId === userId ||
+					(states.user_roles && states.user_roles.manage_channel)) && (
+					<CreateChannelModals serverId={server.id} type='text'>
+						<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
+							<span>create channel </span>
+							<div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
+								<Plus size={15} className='text-gray-1 ' />
+							</div>
 						</div>
-					</div>
-				</CreateChannelModals>
+					</CreateChannelModals>
+				)}
+
 				<UserSettingsModals>
 					<div
 						onClick={() => handleClick('profiles')}
-						className='text-gray-2 hover:!bg-primary group !flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize hover:!text-white'
+						className='group !flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'
 					>
 						<span>edit server profile </span>
 						<Pencil size={18} className='text-gray-2 group-hover:text-white' />

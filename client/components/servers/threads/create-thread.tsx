@@ -5,8 +5,8 @@ import { ReactNode, Suspense, useState } from "react";
 import type { Socket } from "socket.io-client";
 
 import { Message } from "@/types/messages";
-import { cn } from "@/lib/utils";
-import { formUrlQuery } from "@/utils/form-url-query";
+import { cn } from "@/lib/utils/mergeStyle";
+import { formUrlQuery } from "@/lib/utils/form-url-query";
 import { useServerContext } from "@/providers/server";
 
 import ChatForm from "../../shared/messages/chat-form";

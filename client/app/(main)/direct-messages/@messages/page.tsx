@@ -1,5 +1,5 @@
 import ChatList from "@/components/shared/messages/chat-list";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/mergeStyle";
 
 type Props = {
   searchParams: {
