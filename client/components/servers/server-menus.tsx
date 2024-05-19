@@ -14,11 +14,12 @@ import ServerSetting from '@/components/servers/settings/server-setting';
 import AddUser from '@/components/servers/add-user';
 import { Servers } from '@/types/server';
 import useSocket from '@/hooks/useSocket';
+import RolesModal from './settings/roles/rolesModal';
 
 export default function ServerMenu({ server }: { server: Servers }) {
 	const { setServerStates, serversState } = useServerContext();
 	const { states, userId } = useSocket();
-	
+
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
 			...prev,
@@ -30,7 +31,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger  asChild>
+			<DropdownMenuTrigger asChild>
 				<button className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
 					<p className='truncate text-wrap'>{server.name ?? ''}</p>
 					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
@@ -79,6 +80,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 						logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
 						name={serversState.selectedServer?.name || ''}
 						serverId={server.id}
+						serverAuthor={server.owner_id}
 					/>
 				)}
 				{(serverOwnerId === userId ||
@@ -96,7 +98,10 @@ export default function ServerMenu({ server }: { server: Servers }) {
 						</div>
 					</CreateChannelModals>
 				)}
-
+				{(serverOwnerId === userId ||
+					(states.user_roles && states.user_roles.manage_role)) && (
+					<RolesModal serverId={server.id} serverAuthor={server.owner_id} />
+				)}
 				<UserSettingsModals>
 					<div
 						onClick={() => handleClick('profiles')}

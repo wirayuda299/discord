@@ -16,7 +16,9 @@ export async function createRole(
 	manageChannel: boolean = false,
 	manageMessage: boolean = false,
 	manageRole: boolean = false,
-	manageThread: boolean = false
+	manageThread: boolean = false,
+	userId: string,
+	serverAuthor:string
 ) {
 	try {
 		await api.post('/roles/create', {
@@ -32,6 +34,8 @@ export async function createRole(
 			manage_message: manageMessage,
 			manage_role: manageRole,
 			manage_thread: manageThread,
+			userId,
+			serverAuthor,
 		});
 	} catch (error) {
 		throw error;

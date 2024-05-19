@@ -73,6 +73,8 @@ export class RolesController {
       manage_message,
       manage_role,
       manage_thread,
+      userId,
+      serverAuthor,
     } = req.body;
 
     return this.roleService.createRole(
@@ -87,7 +89,9 @@ export class RolesController {
       manage_channel,
       manage_message,
       manage_role,
-      manage_thread
+      manage_thread,
+      userId,
+      serverAuthor
     );
   }
   @Delete('/remove-role')

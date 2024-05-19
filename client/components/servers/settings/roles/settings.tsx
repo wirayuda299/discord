@@ -28,6 +28,7 @@ import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
 
 import MemberWithRole from './MemberWithRole';
+import { useAuth } from '@clerk/nextjs';
 
 const schema = z.object({
 	name: z.string().min(4).max(20),
@@ -51,7 +52,9 @@ type Props = {
 	roles: Role[];
 	selectedTab: string;
 	serverId: string;
+	serverAuthor: string;
 	type: 'create' | 'update' | null;
+	styles?: string;
 };
 
 export default function RolesSettings({
@@ -63,8 +66,11 @@ export default function RolesSettings({
 	serverId,
 	selectType,
 	selectedTab,
+	styles,
+	serverAuthor,
 }: Props) {
 	const { mutate } = useSWRConfig();
+	const { userId } = useAuth();
 	const form = useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -90,6 +96,8 @@ export default function RolesSettings({
 
 	const onSubmit = async (data: z.infer<typeof schema>) => {
 		let media = null;
+		if (!userId) return 
+		
 		try {
 			if (files && files.icon) {
 				const [, file] = await Promise.all([
@@ -126,7 +134,9 @@ export default function RolesSettings({
 					manage_channel,
 					manage_message,
 					manage_role,
-					manage_thread
+					manage_thread,
+					userId!!,
+					serverAuthor
 				);
 			}
 
@@ -192,17 +202,18 @@ export default function RolesSettings({
 	}, [selectedRole, type]);
 
 	return (
-		<div className='flex w-full gap-3'>
-			<aside className='size-full min-h-screen max-w-52 border-r border-r-foreground'>
-				<header className='flex justify-between p-1'>
+		<div className={cn('flex w-full gap-3 overflow-y-auto', styles)}>
+			<aside className=' size-full max-h-screen  min-h-screen     max-w-52 overflow-y-auto border-r border-r-foreground'>
+				<header className='flex w-full justify-between p-1'>
 					<button
 						onClick={() => {
 							selectRole(null);
 							selectType(null);
 						}}
-						className='flex items-center gap-3'
+						className='flex items-center gap-3 text-gray-2'
 					>
-						<ArrowLeft /> <span className='text-base font-semibold'>Back</span>
+						<ArrowLeft className='text-gray-2' />{' '}
+						<span className='text-base font-semibold'>Back</span>
 					</button>
 					<button
 						onClick={() => {
@@ -210,16 +221,16 @@ export default function RolesSettings({
 							selectType('create');
 						}}
 					>
-						<Plus size={18} />
+						<Plus className='text-gray-2' size={18} />
 					</button>
 				</header>
-				<ul className='flex flex-col gap-3 pl-9 pr-4'>
+				<ul className='flex w-full flex-col gap-3 pl-9 pr-4'>
 					{roles.map((role) => (
 						<li
 							onClick={() => selectRole(role)}
 							key={role.name}
 							className={cn(
-								'text-sm hover:bg-background hover:brightness-110 font-medium capitalize py-2 rounded flex items-center gap-2 cursor-pointer',
+								'text-sm hover:bg-background hover:brightness-110 font-medium capitalize py-2 rounded flex items-center text-gray-2 gap-2 cursor-pointer',
 								selectedRole?.name === role.name &&
 									'bg-background brightness-110'
 							)}
@@ -233,8 +244,8 @@ export default function RolesSettings({
 					))}
 				</ul>
 			</aside>
-			<div className='w-full'>
-				<h4 className='text-lg font-medium uppercase'>
+			<div className='size-full max-h-screen overflow-y-auto pb-16'>
+				<h4 className='text-lg font-medium uppercase text-gray-2'>
 					{type === 'create'
 						? 'Create role'
 						: `Edit Role -- ${selectedRole?.name}`}
@@ -244,7 +255,7 @@ export default function RolesSettings({
 						<li
 							onClick={() => selectTab(tab)}
 							className={cn(
-								'cursor-pointer text-base transition-colors ease duration-300 font-normal capitalize hover:text-primary',
+								'cursor-pointer text-base transition-colors ease duration-300 font-normal capitalize hover:text-primary text-gray-2',
 								selectedTab === tab && 'text-primary',
 								type === 'create' && tab === 'manage members' && 'hidden'
 							)}
@@ -257,7 +268,7 @@ export default function RolesSettings({
 				{selectedTab !== 'manage members' ? (
 					<Form {...form}>
 						<form
-							className=' mt-5 space-y-5 '
+							className=' mt-5 h-full space-y-5 '
 							onSubmit={form.handleSubmit(onSubmit)}
 						>
 							{selectedTab === 'display' && (
@@ -267,14 +278,14 @@ export default function RolesSettings({
 										control={form.control}
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>
+												<FormLabel className='text-gray-2'>
 													Role name <span className='text-red-700'>*</span>
 												</FormLabel>
 												<FormControl>
 													<Input
 														{...field}
 														placeholder='Role name'
-														className='border-none bg-foreground  ring-offset-transparent focus:shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-transparent'
+														className='border-none bg-foreground text-gray-2  ring-offset-transparent focus:shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-transparent'
 													/>
 												</FormControl>
 											</FormItem>
@@ -286,7 +297,7 @@ export default function RolesSettings({
 										control={form.control}
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>
+												<FormLabel className='text-gray-2'>
 													Role color <span className='text-red-700'>*</span>
 												</FormLabel>
 												<FormDescription className='text-gray-2'>
@@ -329,8 +340,8 @@ export default function RolesSettings({
 										name='icon'
 										control={form.control}
 										render={() => (
-											<FormItem>
-												<FormLabel>Role icon</FormLabel>
+											<FormItem className='flex flex-col gap-5'>
+												<FormLabel className='text-gray-2'>Role icon</FormLabel>
 												<FormDescription className='text-gray-2'>
 													Upload an image under 256 KB or pick a custom emoji
 													from this server. We recommend at least 64x64 pixels.
@@ -355,7 +366,7 @@ export default function RolesSettings({
 															)}
 															<FormLabel
 																htmlFor='icon'
-																className='h-9 w-32 rounded border p-2 text-center'
+																className='h-9 w-32 rounded border p-2 text-center text-gray-2'
 															>
 																{icon || (preview && preview.icon)
 																	? 'Change Image'
@@ -399,7 +410,7 @@ export default function RolesSettings({
 																	alt='role icon'
 																/>
 															)}
-															<span className='text-xs font-light'>
+															<span className='text-xs font-light text-gray-2'>
 																Today at 12.00 am
 															</span>
 														</div>
@@ -420,7 +431,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Manage channels</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Manage channels
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -440,7 +453,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Manage role</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Manage role
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -460,7 +475,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Ban member</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Ban member
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -480,7 +497,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Kick member</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Kick member
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -500,7 +519,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Attach file</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Attach file
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -520,7 +541,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Manage thread</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Manage thread
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -540,7 +563,9 @@ export default function RolesSettings({
 										render={({ field }) => (
 											<FormItem>
 												<div className='flex justify-between'>
-													<FormLabel>Manage messages</FormLabel>
+													<FormLabel className='text-gray-2'>
+														Manage messages
+													</FormLabel>
 													<FormControl>
 														<Switch
 															checked={field.value}
@@ -568,7 +593,7 @@ export default function RolesSettings({
 					</Form>
 				) : (
 					type !== 'create' && (
-							<MemberWithRole serverId={serverId }  selectedRole={selectedRole} />
+						<MemberWithRole serverId={serverId} selectedRole={selectedRole} />
 					)
 				)}
 			</div>

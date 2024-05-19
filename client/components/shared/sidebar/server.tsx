@@ -5,7 +5,7 @@ import Image from "next/image";
 
 import ChannelList from "@/components/servers/channels/list";
 import { Servers } from "@/types/server";
-import ServerMenu from "@/components/servers/channels/server-menus";
+import ServerMenu from "@/components/servers/server-menus";
 import ChannelDrawerMobile from "@/components/servers/channels/ChannelMobile";
 import { Channel } from "@/types/channels";
 

@@ -1,9 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class RolesService {
   constructor(private db: DatabaseService) {}
+
+  async isAllowedToCreateRole(serverId: string, userId: string) {
+    const isallowed = await this.db.pool.query(
+      `SELECT p.manage_channel
+        FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        JOIN user_roles ur ON rp.role_id = ur.role_id
+        JOIN members m ON ur.user_id = m.user_id
+        WHERE m.user_id = $1
+        AND m.server_id = $2
+        AND p.manage_role = true`,
+      [serverId, userId]
+    );
+    return isallowed.rows;
+  }
 
   async createRole(
     color: string = '#99aab5',
@@ -17,9 +32,20 @@ export class RolesService {
     manage_channel: boolean = false,
     manage_message: boolean = false,
     manage_role: boolean = false,
-    manage_thread: boolean = false
+    manage_thread: boolean = false,
+    userId: string,
+    serverAuthor: string
   ) {
     try {
+      const isAllowed = await this.isAllowedToCreateRole(serverId, userId);
+
+      if (isAllowed.length < 1 || userId !== serverAuthor) {
+        throw new HttpException(
+          'You are not allowed to create role',
+          HttpStatus.FORBIDDEN
+        );
+      }
+
       await this.db.pool.query(`begin`);
       const {
         rows: [role],

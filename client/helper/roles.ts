@@ -20,6 +20,7 @@ const prepareHeaders = async () => {
     Cookie: await getCookies(),
   };
 };
+
 export async function getAllRoles(serverId: string): Promise<Role[]> {
   try {
     const res = await fetch(
@@ -36,6 +37,7 @@ export async function getAllRoles(serverId: string): Promise<Role[]> {
     throw error;
   }
 }
+
 export async function updateRole(
   color: string = "#99aab5",
   name: string = "new role",
