@@ -1,18 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { MoveLeft } from 'lucide-react';
 import Image from 'next/image';
 import { Suspense, memo, useRef } from 'react';
 
 import { cn } from '@/lib/utils/mergeStyle';
 
-import ChanelInfo from '@/components/servers/channels/channel-info';
-import Thread from './threads';
-import NotificationSettings from './notification-settings';
-import PinnedMessage from '@/components/shared/messages/pinned-message';
-import Inbox from './inbox';
-import MemberSheet from '../members/members';
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
 import SearchForm from './search-form';
@@ -21,6 +16,13 @@ import useSwipe from '@/hooks/useSwipe';
 import useSocket from '@/hooks/useSocket';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
+
+const Inbox = dynamic(() => import('./inbox'), {ssr: false});
+const PinnedMessage = dynamic(() => import('@/components/shared/messages/pinned-message'),{ssr: false});
+const MemberSheet = dynamic(() => import('../members/members'), { ssr: false });
+const NotificationSettings = dynamic(() => import('./notification-settings'), {ssr: false});
+const Thread = dynamic(() => import('./threads'), { ssr: false });
+const ChanelInfo = dynamic(() => import('@/components/servers/channels/channel-info'),{ ssr: false });
 
 function SelectedChannel() {
 	const ref = useRef<HTMLUListElement>(null);
@@ -41,7 +43,7 @@ function SelectedChannel() {
 			onTouchMove={onTouchMove}
 			onTouchEnd={onTouchEnd}
 			className={cn(
-				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background  w-full',
+				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background w-full',
 				serversState.selectedChannel ? 'right-0' : '-right-full'
 			)}
 		>
