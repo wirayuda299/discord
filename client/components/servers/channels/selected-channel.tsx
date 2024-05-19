@@ -41,7 +41,7 @@ function SelectedChannel() {
 			onTouchMove={onTouchMove}
 			onTouchEnd={onTouchEnd}
 			className={cn(
-				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 h-screen overflow-y-auto overflow-x-hidden bg-black md:bg-background  w-full',
+				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background  w-full',
 				serversState.selectedChannel ? 'right-0' : '-right-full'
 			)}
 		>
