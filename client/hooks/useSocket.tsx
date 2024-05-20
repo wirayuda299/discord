@@ -12,14 +12,14 @@ const intialValues = {
 	channel_messages: [] as Message[],
 	personal_messages: [] as Message[],
 	thread_messages: [] as Message[],
-	user_roles: {},
+	user_roles:{},
 };
 
 export default function useSocket() {
-	const { socket } = useSocketContext();
-	const params = useParams();
 	const { userId } = useAuth();
 	const searchParams = useSearchParams();
+	const params = useParams();
+	const { socket } = useSocketContext();
 	const [states, dispatch] = useReducer(socketReducer, intialValues);
 
 	const reloadChannelMessage = useCallback(
@@ -34,12 +34,12 @@ export default function useSocket() {
 		[socket]
 	);
 
-	const reloadPersonalMessage = () => {
+	const reloadPersonalMessage = useCallback(() => {
 		socket?.emit('personal-message', {
 			userId: searchParams.get('chat'),
 			conversationId: searchParams.get('conversationId'),
 		});
-	};
+	}, [searchParams, socket]);
 
 	const reloadThreadMessages = (threadId: string) => {
 		if (socket) {
@@ -50,14 +50,14 @@ export default function useSocket() {
 			});
 		}
 	};
-	const getUserRole = (userId: string) => {
+	const getUserRole = useCallback((userId: string) => {
 		if (socket) {
 			socket.emit('member-roles', {
 				serverId: params.id as string,
 				userId,
 			});
 		}
-	};
+	}, [params.id, socket]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -88,7 +88,7 @@ export default function useSocket() {
 		socket.on('set-thread-messages', (data) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		});
-	}, [socket, searchParams, params]);
+	}, [socket, searchParams, params, getUserRole, userId, reloadPersonalMessage, reloadChannelMessage]);
 
 	return {
 		reloadChannelMessage,

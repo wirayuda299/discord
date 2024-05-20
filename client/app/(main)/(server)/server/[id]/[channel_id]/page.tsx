@@ -40,6 +40,6 @@ export default async function ChannelId({ searchParams, params }: Props) {
     return <SelectedChannel />;
   }
   if (searchParams.channel_type === "audio") {
-    return <VideoCall room={params.channel_id} />;
+    return <VideoCall room={params.channel_id} serverId={params.id } />;
   }
 }

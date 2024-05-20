@@ -1,27 +1,28 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { useForm } from 'react-hook-form';
+import { useAuth } from '@clerk/nextjs';
+import { toast } from 'sonner';
 
-import { createChannel } from "@/actions/channel";
-import { Button } from "@/components/ui/button";
+import { createChannel } from '@/actions/channel';
+import { Button } from '@/components/ui/button';
 import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from "@/components/ui/form";
-import ChannelTypeItem from "./channel-type";
-import { Input } from "@/components/ui/input";
-import { CreateChannelSchemaType, createChannelSchema } from "@/validations";
-import { createError } from "@/utils/error";
-import { useAuth } from "@clerk/nextjs";
+	Form,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormControl,
+} from '@/components/ui/form';
+import ChannelTypeItem from './channel-type';
+import { Input } from '@/components/ui/input';
+import { CreateChannelSchemaType, createChannelSchema } from '@/validations';
+import { createError } from '@/utils/error';
+import { useCallback } from 'react';
 
 export default function CreateChannelForm({
 	serverId,
-  type,
-  serverAuthor
+	type,
+	serverAuthor,
 }: {
 	serverId: string;
 	type: string;
@@ -35,28 +36,33 @@ export default function CreateChannelForm({
 			name: '',
 		},
 	});
-	async function onSubmit(data: CreateChannelSchemaType) {
-		const { channelType, name } = data;
-    const joinedName = name.split(' ').join('-');
-    if (!userId) return 
-    
-		try {
-			await createChannel(
-				joinedName,
-				serverId,
-				channelType,
-				'/server/' + serverId,
-				userId!!,
-				serverAuthor
-			);
-			form.resetField('name');
-			toast.success('New channel has been created');
-		} catch (error) {
-			createError(error);
-		}
-	}
-	const isValid = form.formState.isValid;
-	const isSubmitting = form.formState.isSubmitting;
+
+	const onSubmit = useCallback(
+		async (data: CreateChannelSchemaType) => {
+			const { channelType, name } = data;
+			const joinedName = name.split(' ').join('-');
+			if (!userId) return;
+
+			try {
+				await createChannel(
+					joinedName,
+					serverId,
+					channelType,
+					'/server/' + serverId,
+					userId,
+					serverAuthor
+				);
+				form.resetField('name');
+				toast.success('New channel has been created');
+			} catch (error) {
+				createError(error);
+			}
+		},
+		[userId, serverId, serverAuthor, form]
+	);
+
+	const { isValid, isSubmitting } = form.formState;
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)}>

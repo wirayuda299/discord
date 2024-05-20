@@ -26,7 +26,10 @@ export default function Roles({
 	serverId: string;
     serverAuthor:string
     styles?: string;
-}) {
+	}) {
+	const { data, isLoading, error } = useFetch('roles', () =>
+		getAllRoles(serverId)
+	);
 	const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 	const [selectedTab, setSelectedTab] = useState<string>('display');
 	const [type, setType] = useState<'create' | 'update' | null>(null);
@@ -34,9 +37,6 @@ export default function Roles({
 	const selectRole = (role: Role | null) => setSelectedRole(role);
 	const selectTab = (tab: string = 'display') => setSelectedTab(tab);
 	const selectType = (type: 'create' | 'update' | null) => setType(type);
-	const { data, isLoading, error } = useFetch('roles', () =>
-		getAllRoles(serverId)
-	);
 
 	if (isLoading) return <GeneralLoader />;
 	if (error) return <p>{error.message}</p>;

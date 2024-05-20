@@ -4,7 +4,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { MoveLeft } from 'lucide-react';
 import Image from 'next/image';
-import { Suspense, memo, useRef } from 'react';
+import { Suspense, memo, useCallback, useMemo, useRef } from 'react';
 
 import { cn } from '@/lib/utils/mergeStyle';
 
@@ -12,17 +12,24 @@ import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
 import SearchForm from './search-form';
 import { useServerContext } from '@/providers/server';
-import useSwipe from '@/hooks/useSwipe';
 import useSocket from '@/hooks/useSocket';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
 
-const Inbox = dynamic(() => import('./inbox'), {ssr: false});
-const PinnedMessage = dynamic(() => import('@/components/shared/messages/pinned-message'),{ssr: false});
+const Inbox = dynamic(() => import('./inbox'), { ssr: false });
+const PinnedMessage = dynamic(
+	() => import('@/components/shared/messages/pinned-message'),
+	{ ssr: false }
+);
 const MemberSheet = dynamic(() => import('../members/members'), { ssr: false });
-const NotificationSettings = dynamic(() => import('./notification-settings'), {ssr: false});
+const NotificationSettings = dynamic(() => import('./notification-settings'), {
+	ssr: false,
+});
 const Thread = dynamic(() => import('./threads'), { ssr: false });
-const ChanelInfo = dynamic(() => import('@/components/servers/channels/channel-info'),{ ssr: false });
+const ChanelInfo = dynamic(
+	() => import('@/components/servers/channels/channel-info'),
+	{ ssr: false }
+);
 
 function SelectedChannel() {
 	const ref = useRef<HTMLUListElement>(null);
@@ -30,18 +37,21 @@ function SelectedChannel() {
 	const { serversState, setServerStates } = useServerContext();
 	const { reloadChannelMessage, states, socket, params, searchParams, userId } =
 		useSocket();
-	const { onTouchEnd, onTouchMove, onTouchStart } = useSwipe(setServerStates);
 	const { selectedChannel } = serversState;
 
-	const path = `/server/${params?.id}/${params?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
+	const path = useMemo(
+		() =>
+			`/server/${params?.id}/${params?.channel_id}?channel_type=${selectedChannel?.channel_type}`,
+		[params, selectedChannel]
+	);
 
+	const handleBackClick = useCallback(() => {
+		setServerStates((prev) => ({ ...prev, selectedChannel: null }));
+	}, [setServerStates]);
 	useScroll(ref, states.channel_messages);
 
 	return (
 		<div
-			onTouchStart={onTouchStart}
-			onTouchMove={onTouchMove}
-			onTouchEnd={onTouchEnd}
 			className={cn(
 				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background w-full',
 				serversState.selectedChannel ? 'right-0' : '-right-full'
@@ -50,14 +60,10 @@ function SelectedChannel() {
 			<header className='flex min-h-14 w-full items-center justify-between border-b-2 border-b-foreground p-2 '>
 				<div className='flex items-center gap-3'>
 					<Link
+						aria-label='Go back'
 						href={'/server/' + params.id}
 						className='block md:hidden'
-						onClick={() => {
-							setServerStates((prev) => ({
-								...prev,
-								selectedChannel: null,
-							}));
-						}}
+						onClick={handleBackClick}
 					>
 						<MoveLeft className='text-gray-2' />
 					</Link>
