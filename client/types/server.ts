@@ -56,7 +56,8 @@ export type Member = {
 	username: string;
 	avatar_asset_id: string | null;
 	bio: string | null;
-	avatar: string;
+  avatar: string;
+  serverProfile:ServerProfile
 };
 
 export interface MemberWithRole extends Member {

@@ -5,10 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import { ServersService } from '../servers/servers.service';
 
 @Injectable()
 export class MembersService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private serverService: ServersService
+  ) {}
 
   async isAllowedToKickMember(serverId: string, userId: string) {
     const isallowed = await this.db.pool.query(
@@ -73,7 +77,12 @@ export class MembersService {
       `,
           [member.user_id, serverId]
         );
+        const serverProfile = await this.serverService.getServerProfile(
+          serverId,
+          member.user_id
+        );
         member.role = role.rows[0];
+        member.serverProfile = serverProfile.data;
       }
       return {
         data: members.rows,
@@ -176,6 +185,34 @@ export class MembersService {
         messages: 'Member kicked from server',
         error: false,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async banMember(serverId: string, memberId: string, bannedBy: string) {
+    try {
+      await this.db.pool.query(
+        `insert into banned_members(server_id, member_id, banned_by)
+        values($1, $2, $3)`,
+        [serverId, memberId, bannedBy]
+      );
+      return {
+        message: 'Member banned',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getBannedMembers(serverId: string) {
+    try {
+      const bannedMembers = await this.db.pool.query(
+        `select * from banned_members where server_id = $1`,
+        [serverId]
+      );
+      return bannedMembers.rows;
     } catch (error) {
       throw error;
     }

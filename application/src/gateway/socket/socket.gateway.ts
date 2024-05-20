@@ -241,4 +241,9 @@ export class SocketGateway implements OnModuleInit {
     );
     this.server.emit('set-current-user-role', role);
   }
+  @SubscribeMessage('banned-members')
+  async getBannedMembers(@MessageBody() payload: { serverId: string }) {
+    const members = await this.memberService.getBannedMembers(payload.serverId);
+    this.server.emit('set-banned-members', members);
+  }
 }

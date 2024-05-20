@@ -7,6 +7,7 @@ type AllowedActionType =
   | "PERSONAL_MESSAGES"
   | "THREAD_MESSAGES"
   | 'SET_USER_ROLES'
+  | 'BANNED_MEMBERS'
 
 type ActionType = {
   type: AllowedActionType;
@@ -40,6 +41,11 @@ export function socketReducer(states: SocketStates, action: ActionType) {
       return {
         ...states,
         user_roles: action.payload,
+      };
+    case "BANNED_MEMBERS":
+      return {
+        ...states,
+        banned_members: action.payload,
       };
 
     default:

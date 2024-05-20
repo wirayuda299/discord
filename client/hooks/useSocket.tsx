@@ -1,104 +1,148 @@
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useMemo } from 'react';
 import { socketReducer } from '@/reducer/socket';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-
 import { useSocketContext } from '@/providers/socket-io';
 import { Permission } from '@/types/server';
-import { SocketStates } from '@/types/socket-states';
+import { BannedMembers, SocketStates } from '@/types/socket-states';
 
-const intialValues: SocketStates = {
+const initialValues: SocketStates = {
 	active_users: [] as string[],
 	channel_messages: [],
 	personal_messages: [],
 	thread_messages: [],
 	user_roles: null,
+	banned_members: [],
 };
 
 export default function useSocket() {
 	const { userId } = useAuth();
 	const searchParams = useSearchParams();
-	const params = useParams();
+	const { id: serverId, channel_id: channelId } = useParams();
 	const { socket } = useSocketContext();
-	const [states, dispatch] = useReducer(socketReducer, intialValues);
+	const [states, dispatch] = useReducer(socketReducer, initialValues);
+
+	const chat = useMemo(() => searchParams.get('chat'), [searchParams]);
+	const conversationId = useMemo(
+		() => searchParams.get('conversationId'),
+		[searchParams]
+	);
 
 	const reloadChannelMessage = useCallback(
 		(channelId: string, serverId: string) => {
 			if (socket) {
-				socket?.emit('get-channel-message', {
-					channelId,
-					serverId,
-				});
+				socket.emit('get-channel-message', { channelId, serverId });
 			}
 		},
 		[socket]
 	);
 
 	const reloadPersonalMessage = useCallback(() => {
-		socket?.emit('personal-message', {
-			userId: searchParams.get('chat'),
-			conversationId: searchParams.get('conversationId'),
-		});
-	}, [searchParams, socket]);
-
-	const reloadThreadMessages = (threadId: string) => {
-		if (socket) {
-			socket.emit('thread-messages', {
-				threadId,
-				serverId: params.id as string,
-				channelId: params.channel_id,
+		if (socket && chat && conversationId) {
+			socket.emit('personal-message', {
+				userId: chat,
+				conversationId,
 			});
 		}
-	};
+	}, [socket, chat, conversationId]);
+
+	const reloadThreadMessages = useCallback(
+		(threadId: string) => {
+			if (socket && serverId && channelId) {
+				socket.emit('thread-messages', {
+					threadId,
+					serverId,
+					channelId,
+				});
+			}
+		},
+		[socket, serverId, channelId]
+	);
+
 	const getUserRole = useCallback(
 		(userId: string) => {
-			if (socket) {
+			if (socket && serverId) {
 				socket.emit('member-roles', {
-					serverId: params.id as string,
+					serverId,
 					userId,
 				});
 			}
 		},
-		[params.id, socket]
+		[socket, serverId]
 	);
+
+	const getBannedMembers = useCallback(() => {
+		if (socket && serverId) {
+			socket.emit('banned-members', {
+				serverId,
+			});
+		}
+	}, [socket, serverId]);
 
 	useEffect(() => {
 		if (!socket) return;
 
-		if (searchParams.get('chat')) {
-			reloadPersonalMessage();
-			socket.on('set-personal-messages', (messages) => {
-				dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
-			});
-		}
+		const handlePersonalMessages = (messages: any) => {
+			dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
+		};
 
-		if (params.channel_id && params.id) {
-			reloadChannelMessage(params.channel_id as string, params.id as string);
+		const handleChannelMessages = (data: any) => {
+			dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
+		};
 
-			socket.on('set-message', (data) => {
-				dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
-			});
-		}
+		const handleBannedMembers = (data: BannedMembers[]) => {
+			dispatch({ type: 'BANNED_MEMBERS', payload: data });
+		};
 
-		socket.on('set-active-users', (data) => {
+		const handleActiveUsers = (data: any) => {
 			dispatch({ type: 'ACTIVE_USERS', payload: data });
-		});
-		getUserRole(userId!);
-		socket.on('set-current-user-role', (data: Permission) => {
-			dispatch({ type: 'SET_USER_ROLES', payload: data as Permission });
-		});
+		};
 
-		socket.on('set-thread-messages', (data) => {
+		const handleCurrentUserRole = (data: Permission) => {
+			dispatch({ type: 'SET_USER_ROLES', payload: data });
+		};
+
+		const handleThreadMessages = (data: any) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
-		});
+		};
+
+		if (chat) {
+			reloadPersonalMessage();
+			socket.on('set-personal-messages', handlePersonalMessages);
+		}
+
+		if (channelId && serverId) {
+			reloadChannelMessage(channelId as string, serverId as string);
+			getBannedMembers();
+
+			socket.on('set-message', handleChannelMessages);
+			socket.on('set-banned-members', handleBannedMembers);
+		}
+
+		socket.on('set-active-users', handleActiveUsers);
+		getUserRole(userId!);
+		socket.on('set-current-user-role', handleCurrentUserRole);
+		socket.on('set-thread-messages', handleThreadMessages);
+
+		return () => {
+			socket.off('set-personal-messages', handlePersonalMessages);
+			socket.off('set-message', handleChannelMessages);
+			socket.off('set-banned-members', handleBannedMembers);
+			socket.off('set-active-users', handleActiveUsers);
+			socket.off('set-current-user-role', handleCurrentUserRole);
+			socket.off('set-thread-messages', handleThreadMessages);
+		};
 	}, [
 		socket,
-		searchParams,
-		params,
-		getUserRole,
-		userId,
+		chat,
+		conversationId,
+		channelId,
+		serverId,
 		reloadPersonalMessage,
 		reloadChannelMessage,
+		getBannedMembers,
+		getUserRole,
+		userId,
 	]);
 
 	return {
@@ -111,6 +155,6 @@ export default function useSocket() {
 		socket,
 		userId,
 		getUserRole,
-		params,
+		params: { serverId, channelId },
 	};
 }

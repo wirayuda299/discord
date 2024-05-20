@@ -43,4 +43,9 @@ export class MembersController {
       currentUser
     );
   }
+  @Post('/ban')
+  async banMember(@Req() req: Request) {
+    const { serverId, memberId, bannedBy } = req.body;
+    return await this.memberService.banMember(serverId, memberId, bannedBy);
+  }
 }

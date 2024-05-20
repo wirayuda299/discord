@@ -17,8 +17,25 @@ export async function kickMember(
 			memberId,
 			serverAuthor,
 			currentUser,
-    });
-    revalidate(`/server/${serverId}`)
+		});
+		revalidate(`/server/${serverId}`);
+	} catch (error) {
+		throw error;
+	}
+}
+
+export async function banMember(
+	serverId: string,
+	memberId: string,
+	bannedBy: string
+) {
+	try {
+		await api.post('/members/ban', {
+			serverId,
+			memberId,
+			bannedBy,
+		});
+		revalidate(`/server/${serverId}`);
 	} catch (error) {
 		throw error;
 	}

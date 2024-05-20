@@ -17,7 +17,7 @@ function MemberSheet({
 	serverId: string;
 	userId: string;
 }) {
-	const { states } = useSocket();
+	const { states, socket } = useSocket();
 
 	const { data, error, isLoading } = useFetch('members', () =>
 		getServerMembers(serverId)
@@ -78,6 +78,7 @@ function MemberSheet({
 					) : (
 						data?.map((member) => (
 							<MemberItem
+								socket={socket}
 								currentUser={userId}
 								states={states}
 								ownerId={selectedServer.owner_id}
