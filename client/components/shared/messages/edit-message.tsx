@@ -14,7 +14,6 @@ export default function EditMessageForm({
   currentUser,
   messageAuthor,
   messageId,
-  serverId,
   reloadMessage,
 }: {
   message: string;
@@ -22,7 +21,6 @@ export default function EditMessageForm({
   messageAuthor: string;
   currentUser: string;
   messageId: string;
-  serverId: string;
   reloadMessage: () => void;
 }) {
   const [value, setValue] = useState<string>(message);
@@ -41,7 +39,6 @@ export default function EditMessageForm({
         currentUser,
         messageId,
         value,
-        serverId,
       ).then(() => {
         router.refresh();
         handleClose();

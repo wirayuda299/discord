@@ -146,10 +146,11 @@ export class ServersService {
   async getAllServerCreatedByCurrentUserOrAsMember(ownerId: string) {
     try {
       const servers = await this.databaseService.pool.query(
-        `select name, logo, created_at, updated_at, id, logo_asset_id, invite_code, banner, banner_asset_id from servers
+        `select name, logo, created_at, updated_at, id, logo_asset_id, invite_code, banner, banner_asset_id, owner_id from servers
         where servers.owner_id = $1
         union all
-        select name, logo, created_at, updated_at, servers.id, logo_asset_id, invite_code, banner, banner_asset_id from servers
+        select name, logo, created_at, updated_at, servers.id, logo_asset_id, invite_code, banner, banner_asset_id,owner_id
+         from servers
         join members as m on m.user_id = $1 
         where m.user_id = $1 and m.server_id = servers.id
         order by created_at asc
@@ -158,16 +159,17 @@ export class ServersService {
       );
 
       for (const server of servers.rows) {
-        const serverProfile = await this.databaseService.pool.query(
-          `select * from server_profile where user_id = $1 and server_id = $2`,
-          [ownerId, server.id]
+        const serverProfile = await this.getServerProfile(
+          server.id,
+          server.owner_id
         );
+
         const serverSettings = await this.databaseService.pool.query(
           `select * from server_settings where server_id = $1`,
           [server.id]
         );
         server.settings = serverSettings.rows[0];
-        server.serverProfile = serverProfile.rows[0];
+        server.serverProfile = serverProfile.data;
       }
       return {
         data: servers.rows,
@@ -186,7 +188,9 @@ export class ServersService {
       );
 
       if (server.rows.length < 1) {
-        throw new NotFoundException('Server not found');
+        throw new NotFoundException('Server not found', {
+          description: `Server with ID : ${id} not found`,
+        });
       }
       const channelsQuery = await this.databaseService.pool.query(
         `SELECT 
@@ -285,18 +289,28 @@ export class ServersService {
         `select * from users where id = $1`,
         [userId]
       );
+      const isServerProfileExists = await this.databaseService.pool.query(
+        `select * from server_profile where user_id = $1 and server_id = $2`,
+        [user.rows[0].id, server_id]
+      );
       await this.databaseService.pool.query('begin');
       await this.databaseService.pool.query(
         `INSERT INTO members(server_id, user_id) VALUES($1, $2)
         returning id`,
         [server_id, userId]
       );
-
-      await this.databaseService.pool.query(
-        `insert into server_profile(server_id, user_id, avatar, username)
-        values($1, $2, $3, $4)`,
-        [server_id, user.rows[0].id, user.rows[0].image, user.rows[0].username]
-      );
+      if (isServerProfileExists.rows.length < 1) {
+        await this.databaseService.pool.query(
+          `insert into server_profile(server_id, user_id, avatar, username)
+          values($1, $2, $3, $4)`,
+          [
+            server_id,
+            user.rows[0].id,
+            user.rows[0].image,
+            user.rows[0].username,
+          ]
+        );
+      }
 
       await this.databaseService.pool.query('commit');
       return {

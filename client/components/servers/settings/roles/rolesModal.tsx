@@ -1,8 +1,14 @@
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { User } from "lucide-react";
-import Roles from "./roles";
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { User } from 'lucide-react';
+import Roles from './roles';
 
-export default function RolesModal({ serverId, serverAuthor}: { serverId: string; serverAuthor: string }) {
+export default function RolesModal({
+	serverId,
+	serverAuthor,
+}: {
+	serverId: string;
+	serverAuthor: string;
+}) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -20,4 +26,4 @@ export default function RolesModal({ serverId, serverAuthor}: { serverId: string
 			</DialogContent>
 		</Dialog>
 	);
-};
+}

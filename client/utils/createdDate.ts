@@ -3,7 +3,7 @@ const roundDown = (value: number) => Math.floor(value);
 export const getCreatedDate = (createdAt: Date) => {
   try {
     const now = Date.now();
-    const diff = now - new Date(createdAt).getTime();
+    const diff = now - createdAt.getTime();
 
     const diffInSeconds = diff / 1000;
     const diffInMinutes = diffInSeconds / 60;

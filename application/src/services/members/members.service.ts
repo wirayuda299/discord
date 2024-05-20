@@ -1,9 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class MembersService {
   constructor(private db: DatabaseService) {}
+
+  async isAllowedToKickMember(serverId: string, userId: string) {
+    const isallowed = await this.db.pool.query(
+      `SELECT p.manage_channel
+        FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        JOIN user_roles ur ON rp.role_id = ur.role_id
+        JOIN members m ON ur.user_id = m.user_id
+        WHERE m.user_id = $1
+        AND m.server_id = $2
+        AND p.kick_member = true`,
+      [serverId, userId]
+    );
+    return isallowed.rows;
+  }
 
   async isMemberOrServerAuthor(userId: string, serverId: string) {
     try {
@@ -98,6 +118,62 @@ export class MembersService {
       );
       return {
         data: members.rows,
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async kickMember(
+    serverId: string,
+    memberId: string,
+    serverAuthor: string,
+    currentUser: string
+  ) {
+    try {
+      const isAllowed = await this.isAllowedToKickMember(serverId, memberId);
+      if (isAllowed.length < 1 && serverAuthor !== currentUser) {
+        throw new HttpException(
+          'You are not allowed to kick member',
+          HttpStatus.FORBIDDEN
+        );
+      }
+
+      const foundMember = await this.db.pool.query(
+        `select * from members where server_id = $1 and user_id = $2`,
+        [serverId, memberId]
+      );
+      if (foundMember.rows.length < 1) {
+        throw new NotFoundException('Member not found');
+      }
+      const roles = await this.db.pool.query(
+        ` select * from user_roles as ur
+          join roles as r on r.id = ur.role_id 
+          join permissions as p on p.id = ur.permission_id 
+          where ur.user_id = $1 and p.server_id = $2`,
+        [memberId, serverId]
+      );
+      await this.db.pool.query(`begin`);
+      await this.db.pool.query(
+        `delete from members where user_id = $1 and server_id = $2`,
+        [memberId, serverId]
+      );
+
+      if (roles.rows.length >= 1) {
+        await this.db.pool.query(
+          `DELETE FROM user_roles
+            WHERE user_id = $1
+            AND role_id IN (
+                SELECT id FROM roles
+                WHERE server_id =$2
+            )`,
+          [memberId, serverId]
+        );
+      }
+      await this.db.pool.query(`commit`);
+      return {
+        messages: 'Member kicked from server',
         error: false,
       };
     } catch (error) {

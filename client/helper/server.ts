@@ -1,17 +1,10 @@
-import { Channel } from '@/types/channels';
 import { revalidatePath } from 'next/cache';
+
+import { Channel } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
-import { getCookies } from './cookies';
-import { revalidate } from '@/utils/cache';
+import { prepareHeaders } from './cookies';
 
 const serverUrl = process.env.SERVER_URL;
-
-const prepareHeaders = async () => {
-	return {
-		'content-type': 'application/json',
-		Cookie: await getCookies(),
-	};
-};
 
 export async function getAllServerCreatedByCurrentUser(
 	userId: string
@@ -82,9 +75,7 @@ export async function getServerMembers(serverId: string): Promise<Member[]> {
 			headers: await prepareHeaders(),
 			method: 'GET',
 			credentials: 'include',
-			next: {
-				tags: ['members'],
-			},
+			next: { tags: ['members'] },
 		});
 
 		const members = await res.json();
@@ -164,8 +155,8 @@ export async function updateServer(
 				bannerAssetId,
 			}),
 		});
-		revalidate('/server');
-		revalidate('/server/' + serverId);
+		revalidatePath('/server');
+		revalidatePath('/server/' + serverId);
 	} catch (error) {
 		throw error;
 	}

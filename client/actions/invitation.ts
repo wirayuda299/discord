@@ -4,9 +4,9 @@ import { ApiRequest } from "@/utils/api";
 
 const api = new ApiRequest();
 
-export async function acceptinvitation(friendId: string) {
+export async function acceptinvitation(friendId: string, userId:string) {
   try {
-    await api.post("/invitation/accept", { userId: api.getUserId, friendId });
+    await api.post("/invitation/accept", { userId, friendId });
   } catch (error) {
     throw error;
   }

@@ -1,4 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
+
 import { MembersService } from 'src/services/members/members.service';
 
 @Controller('api/v1/members')
@@ -29,5 +31,16 @@ export class MembersController {
   @Get('/without-role')
   getMemberWithNoRole(@Query('serverId') serverId: string) {
     return this.memberService.getMembersHasNoRole(serverId);
+  }
+
+  @Post('/kick')
+  kickMemberFromServer(@Req() req: Request) {
+    const { serverId, memberId, serverAuthor, currentUser } = req.body;
+    return this.memberService.kickMember(
+      serverId,
+      memberId,
+      serverAuthor,
+      currentUser
+    );
   }
 }

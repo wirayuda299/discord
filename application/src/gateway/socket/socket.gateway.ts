@@ -1,4 +1,9 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
@@ -6,6 +11,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { MembersService } from 'src/services/members/members.service';
 import { MessagesService } from 'src/services/messages/messages.service';
 import { RolesService } from 'src/services/roles/roles.service';
 import { ThreadsService } from 'src/services/threads/threads.service';
@@ -43,7 +49,8 @@ export class SocketGateway implements OnModuleInit {
   constructor(
     private messages: MessagesService,
     private threadService: ThreadsService,
-    private roles: RolesService
+    private roles: RolesService,
+    private memberService: MembersService
   ) {}
 
   onModuleInit() {
@@ -83,6 +90,16 @@ export class SocketGateway implements OnModuleInit {
   ) {
     this.logger.log(payload);
     if (payload.type === 'channel') {
+      const { data } = await this.memberService.isMemberOrServerAuthor(
+        payload.user_id,
+        payload.serverId
+      );
+      if (!data.isAuthor && !data.isMember) {
+        throw new HttpException(
+          'You are not allowed to send message',
+          HttpStatus.FORBIDDEN
+        );
+      }
       await this.messages.sendMessage({
         channelId: payload.channelId,
         content: payload.content,

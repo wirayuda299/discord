@@ -55,6 +55,7 @@ export class ServersController {
     if (!ownerId) {
       throw new HttpException('User Id is required', HttpStatus.BAD_REQUEST);
     }
+
     return this.serverService.getAllServerCreatedByCurrentUserOrAsMember(
       ownerId
     );

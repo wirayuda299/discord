@@ -1,6 +1,7 @@
-import { getCookies } from "./cookies";
+import { prepareHeaders } from "./cookies";
 
 const serverUrl = process.env.SERVER_URL;
+
 type ThreadType = {
   thread_id: string;
   message_id: string;
@@ -8,12 +9,7 @@ type ThreadType = {
   thread_name: string;
   channel_id: string;
 };
-const prepareHeaders = async () => {
-  return {
-    "content-type": "application/json",
-    Cookie: await getCookies(),
-  };
-};
+
 
 export async function getAllThreads(
   channelId: string,

@@ -1,4 +1,5 @@
-import { getCookies } from "./cookies";
+import { prepareHeaders } from "./cookies";
+
 type Friend = {
   user_id: string;
   username: string;
@@ -6,12 +7,6 @@ type Friend = {
   created_at: string;
 };
 
-const prepareHeaders = async () => {
-  return {
-    "content-type": "application/json",
-    Cookie: await getCookies(),
-  };
-};
 
 export async function getFriendList(userId: string): Promise<Friend[]> {
   try {

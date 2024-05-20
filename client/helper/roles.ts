@@ -1,5 +1,5 @@
 import { Permission } from "@/types/server";
-import { getCookies } from "./cookies";
+import { prepareHeaders } from "./cookies";
 
 const serverUrl = process.env.SERVER_URL;
 
@@ -14,12 +14,6 @@ export interface Role {
   permissions: Permission;
 }
 
-const prepareHeaders = async () => {
-  return {
-    "content-type": "application/json",
-    Cookie: await getCookies(),
-  };
-};
 
 export async function getAllRoles(serverId: string): Promise<Role[]> {
   try {

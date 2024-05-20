@@ -1,14 +1,9 @@
 import { User, UserInvite } from "@/types/user";
-import { getCookies } from "./cookies";
+import { prepareHeaders } from "./cookies";
 
 const serverUrl = process.env.SERVER_URL;
 
-const prepareHeaders = async () => {
-  return {
-    "content-type": "application/json",
-    Cookie: await getCookies(),
-  };
-};
+
 
 export async function deleteUser(id: string) {
   try {
@@ -107,7 +102,7 @@ export async function getPendingInvitation(
     );
 
     const invitations = await res.json();
-    return invitations.data as UserInvite[];
+    return invitations.data
   } catch (error) {
     throw error;
   }

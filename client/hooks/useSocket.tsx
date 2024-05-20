@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { socketReducer } from '@/reducer/socket';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 import { useSocketContext } from '@/providers/socket-io';
-import { Message } from '@/types/messages';
-import { useAuth } from '@clerk/nextjs';
 import { Permission } from '@/types/server';
+import { SocketStates } from '@/types/socket-states';
 
-const intialValues = {
+const intialValues: SocketStates = {
 	active_users: [] as string[],
-	channel_messages: [] as Message[],
-	personal_messages: [] as Message[],
-	thread_messages: [] as Message[],
-	user_roles:{},
+	channel_messages: [],
+	personal_messages: [],
+	thread_messages: [],
+	user_roles: null,
 };
 
 export default function useSocket() {
@@ -50,14 +50,17 @@ export default function useSocket() {
 			});
 		}
 	};
-	const getUserRole = useCallback((userId: string) => {
-		if (socket) {
-			socket.emit('member-roles', {
-				serverId: params.id as string,
-				userId,
-			});
-		}
-	}, [params.id, socket]);
+	const getUserRole = useCallback(
+		(userId: string) => {
+			if (socket) {
+				socket.emit('member-roles', {
+					serverId: params.id as string,
+					userId,
+				});
+			}
+		},
+		[params.id, socket]
+	);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -80,15 +83,23 @@ export default function useSocket() {
 		socket.on('set-active-users', (data) => {
 			dispatch({ type: 'ACTIVE_USERS', payload: data });
 		});
-		getUserRole(userId!)
-			socket.on('set-current-user-role', (data:Permission) => {
-				dispatch({ type: 'SET_USER_ROLES', payload: data as Permission });
-			});
+		getUserRole(userId!);
+		socket.on('set-current-user-role', (data: Permission) => {
+			dispatch({ type: 'SET_USER_ROLES', payload: data as Permission });
+		});
 
 		socket.on('set-thread-messages', (data) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		});
-	}, [socket, searchParams, params, getUserRole, userId, reloadPersonalMessage, reloadChannelMessage]);
+	}, [
+		socket,
+		searchParams,
+		params,
+		getUserRole,
+		userId,
+		reloadPersonalMessage,
+		reloadChannelMessage,
+	]);
 
 	return {
 		reloadChannelMessage,

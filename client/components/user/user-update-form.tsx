@@ -24,6 +24,7 @@ import { ServerProfile } from "@/types/server";
 import { getCookies } from "@/helper/cookies";
 import { updateServerProfile } from "@/helper/server";
 import UserInfo from "./user-info";
+import { createError } from "@/utils/error";
 
 const schema = z.object({
   username: z.string().min(4),
@@ -152,11 +153,7 @@ export default function UserUpdateForm({
         mutate("server-profile");
       }
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Unknown error");
-      }
+      createError(error)
     }
   }
 

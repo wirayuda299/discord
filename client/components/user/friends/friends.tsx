@@ -54,7 +54,9 @@ export default function Friends() {
 
   const handleAcceptInvitation = async (friendId: string) => {
     try {
-      await acceptinvitation(friendId).then(() => {
+      if (!userId || !friendId) return 
+      
+      await acceptinvitation(friendId, userId).then(() => {
         const mutateKeys = [
           "pending-invitation",
           "my-invitations",

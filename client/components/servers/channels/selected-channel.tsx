@@ -95,23 +95,14 @@ function SelectedChannel() {
 						/>
 					</Suspense>
 					<NotificationSettings />
-					<Suspense
-						fallback={
-							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
-						}
-					>
+			
 						<PinnedMessage channelId={params.channel_id as string} />
-					</Suspense>
-					<Suspense
-						fallback={
-							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
-						}
-					>
+			
 						<MemberSheet
+							userId={userId!!}
 							serverId={params.id as string}
 							selectedServer={serversState.selectedServer}
 						/>
-					</Suspense>
 					<SearchForm />
 					<Inbox>
 						<p>channel notifications</p>
