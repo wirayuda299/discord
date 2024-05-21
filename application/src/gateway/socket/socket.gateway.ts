@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
@@ -41,40 +36,35 @@ type PayloadTypes = {
 })
 export class SocketGateway implements OnModuleInit {
   private activeUsers = new Map<string, string>();
-  private logger = new Logger();
+  private logger = new Logger(SocketGateway.name);
 
   @WebSocketServer()
   server: Server;
 
   constructor(
-    private messages: MessagesService,
-    private threadService: ThreadsService,
-    private roles: RolesService,
-    private memberService: MembersService
+    private messagesService: MessagesService,
+    private threadsService: ThreadsService,
+    private rolesService: RolesService,
+    private membersService: MembersService
   ) {}
 
   onModuleInit() {
-    this.server.on('connection', (socket) => {
-      this.handleConnection(socket);
-    });
-
-    this.server.on('disconnect', (socket) => {
-      this.handleDisconnect(socket);
-    });
+    this.server.on('connection', this.handleConnection.bind(this));
+    this.server.on('disconnect', this.handleDisconnect.bind(this));
   }
 
-  handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId;
+  private handleConnection(client: Socket) {
+    const userId = client.handshake.query.userId as string;
     if (userId) {
-      this.activeUsers.set(userId as string, userId as string);
+      this.activeUsers.set(userId, userId);
       this.broadcastActiveUsers();
     }
   }
 
-  handleDisconnect(client: Socket) {
-    const userId = client.handshake.query.userId;
+  private handleDisconnect(client: Socket) {
+    const userId = client.handshake.query.userId as string;
     if (userId) {
-      this.activeUsers.delete(userId as string);
+      this.activeUsers.delete(userId);
       this.broadcastActiveUsers();
     }
   }
@@ -83,24 +73,9 @@ export class SocketGateway implements OnModuleInit {
     this.server.emit('set-active-users', Array.from(this.activeUsers.keys()));
   }
 
-  @SubscribeMessage('message')
-  async handleMessage(
-    @MessageBody()
-    payload: PayloadTypes
-  ) {
-    this.logger.log(payload);
-    if (payload.type === 'channel') {
-      const { data } = await this.memberService.isMemberOrServerAuthor(
-        payload.user_id,
-        payload.serverId
-      );
-      if (!data.isAuthor && !data.isMember) {
-        throw new HttpException(
-          'You are not allowed to send message',
-          HttpStatus.FORBIDDEN
-        );
-      }
-      await this.messages.sendMessage({
+  private async handleSendMessage(payload: PayloadTypes) {
+    try {
+      await this.messagesService.sendMessage({
         channelId: payload.channelId,
         content: payload.content,
         imageAssetId: payload.imageAssetId,
@@ -109,17 +84,19 @@ export class SocketGateway implements OnModuleInit {
         is_read: payload.is_read,
         username: payload.username,
       });
-
-      const messages = await this.messages.getMessageByChannelId(
+      const messages = await this.messagesService.getMessageByChannelId(
         payload.channelId,
         payload.serverId
       );
-
       this.server.emit('set-message', messages.data);
+    } catch (error) {
+      this.logger.error('Error sending message', error);
     }
+  }
 
-    if (payload.type === 'reply') {
-      await this.messages.replyMessage(
+  private async handleReplyMessage(payload: PayloadTypes) {
+    try {
+      await this.messagesService.replyMessage(
         payload.parentMessageId,
         payload.content,
         payload.user_id,
@@ -128,62 +105,96 @@ export class SocketGateway implements OnModuleInit {
         payload.type
       );
 
-      if (payload.threadId) {
-        const messages = await this.threadService.getThreadMessage(
-          payload.threadId,
-          payload.serverId,
-          payload.channelId
-        );
-        this.server.emit('set-thread-messages', messages);
-      }
-
-      if (payload.recipientId) {
-        const messages = await this.messages.getPersonalMessage(
-          payload.conversationId,
-          payload.user_id
-        );
-        this.server.emit('set-personal-messages', messages);
-      }
-
-      if (payload.channelId && payload.serverId) {
-        const messages = await this.messages.getMessageByChannelId(
-          payload.channelId,
-          payload.serverId
-        );
-
-        this.server.emit('set-message', messages.data);
-      }
+      await this.updateMessagesBasedOnPayload(payload);
+    } catch (error) {
+      this.logger.error('Error replying to message', error);
     }
-    if (payload.type === 'thread') {
-      await this.threadService.sendThreadMessage(
+  }
+
+  private async handleThreadMessage(payload: PayloadTypes) {
+    try {
+      await this.threadsService.sendThreadMessage(
         payload.content,
         payload.user_id,
         payload.imageUrl,
         payload.imageAssetId,
         payload.threadId
       );
-      const messages = await this.threadService.getThreadMessage(
+      const messages = await this.threadsService.getThreadMessage(
         payload.threadId,
         payload.serverId,
         payload.channelId
       );
       this.server.emit('set-thread-messages', messages);
+    } catch (error) {
+      this.logger.error('Error handling thread message', error);
     }
+  }
 
-    if (payload.type === 'personal') {
-      await this.messages.sendPersonalMessage(
+  private async handlePersonalMessage(payload: PayloadTypes) {
+    try {
+      await this.messagesService.sendPersonalMessage(
         payload.content,
         payload.user_id,
         payload.imageUrl,
         payload.imageAssetId,
         payload.recipientId
       );
-
-      const messages = await this.messages.getPersonalMessage(
+      const messages = await this.messagesService.getPersonalMessage(
         payload.conversationId,
         payload.user_id
       );
       this.server.emit('set-personal-messages', messages);
+    } catch (error) {
+      this.logger.error('Error handling personal message', error);
+    }
+  }
+
+  private async updateMessagesBasedOnPayload(payload: PayloadTypes) {
+    try {
+      if (payload.threadId) {
+        const messages = await this.threadsService.getThreadMessage(
+          payload.threadId,
+          payload.serverId,
+          payload.channelId
+        );
+        this.server.emit('set-thread-messages', messages);
+      } else if (payload.recipientId) {
+        const messages = await this.messagesService.getPersonalMessage(
+          payload.conversationId,
+          payload.user_id
+        );
+        this.server.emit('set-personal-messages', messages);
+      } else if (payload.channelId && payload.serverId) {
+        const messages = await this.messagesService.getMessageByChannelId(
+          payload.channelId,
+          payload.serverId
+        );
+        this.server.emit('set-message', messages.data);
+      }
+    } catch (error) {
+      this.logger.error('Error updating messages based on payload', error);
+    }
+  }
+
+  @SubscribeMessage('message')
+  async handleMessage(@MessageBody() payload: PayloadTypes) {
+    this.logger.log(`Handling message of type: ${payload.type}`);
+    switch (payload.type) {
+      case 'channel':
+        await this.handleSendMessage(payload);
+        break;
+      case 'reply':
+        await this.handleReplyMessage(payload);
+        break;
+      case 'thread':
+        await this.handleThreadMessage(payload);
+        break;
+      case 'personal':
+        await this.handlePersonalMessage(payload);
+        break;
+      default:
+        this.logger.warn(`Unknown message type: ${payload.type}`);
     }
   }
 
@@ -191,12 +202,15 @@ export class SocketGateway implements OnModuleInit {
   async getChannelMessage(
     @MessageBody() payload: { channelId: string; serverId: string }
   ) {
-    const messages = await this.messages.getMessageByChannelId(
-      payload.channelId,
-      payload.serverId
-    );
-
-    this.server.emit('set-message', messages.data);
+    try {
+      const messages = await this.messagesService.getMessageByChannelId(
+        payload.channelId,
+        payload.serverId
+      );
+      this.server.emit('set-message', messages.data);
+    } catch (error) {
+      this.logger.error('Error getting channel messages', error);
+    }
   }
 
   @SubscribeMessage('thread-messages')
@@ -208,42 +222,57 @@ export class SocketGateway implements OnModuleInit {
       channelId: string;
     }
   ) {
-    const messages = await this.threadService.getThreadMessage(
-      payload.threadId,
-      payload.serverId,
-      payload.channelId
-    );
-    this.server.emit('set-thread-messages', messages);
+    try {
+      const messages = await this.threadsService.getThreadMessage(
+        payload.threadId,
+        payload.serverId,
+        payload.channelId
+      );
+      this.server.emit('set-thread-messages', messages);
+    } catch (error) {
+      this.logger.error('Error getting thread messages', error);
+    }
   }
 
   @SubscribeMessage('personal-message')
   async getPersonalMessages(
-    @MessageBody()
-    payload: {
-      conversationId: string;
-      userId: string;
-    }
+    @MessageBody() payload: { conversationId: string; userId: string }
   ) {
-    const messages = await this.messages.getPersonalMessage(
-      payload.conversationId,
-      payload.userId
-    );
-    this.server.emit('set-personal-messages', messages);
+    try {
+      const messages = await this.messagesService.getPersonalMessage(
+        payload.conversationId,
+        payload.userId
+      );
+      this.server.emit('set-personal-messages', messages);
+    } catch (error) {
+      this.logger.error('Error getting personal messages', error);
+    }
   }
 
   @SubscribeMessage('member-roles')
   async getMemberRole(
     @MessageBody() payload: { userId: string; serverId: string }
   ) {
-    const role = await this.roles.getCurrentUserRole(
-      payload.userId,
-      payload.serverId
-    );
-    this.server.emit('set-current-user-role', role);
+    try {
+      const role = await this.rolesService.getCurrentUserRole(
+        payload.userId,
+        payload.serverId
+      );
+      this.server.emit('set-current-user-role', role);
+    } catch (error) {
+      this.logger.error('Error getting member role', error);
+    }
   }
+
   @SubscribeMessage('banned-members')
   async getBannedMembers(@MessageBody() payload: { serverId: string }) {
-    const members = await this.memberService.getBannedMembers(payload.serverId);
-    this.server.emit('set-banned-members', members);
+    try {
+      const members = await this.membersService.getBannedMembers(
+        payload.serverId
+      );
+      this.server.emit('set-banned-members', members);
+    } catch (error) {
+      this.logger.error('Error getting banned members', error);
+    }
   }
 }

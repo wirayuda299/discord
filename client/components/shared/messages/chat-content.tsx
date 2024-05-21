@@ -2,12 +2,13 @@ import { ReactNode, memo, useCallback, useState } from 'react';
 import Image from 'next/image';
 import type { Socket } from 'socket.io-client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
-import EditMessageForm from './edit-message';
-import MessageMenu from './menu';
-import EmojiPickerButton from './emoji-picker';
 import { ServerStates, useServerContext } from '@/providers/server';
 import { Message } from '@/types/messages';
+const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
+const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {ssr: false});
+const MessageMenu = dynamic(() => import('./menu'), { ssr: false });
 
 type Props = {
 	userId: string;

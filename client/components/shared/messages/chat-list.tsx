@@ -20,6 +20,7 @@ export default function ChatList() {
 
   if (!searchParams.get("chat")) return null;
 
+
   return (
     <div className="size-full">
       <header className="flex items-center justify-between border-b border-b-foreground p-2">
