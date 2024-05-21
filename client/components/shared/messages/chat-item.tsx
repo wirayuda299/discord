@@ -13,7 +13,6 @@ import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
-import ImagePreview from '../image-preview';
 
 type Props = {
 	socket: Socket | null;
@@ -114,7 +113,15 @@ function ChatItem({
 			/>
 
 			{msg.media_image && !msg.parent_message_id && (
-				<ImagePreview image={msg.media_image} />
+				<Image
+					src={msg.media_image}
+					width={200}
+					height={100}
+					placeholder='blur'
+					alt='media'
+					className='ml-9 mt-3 aspect-auto rounded-md object-cover'
+					loading='lazy'
+				/>
 			)}
 			<div className=' mt-1'>
 				{(msg?.threads || []).map((thread) => (
@@ -126,7 +133,9 @@ function ChatItem({
 						<div
 							onClick={() => {
 								const p = getPath(thread.thread_id);
-								router.push(`/server/${params.id}/${params.channel_id}?${p}`);
+								router.push(
+									`/server/${params.serverId}/${params.channelId}?${p}`
+								);
 							}}
 							className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
 						>

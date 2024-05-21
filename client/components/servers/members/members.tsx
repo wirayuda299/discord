@@ -24,6 +24,7 @@ function MemberSheet({
 	);
 	if (!selectedServer) return null;
 
+
 	return (
 		<Sheet>
 			<SheetTrigger>

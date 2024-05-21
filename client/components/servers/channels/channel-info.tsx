@@ -21,7 +21,6 @@ import MemberItem from '../members/memberItem';
 import useSocket from '@/hooks/useSocket';
 import { Message } from '@/types/messages';
 import { PinnedMessage, getPinnedMessages } from '@/helper/message';
-import ImagePreview from '@/components/shared/image-preview';
 import { Member } from '@/types/server';
 import { SocketStates } from '@/types/socket-states';
 import { Socket } from 'socket.io-client';
@@ -104,7 +103,16 @@ function renderMedia(media: string[]) {
 		<div className='flex w-full flex-wrap justify-center gap-3'>
 			{media.length < 1 && <p className='text-center'>No media yet</p>}
 			{media?.map((m: string) => (
-				<ImagePreview styles='ml-0' image={m} key={m} />
+				<Image
+					key={m}
+					src={m}
+					width={200}
+					height={100}
+					placeholder='blur'
+					alt='media'
+					className='ml-0 mt-3 aspect-auto rounded-md object-cover'
+					loading='lazy'
+				/>
 			))}
 		</div>
 	);

@@ -78,11 +78,7 @@ export class ThreadsService {
     }
   }
 
-  async getThreadMessage(
-    threadId: string,
-    serverId: string,
-    channelId: string
-  ) {
+  async getThreadMessage(threadId: string, serverId: string) {
     try {
       const allThreads = [];
       const threads = await this.db.pool.query(
@@ -125,7 +121,6 @@ export class ThreadsService {
 
         const replies = await this.messageService.getReplies(
           message.message_id,
-          channelId,
           serverId
         );
 

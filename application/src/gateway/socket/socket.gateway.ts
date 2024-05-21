@@ -88,7 +88,7 @@ export class SocketGateway implements OnModuleInit {
         payload.channelId,
         payload.serverId
       );
-      this.server.emit('set-message', messages.data);
+      this.server.emit('set-message', messages);
     } catch (error) {
       this.logger.error('Error sending message', error);
     }
@@ -122,8 +122,7 @@ export class SocketGateway implements OnModuleInit {
       );
       const messages = await this.threadsService.getThreadMessage(
         payload.threadId,
-        payload.serverId,
-        payload.channelId
+        payload.serverId
       );
       this.server.emit('set-thread-messages', messages);
     } catch (error) {
@@ -133,13 +132,7 @@ export class SocketGateway implements OnModuleInit {
 
   private async handlePersonalMessage(payload: PayloadTypes) {
     try {
-      await this.messagesService.sendPersonalMessage(
-        payload.content,
-        payload.user_id,
-        payload.imageUrl,
-        payload.imageAssetId,
-        payload.recipientId
-      );
+      await this.messagesService.sendMessage(payload);
       const messages = await this.messagesService.getPersonalMessage(
         payload.conversationId,
         payload.user_id
@@ -155,8 +148,7 @@ export class SocketGateway implements OnModuleInit {
       if (payload.threadId) {
         const messages = await this.threadsService.getThreadMessage(
           payload.threadId,
-          payload.serverId,
-          payload.channelId
+          payload.serverId
         );
         this.server.emit('set-thread-messages', messages);
       } else if (payload.recipientId) {
@@ -170,7 +162,7 @@ export class SocketGateway implements OnModuleInit {
           payload.channelId,
           payload.serverId
         );
-        this.server.emit('set-message', messages.data);
+        this.server.emit('set-message', messages);
       }
     } catch (error) {
       this.logger.error('Error updating messages based on payload', error);
@@ -207,7 +199,7 @@ export class SocketGateway implements OnModuleInit {
         payload.channelId,
         payload.serverId
       );
-      this.server.emit('set-message', messages.data);
+      this.server.emit('set-message', messages);
     } catch (error) {
       this.logger.error('Error getting channel messages', error);
     }
@@ -225,8 +217,7 @@ export class SocketGateway implements OnModuleInit {
     try {
       const messages = await this.threadsService.getThreadMessage(
         payload.threadId,
-        payload.serverId,
-        payload.channelId
+        payload.serverId
       );
       this.server.emit('set-thread-messages', messages);
     } catch (error) {

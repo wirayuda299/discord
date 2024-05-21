@@ -25,7 +25,7 @@ export async function createThread(props: Props) {
       threadName,
       userId,
     } = props;
-    return await api.post("/threads/create", {
+     await api.post("/threads/create", {
       imageAssetId,
       message,
       image: imageUrl,
@@ -33,7 +33,7 @@ export async function createThread(props: Props) {
       userId,
       messageId: msgId,
       channelId,
-    });
+     });
   } catch (error) {
     throw error;
   }
