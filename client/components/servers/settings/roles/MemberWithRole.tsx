@@ -45,7 +45,6 @@ export default function MemberWithRole({
 			<div className='flex gap-3 py-3'>
 				<SearchForm styles='max-w-full py-2.5' />
 				<AssignRole
-					serverId={serverId}
 					role={selectedRole}
 				>
 					<Button>Add Members</Button>
@@ -61,7 +60,6 @@ export default function MemberWithRole({
 					/>
 					<p className='text-sm text-gray-2'>No members were found.</p>
 					<AssignRole
-						serverId={serverId}
 						role={selectedRole}
 					>
 						<p className='cursor-pointer text-sm font-semibold text-blue-400'>

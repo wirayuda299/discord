@@ -14,6 +14,7 @@ const Table = React.forwardRef<
     />
   </div>
 ));
+// @ts-ignore
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef<
@@ -22,6 +23,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
 ));
+// @ts-ignore
 TableHeader.displayName = "TableHeader";
 
 const TableBody = React.forwardRef<
@@ -34,6 +36,7 @@ const TableBody = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableBody.displayName = "TableBody";
 
 const TableFooter = React.forwardRef<
@@ -49,6 +52,7 @@ const TableFooter = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableFooter.displayName = "TableFooter";
 
 const TableRow = React.forwardRef<
@@ -64,6 +68,7 @@ const TableRow = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableRow.displayName = "TableRow";
 
 const TableHead = React.forwardRef<
@@ -79,6 +84,7 @@ const TableHead = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableHead.displayName = "TableHead";
 
 const TableCell = React.forwardRef<
@@ -91,6 +97,7 @@ const TableCell = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableCell.displayName = "TableCell";
 
 const TableCaption = React.forwardRef<
@@ -103,6 +110,7 @@ const TableCaption = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 TableCaption.displayName = "TableCaption";
 
 export {

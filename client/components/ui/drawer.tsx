@@ -32,6 +32,7 @@ const DrawerOverlay = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
@@ -53,6 +54,7 @@ const DrawerContent = React.forwardRef<
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
+// @ts-ignore
 DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({
@@ -90,6 +92,7 @@ const DrawerTitle = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
 
 const DrawerDescription = React.forwardRef<
@@ -102,6 +105,7 @@ const DrawerDescription = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {

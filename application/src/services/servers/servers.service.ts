@@ -291,9 +291,10 @@ export class ServersService {
       );
       const isServerProfileExists = await this.databaseService.pool.query(
         `select * from server_profile where user_id = $1 and server_id = $2`,
-        [user.rows[0].id, server_id]
+        [userId, server_id]
       );
       await this.databaseService.pool.query('begin');
+
       await this.databaseService.pool.query(
         `INSERT INTO members(server_id, user_id) VALUES($1, $2)
         returning id`,
@@ -318,6 +319,8 @@ export class ServersService {
         error: false,
       };
     } catch (error) {
+      console.log(error);
+
       await this.databaseService.pool.query('rollback');
       throw error;
     }

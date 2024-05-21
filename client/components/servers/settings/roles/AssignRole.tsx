@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { ReactNode } from 'react';
+import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
 
 import { Button } from '@/components/ui/button';
@@ -14,23 +15,20 @@ import { assignRole } from '@/actions/roles';
 import { Role } from '@/helper/roles';
 import useSocket from '@/hooks/useSocket';
 import useFetch from '@/hooks/useFetch';
-import { toast } from 'sonner';
 import { getMemberWithoutRole } from '@/helper/server';
 
 export default function AssignRole({
 	children,
-	serverId,
 	role,
 }: {
 	children: ReactNode;
-	serverId: string;
 	role: Role | null;
 }) {
 	const { mutate } = useSWRConfig();
-	const { data, isLoading, error } = useFetch('members', () =>
-		getMemberWithoutRole(serverId)
-	);
 	const { getUserRole, reloadChannelMessage,params  } = useSocket();
+	const { data, isLoading, error } = useFetch('members', () =>
+		getMemberWithoutRole(params.serverId as string)
+	);
 
 	const handleAssignRole = async (userId: string) => {
 		try {
@@ -43,7 +41,7 @@ export default function AssignRole({
 			createError(error);
 		} finally {
 			getUserRole(userId);
-			reloadChannelMessage(params.channel_id as string, serverId);
+			reloadChannelMessage(params.channelId as string, params.serverId as string);
 			mutate('members');
 			mutate('members-by-role');
 		}

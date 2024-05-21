@@ -14,5 +14,5 @@ export default function Error({
     toast.error(error.message);
   }, [error]);
 
-  return <div></div>;
+  return <div>{JSON.stringify(error)}</div>;
 }

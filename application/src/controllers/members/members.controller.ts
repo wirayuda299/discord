@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { Request } from 'express';
 
 import { MembersService } from 'src/services/members/members.service';
@@ -9,6 +17,9 @@ export class MembersController {
 
   @Get()
   getMembers(@Query('serverId') id: string) {
+    if (!id) {
+      throw new HttpException('Server Id is required', HttpStatus.BAD_REQUEST);
+    }
     return this.memberService.getMemberInServer(id);
   }
 

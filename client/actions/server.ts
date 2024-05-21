@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 
 import { ApiRequest } from "../utils/api";
-import { revalidate } from "@/utils/cache";
 
 const api = new ApiRequest();
 
@@ -38,8 +37,10 @@ export async function inviteUser(
       userId,
       serverId,
     });
-    revalidate(path);
+    revalidatePath(path);
   } catch (error) {
+    console.log(error);
+    
     throw error;
   }
 }

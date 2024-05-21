@@ -5,7 +5,7 @@
 		"plugin:tailwindcss/recommended",
 		"prettier"
 	],
-
+"ignorePatterns":["./components/ui/**"],
 	"rules": {
 		"tailwindcss/no-custom-classname": "off",
 		"no-useless-catch": "off"

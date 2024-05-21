@@ -19,6 +19,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     );
   },
 );
+// @ts-ignore
 Textarea.displayName = "Textarea";
 
 export { Textarea };

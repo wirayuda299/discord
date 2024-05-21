@@ -58,6 +58,8 @@ export class MembersService {
 
   async getMemberInServer(serverId: string) {
     try {
+      console.log(serverId);
+
       const members = await this.db.pool.query(
         ` select * from members as m
           join server_profile as sp on sp.user_id = m.user_id 
@@ -68,22 +70,27 @@ export class MembersService {
 
       for await (const member of members.rows) {
         const role = await this.db.pool.query(
-          `
-        select * from role_permissions as rp
-        join roles as r on r.id = rp.role_id 
-        join permissions as p on p.id = rp.permission_id 
-        join user_roles as ur on ur.role_id = r.id 
-        where ur.user_id = $1 and r.server_id = $2
-      `,
+          `select * from role_permissions as rp
+          join roles as r on r.id = rp.role_id 
+          join permissions as p on p.id = rp.permission_id 
+          join user_roles as ur on ur.role_id = r.id 
+          where ur.user_id = $1 and r.server_id = $2`,
           [member.user_id, serverId]
         );
         const serverProfile = await this.serverService.getServerProfile(
           serverId,
           member.user_id
         );
+
+        console.log('Server profile', serverProfile.data);
+        console.log(member);
+
         member.role = role.rows[0];
         member.serverProfile = serverProfile.data;
       }
+
+      console.log(members.rows);
+
       return {
         data: members.rows,
         error: false,

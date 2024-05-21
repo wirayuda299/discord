@@ -4,34 +4,9 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 import { deleteUser } from "@/helper/user";
+import { createUser } from "@/actions/user";
 
-const serverUrl = process.env.SERVER_URL;
 
-export async function createUser(
-  id: string,
-  username: string,
-  email: string,
-  image: string,
-) {
-  try {
-    await fetch(`${serverUrl}/user/create`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        id,
-        username,
-        email,
-        image,
-      }),
-    });
-  } catch (error) {
-    console.log(error);
-
-    throw error;
-  }
-}
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;

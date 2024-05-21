@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils/mergeStyle";
+import { cn } from "../../lib/utils/mergeStyle";
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -15,6 +15,7 @@ const Card = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
@@ -27,6 +28,7 @@ const CardHeader = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<
@@ -42,6 +44,7 @@ const CardTitle = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<
@@ -54,6 +57,7 @@ const CardDescription = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 CardDescription.displayName = "CardDescription";
 
 const CardContent = React.forwardRef<
@@ -62,6 +66,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
 ));
+// @ts-ignore
 CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<
@@ -74,6 +79,7 @@ const CardFooter = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 CardFooter.displayName = "CardFooter";
 
 export {

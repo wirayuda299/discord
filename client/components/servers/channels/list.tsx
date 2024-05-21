@@ -53,9 +53,9 @@ export default function ChannelList({ channels, server }:{channels:Channel[], se
 	}, [channels]);
 
 	useEffect(() => {
-		const channel = channels.find((c) => c.channel_id === params.channel_id);
+		const channel = channels.find((c) => c.channel_id === params.channelId);
 		setServerStates((prev) => ({ ...prev, selectedChannel: channel || null }));
-	}, [channels, params.channel_id, setServerStates]);
+	}, [channels, params.channelId, setServerStates]);
 
 	return (
 		<ul className='text-gray-2'>

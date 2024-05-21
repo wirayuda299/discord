@@ -37,6 +37,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     <ChevronRight className="ml-auto size-4" />
   </DropdownMenuPrimitive.SubTrigger>
 ));
+// @ts-ignore
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName;
 
@@ -53,6 +54,7 @@ const DropdownMenuSubContent = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName;
 
@@ -72,6 +74,7 @@ const DropdownMenuContent = React.forwardRef<
     />
   </DropdownMenuPrimitive.Portal>
 ));
+// @ts-ignore
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 
 const DropdownMenuItem = React.forwardRef<
@@ -90,6 +93,7 @@ const DropdownMenuItem = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<
@@ -113,6 +117,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     {children}
   </DropdownMenuPrimitive.CheckboxItem>
 ));
+// @ts-ignore
 DropdownMenuCheckboxItem.displayName =
   DropdownMenuPrimitive.CheckboxItem.displayName;
 
@@ -136,6 +141,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     </span>
   </DropdownMenuPrimitive.RadioItem>
 ));
+// @ts-ignore
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
 
 const DropdownMenuLabel = React.forwardRef<
@@ -154,6 +160,7 @@ const DropdownMenuLabel = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
 
 const DropdownMenuSeparator = React.forwardRef<
@@ -166,6 +173,7 @@ const DropdownMenuSeparator = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName;
 
 const DropdownMenuShortcut = ({

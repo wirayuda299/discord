@@ -23,6 +23,8 @@ import { Message } from '@/types/messages';
 import { PinnedMessage, getPinnedMessages } from '@/helper/message';
 import ImagePreview from '@/components/shared/image-preview';
 import { Member } from '@/types/server';
+import { SocketStates } from '@/types/socket-states';
+import { Socket } from 'socket.io-client';
 
 const options = ['members', 'media', 'pins'] as const;
 
@@ -34,7 +36,10 @@ function renderSelectedOption(
 	media: string[],
 	pinnedMessagesData: PinnedMessage[],
 	pinnedMessagesLoading: boolean,
-	activeUsers: string[]
+	currentUser: string,
+	ownerId: string,
+	states: SocketStates,
+	socket: Socket | null
 ) {
 	switch (selectedOption) {
 		case 'members':
@@ -42,7 +47,10 @@ function renderSelectedOption(
 				membersData,
 				membersError,
 				membersLoading,
-				activeUsers
+				currentUser,
+				ownerId,
+				states,
+				socket
 			);
 		case 'media':
 			return renderMedia(media);
@@ -57,7 +65,10 @@ function renderMembers(
 	membersData: Member[],
 	membersError: Error,
 	membersLoading: boolean,
-	activeUsers: string[]
+	currentUser: string,
+	ownerId: string,
+	states: SocketStates,
+	socket: Socket | null
 ) {
 	return (
 		<div className='pt-5'>
@@ -75,8 +86,11 @@ function renderMembers(
 			) : (
 				membersData?.map((member) => (
 					<MemberItem
+						currentUser={currentUser}
+						ownerId={ownerId}
+						socket={socket}
+						states={states}
 						member={member}
-						activeUsers={activeUsers}
 						key={member.id}
 					/>
 				))
@@ -162,19 +176,21 @@ function renderPins(
 export default function ChannelInfo() {
 	const [selectedOption, setSelectedOption] = useState('members');
 	const {
-		serversState: { selectedChannel },
+		serversState: { selectedChannel, selectedServer },
 	} = useServerContext();
-	const { states, params } = useSocket();
+	const { states, params, userId, socket } = useSocket();
 
 	const {
 		data: membersData,
 		error: membersError,
 		isLoading: membersLoading,
-  } = useFetch('members', () => getServerMembers((params?.id as string) || ''));
-  
+	} = useFetch('members', () =>
+		getServerMembers((params?.serverId as string) || '')
+	);
+
 	const { data: pinnedMessagesData, isLoading: pinnedMessagesLoading } =
 		useFetch('pinned-messages', () =>
-			getPinnedMessages(params?.channel_id as string)
+			getPinnedMessages(params?.channelId as string)
 		);
 
 	const media = (states.channel_messages as Message[])
@@ -217,7 +233,10 @@ export default function ChannelInfo() {
 					media,
 					pinnedMessagesData || [],
 					pinnedMessagesLoading,
-					states.active_users
+					userId!!,
+					selectedServer?.owner_id!!,
+					states,
+					socket
 				)}
 			</DrawerContent>
 		</Drawer>

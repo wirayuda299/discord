@@ -21,6 +21,7 @@ const Label = React.forwardRef<
     {...props}
   />
 ));
+// @ts-ignore
 Label.displayName = LabelPrimitive.Root.displayName;
 
 export { Label };
