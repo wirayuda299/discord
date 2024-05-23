@@ -7,12 +7,14 @@ import dynamic from 'next/dynamic';
 import { ServerStates, useServerContext } from '@/providers/server';
 import { Message } from '@/types/messages';
 const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
-const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {ssr: false});
+const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {
+	ssr: false,
+});
 const MessageMenu = dynamic(() => import('./menu'), { ssr: false });
 
 type Props = {
 	userId: string;
-	replyType: string;
+	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	serverStates: ServerStates;
 	message: Message;
@@ -59,35 +61,15 @@ function ChatContent({
 	const router = useRouter();
 	const [formOpen, setFormOpen] = useState<boolean>(false);
 
-	const handleSelectedMessage = useCallback(
-		(
-			type: string,
-			parentMessageId: string = '',
-			messageId: string = '',
-			msg: Message
-		) => {
-			const chat = searchParams.get('chat') as string;
-			const conversationId = searchParams.get('conversationId') as string;
-			const messageType = searchParams.get('message_type') as string;
-			const channelType = searchParams.get('channel_type') as string;
-			const threadId = searchParams.get('threadId') as string;
-
-			const params = new URLSearchParams({
-				type,
-				parent_message_id: parentMessageId,
-				message_id: messageId,
-				reply_type: replyType,
-				...(threadId && { threadId }),
-				...(channelType && { channel_type: channelType }),
-				...(messageType && { messageType }),
-				...(chat && { chat }),
-				...(conversationId && { conversationId }),
-			});
+	const handleSelectedMessage = useCallback((msg: Message ) => {
 			setServerStates((prev) => ({
 				...prev,
-				selectedMessage: msg,
+				selectedMessage: {
+					message: msg,
+					type: replyType,
+					action:'reply'
+				}
 			}));
-			router.push(`${location.pathname}?${params.toString()}`);
 		},
 		[router, searchParams]
 	);

@@ -17,19 +17,16 @@ import { copyText } from "@/utils/copy";
 import CreateThread from "../../servers/threads/create-thread";
 
 type Props = {
-  channelId: string;
-  styles?: string;
-  serverId: string;
-  type: string;
-  currentUser: string;
-  message: Message;
-  handleSelectedMessage: (
-    type: string,
-    parentMessageId: string,
-    messageId: string,
-    msg: Message,
-  ) => void;
-  socket: Socket | null;
+	channelId: string;
+	styles?: string;
+	serverId: string;
+	type: 'personal' | 'thread' | 'channel' | 'reply';
+	currentUser: string;
+	message: Message;
+	handleSelectedMessage: (
+		message: Message, type:'personal' | 'thread' | 'channel' | 'reply', action:string
+	) => void;
+	socket: Socket | null;
 };
 
 export default function MessageMenu({
@@ -76,14 +73,7 @@ export default function MessageMenu({
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
-          onClick={() =>
-            handleSelectedMessage(
-              "reply",
-              message.message_id,
-              message.message_id,
-              message,
-            )
-          }
+          onClick={() => handleSelectedMessage( message, type, 'reply') }
           className="w-full justify-between bg-transparent hover:!bg-primary hover:!text-white "
         >
           <span>Reply</span>

@@ -1,74 +1,52 @@
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ReactNode, Suspense, useState } from "react";
-import type { Socket } from "socket.io-client";
+import Image from 'next/image';
+import { ReactNode, Suspense, useState } from 'react';
+import type { Socket } from 'socket.io-client';
 
-import { Message } from "@/types/messages";
-import { cn } from "@/lib/utils/mergeStyle";
-import { formUrlQuery } from "@/lib/utils/form-url-query";
-import { useServerContext } from "@/providers/server";
+import { Message } from '@/types/messages';
+import { cn } from '@/lib/utils/mergeStyle';
+import { useServerContext } from '@/providers/server';
 
-import ChatForm from "../../shared/messages/chat-form";
-import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
-import useSocket from "@/hooks/useSocket";
+import ChatForm from '../../shared/messages/chat-form';
+import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
+import useSocket from '@/hooks/useSocket';
 
 type Props = {
-  styles?: string;
-  message: Message;
-  text?: ReactNode;
-  serverId: string;
-  channelId: string;
-  socket: Socket | null;
+	styles?: string;
+	message: Message;
+	text?: ReactNode;
+	serverId: string;
+	channelId: string;
+	socket: Socket | null;
 };
 
 export default function CreateThread({
-  message,
-  socket,
-  styles,
-  channelId,
-  serverId,
-  text,
+	message,
+	socket,
+	styles,
+	channelId,
+	serverId,
+	text,
 }: Props) {
-  const router = useRouter();
-  const [threadName, setThreadName] = useState<string>("");
-  const { serversState, setServerStates } = useServerContext();
-  const { reloadChannelMessage, searchParams } = useSocket();
+	const [threadName, setThreadName] = useState<string>('');
+	const { serversState, setServerStates } = useServerContext();
+	const { reloadChannelMessage, searchParams, params, userId } = useSocket();
 
-  function setSelectedMessage(message: Message | null) {
-    setServerStates((prev) => ({
-      ...prev,
-      selectedMessage: message,
-    }));
-  }
+	const setSelectedMessage = (message: Message ) => {
+		setServerStates((prev) => ({
+			...prev,
+			selectedMessage: {
+				message,
+				type: 'thread',
+				action:'create_thread'
+			},
+		}))
+	}
 
-  function handleOpenChange(isOpen: boolean) {
-    if (isOpen) {
-      router.push(
-        formUrlQuery(
-          searchParams.toString(),
-          "action",
-          "create_thread",
-        ) as string,
-      );
-    } else {
-      const path = `/server/${serversState.selectedServer?.id}/${serversState.selectedChannel?.channel_id}?channel_type=${serversState.selectedChannel?.channel_type}&type=thread`;
-      router.push(path);
-    }
-  }
-
-  return (
-		<Sheet onOpenChange={(isOpen) => handleOpenChange(isOpen)}>
+	return (
+		<Sheet>
 			<SheetTrigger asChild>
-				<Link
+				<button
 					onClick={() => setSelectedMessage(message)}
-					href={
-						formUrlQuery(
-							searchParams.toString(),
-							'action',
-							'create_thread'
-						) as string
-					}
 					className={cn(
 						'flex w-full justify-between bg-transparent p-2 text-sm hover:bg-primary hover:text-white',
 						styles
@@ -81,7 +59,7 @@ export default function CreateThread({
 						height={20}
 						alt='threads'
 					/>
-				</Link>
+				</button>
 			</SheetTrigger>
 			<SheetContent side='right' className='border-none p-0'>
 				<header className='flex w-full items-center gap-4 border-b border-b-foreground p-4'>
@@ -166,9 +144,11 @@ export default function CreateThread({
 						</div>
 
 						<ChatForm
+							params={params}
+							userId={userId!!}
+							searchParams={searchParams}
 							threadName={threadName}
 							key={'thread-form'}
-							path='/'
 							placeholder={`Message #thread-name`}
 							serverStates={serversState}
 							reloadMessage={() => reloadChannelMessage(channelId, serverId)}

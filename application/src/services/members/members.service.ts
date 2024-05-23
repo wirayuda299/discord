@@ -58,8 +58,6 @@ export class MembersService {
 
   async getMemberInServer(serverId: string) {
     try {
-      console.log(serverId);
-
       const members = await this.db.pool.query(
         ` select * from members as m
           join server_profile as sp on sp.user_id = m.user_id 
@@ -82,14 +80,9 @@ export class MembersService {
           member.user_id
         );
 
-        console.log('Server profile', serverProfile.data);
-        console.log(member);
-
         member.role = role.rows[0];
         member.serverProfile = serverProfile.data;
       }
-
-      console.log(members.rows);
 
       return {
         data: members.rows,

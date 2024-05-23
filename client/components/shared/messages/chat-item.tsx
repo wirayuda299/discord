@@ -1,10 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import queryString from 'query-string';
-import { memo, useMemo } from 'react';
-import { ReadonlyURLSearchParams, useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction, memo, useMemo } from 'react';
 import type { Socket } from 'socket.io-client';
-import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
 
 import { Message } from '@/types/messages';
 import { ServerStates } from '@/providers/server';
@@ -13,18 +10,19 @@ import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 type Props = {
 	socket: Socket | null;
 	msg: Message & { shouldAddLabel?: boolean };
 	userId: string;
-	replyType: string;
+	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	messages: Message[];
 	serverStates: ServerStates;
-	reloadMessage: () => void;
+	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 	searchParams: ReadonlyURLSearchParams;
-	params: Params;
+	reloadMessage: () => void;
 };
 
 function ChatItem({
@@ -37,25 +35,14 @@ function ChatItem({
 	reloadMessage,
 	styles,
 	searchParams,
-	params,
+	setServerStates
 }: Props) {
-	const router = useRouter();
 	const { selectedServer } = serverStates;
 	const handleAppendOrRemoveEmoji = useEmoji(
 		selectedServer?.id!!,
 		userId,
 		reloadMessage
 	);
-
-	const getPath = (threadId: string) => {
-		const parsed = queryString.parse(searchParams.toString());
-		parsed.type = 'thread';
-		parsed.threadId = threadId;
-		return queryString.stringify(parsed, {
-			skipNull: true,
-			skipEmptyString: true,
-		});
-	};
 
 	const repliedMessage = useMemo(
 		() => foundMessage(messages, msg),
@@ -68,7 +55,7 @@ function ChatItem({
 			className='scroll-mt-5 rounded-md p-1 target:!bg-primary hover:bg-foreground/50 md:hover:bg-background md:hover:brightness-110'
 		>
 			{msg?.shouldAddLabel && <ChatLabel createdAt={msg.created_at} />}
-			{msg.reply_id && (
+			{msg.parent_message_id && (
 				<Link
 					href={`#${msg.parent_message_id || msg.message_id}`}
 					className='group flex w-auto items-center pl-5'
@@ -130,13 +117,13 @@ function ChatItem({
 						key={thread.thread_id}
 						threadId={thread.thread_id}
 					>
-						<div
-							onClick={() => {
-								const p = getPath(thread.thread_id);
-								router.push(
-									`/server/${params.serverId}/${params.channelId}?${p}`
-								);
-							}}
+						<button
+							onClick={(e) =>
+								setServerStates((prev) => ({
+									...prev,
+									selectedThread: thread,
+								}))
+							}
 							className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
 						>
 							<Image
@@ -152,7 +139,7 @@ function ChatItem({
 								started a thread :{' '}
 								<span className='text-white'>{thread.thread_name}</span>
 							</p>
-						</div>
+						</button>
 					</ThreadMessages>
 				))}
 			</div>

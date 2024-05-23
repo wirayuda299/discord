@@ -75,15 +75,7 @@ export class SocketGateway implements OnModuleInit {
 
   private async handleSendMessage(payload: PayloadTypes) {
     try {
-      await this.messagesService.sendMessage({
-        channelId: payload.channelId,
-        content: payload.content,
-        imageAssetId: payload.imageAssetId,
-        imageUrl: payload.imageUrl,
-        user_id: payload.user_id,
-        is_read: payload.is_read,
-        username: payload.username,
-      });
+      await this.messagesService.sendMessage(payload);
       const messages = await this.messagesService.getMessageByChannelId(
         payload.channelId,
         payload.serverId
@@ -96,14 +88,25 @@ export class SocketGateway implements OnModuleInit {
 
   private async handleReplyMessage(payload: PayloadTypes) {
     try {
-      await this.messagesService.replyMessage(
-        payload.parentMessageId,
-        payload.content,
-        payload.user_id,
-        payload.imageUrl,
-        payload.imageAssetId,
-        payload.type
-      );
+      if (payload.parentMessageId && payload.threadId) {
+        await this.threadsService.replyThreadMessage(
+          payload.parentMessageId,
+          payload.threadId,
+          payload.content,
+          payload.user_id,
+          payload.imageUrl,
+          payload.imageAssetId
+        );
+      } else {
+        await this.messagesService.replyMessage(
+          payload.parentMessageId,
+          payload.content,
+          payload.user_id,
+          payload.imageUrl,
+          payload.imageAssetId,
+          payload.type
+        );
+      }
 
       await this.updateMessagesBasedOnPayload(payload);
     } catch (error) {
@@ -113,13 +116,15 @@ export class SocketGateway implements OnModuleInit {
 
   private async handleThreadMessage(payload: PayloadTypes) {
     try {
-      await this.threadsService.sendThreadMessage(
-        payload.content,
-        payload.user_id,
-        payload.imageUrl,
-        payload.imageAssetId,
-        payload.threadId
-      );
+      if (payload.threadId && payload.type !== 'reply') {
+        await this.threadsService.sendThreadMessage(
+          payload.content,
+          payload.user_id,
+          payload.imageUrl,
+          payload.imageAssetId,
+          payload.threadId
+        );
+      }
       const messages = await this.threadsService.getThreadMessage(
         payload.threadId,
         payload.serverId
@@ -132,13 +137,21 @@ export class SocketGateway implements OnModuleInit {
 
   private async handlePersonalMessage(payload: PayloadTypes) {
     try {
-      await this.messagesService.sendMessage(payload);
+      await this.messagesService.sendPersonalMessage(
+        payload.content,
+        payload.user_id,
+        payload.imageUrl,
+        payload.imageAssetId,
+        payload.recipientId
+      );
       const messages = await this.messagesService.getPersonalMessage(
         payload.conversationId,
         payload.user_id
       );
       this.server.emit('set-personal-messages', messages);
     } catch (error) {
+      console.log(error);
+
       this.logger.error('Error handling personal message', error);
     }
   }
@@ -171,7 +184,8 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
-    this.logger.log(`Handling message of type: ${payload.type}`);
+    this.logger.log(payload);
+
     switch (payload.type) {
       case 'channel':
         await this.handleSendMessage(payload);

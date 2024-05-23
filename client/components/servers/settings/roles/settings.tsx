@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
+import { useAuth } from '@clerk/nextjs';
 
 import { cn } from '@/lib/utils/mergeStyle';
 import {
@@ -28,7 +29,6 @@ import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
 
 import MemberWithRole from './MemberWithRole';
-import { useAuth } from '@clerk/nextjs';
 
 const schema = z.object({
 	name: z.string().min(4).max(20),

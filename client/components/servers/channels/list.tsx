@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
 import { Channel } from '@/types/channels';
@@ -52,10 +52,16 @@ export default function ChannelList({ channels, server }:{channels:Channel[], se
 		);
 	}, [channels]);
 
-	useEffect(() => {
-		const channel = channels.find((c) => c.channel_id === params.channelId);
-		setServerStates((prev) => ({ ...prev, selectedChannel: channel || null }));
-	}, [channels, params.channelId, setServerStates]);
+useEffect(() => {
+	const channel = channels.find((c) => c.channel_id === params.channelId);
+	setServerStates((prev) => {
+		if (prev.selectedChannel !== channel) {
+			return { ...prev, selectedChannel: channel || null };
+		}
+		return prev;
+	});
+}, [params.channelId, channels]);
+
 
 	return (
 		<ul className='text-gray-2'>

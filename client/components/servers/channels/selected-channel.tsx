@@ -15,7 +15,6 @@ import { useServerContext } from '@/providers/server';
 import useSocket from '@/hooks/useSocket';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
-import { BannedMembers } from '@/types/socket-states';
 
 const Inbox = dynamic(() => import('./inbox'), { ssr: false });
 const PinnedMessage = dynamic(
@@ -40,24 +39,20 @@ function SelectedChannel() {
 		useSocket();
 	const { selectedChannel } = serversState;
 
-	const path = useMemo(
-		() =>
-			`/server/${params?.serverId}/${params?.channelId}?channel_type=${selectedChannel?.channel_type}`,
-		[params, selectedChannel]
-	);
-	const isBannedUserIncludeCurrentUser = useMemo(
+
+	const isCurrentUserBanned = useMemo(
 		() =>
 			states.banned_members.length >= 1 &&
 			states.banned_members.find(
-				(member: BannedMembers) => member.member_id === userId
+				(member) => member.member_id === userId
 			), [states.banned_members, userId]
 	)
 
-	const handleBackClick = useCallback(() => {
-		setServerStates((prev) => ({ ...prev, selectedChannel: null }));
-	}, [setServerStates]);
+	const handleBackClick = useCallback(() => setServerStates((prev) => ({ ...prev, selectedChannel: null })), [setServerStates]);
 
 	useScroll(ref, states.channel_messages);
+
+	
 
 	return (
 		<div
@@ -130,12 +125,11 @@ function SelectedChannel() {
 					className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
 					ref={ref}
 				>
-					{states.channel_messages.length >= 1 &&
-						states.channel_messages?.map((msg: Message) => (
-							<ChatItem
-								params={params}
-								searchParams={searchParams}
-								replyType={'channel'}
+					{states.channel_messages?.map((msg: Message) => (
+						<ChatItem
+							setServerStates={setServerStates}
+							searchParams={searchParams}
+								replyType='channel'
 								reloadMessage={() =>
 									reloadChannelMessage(
 										params.channelId as string,
@@ -151,23 +145,27 @@ function SelectedChannel() {
 							/>
 						))}
 				</ul>
-				{!isBannedUserIncludeCurrentUser ? (
+				{!isCurrentUserBanned ? (
 					<ChatForm
 						socket={socket}
 						type='channel'
+						params={params}
+						searchParams={searchParams}
+						userId={userId!!}
 						reloadMessage={() =>
 							reloadChannelMessage(
-								selectedChannel?.channel_id!!,
+								params.channelId as string,
 								params.serverId as string
 							)
 						}
 						setServerStates={setServerStates}
-						path={path}
+
 						serverStates={serversState}
 						placeholder={`Message #${selectedChannel?.channel_name}`}
 					/>
-					
-				): <p className='text-center text-white'>You are banned  </p>}
+				) : (
+					<p className='text-center text-white'>You are banned </p>
+				)}
 			</div>
 		</div>
 	);

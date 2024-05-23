@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useSocketContext } from '@/providers/socket-io';
 import { Permission } from '@/types/server';
 import { BannedMembers, SocketStates } from '@/types/socket-states';
+import { Message } from '@/types/messages';
 
 const initialValues: SocketStates = {
 	active_users: [] as string[],
@@ -82,11 +83,11 @@ export default function useSocket() {
 	useEffect(() => {
 		if (!socket) return;
 
-		const handlePersonalMessages = (messages: any) => {
+		const handlePersonalMessages = (messages: Message[]) => {
 			dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
 		};
 
-		const handleChannelMessages = (data: any) => {
+		const handleChannelMessages = (data: Message[]) => {
 			dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
 		};
 
@@ -94,7 +95,7 @@ export default function useSocket() {
 			dispatch({ type: 'BANNED_MEMBERS', payload: data });
 		};
 
-		const handleActiveUsers = (data: any) => {
+		const handleActiveUsers = (data: string[]) => {
 			dispatch({ type: 'ACTIVE_USERS', payload: data });
 		};
 
@@ -102,7 +103,7 @@ export default function useSocket() {
 			dispatch({ type: 'SET_USER_ROLES', payload: data });
 		};
 
-		const handleThreadMessages = (data: any) => {
+		const handleThreadMessages = (data: Message[]) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		};
 

@@ -21,9 +21,9 @@ type Props = {
 	content: string;
 	userId: string;
 	imageAssetId: string;
-	recipientId: string;
+	recipientId?: string;
 	imageUrl: string;
-	conversationId: string;
+	conversationId?: string;
 	type: string;
 	channelId?: string;
 	avatar?: string;
@@ -36,10 +36,10 @@ type Props = {
 
 export const messageData = ({
 	content,
-	conversationId,
+	conversationId = '',
 	imageAssetId,
 	imageUrl,
-	recipientId,
+	recipientId= '',
 	userId,
 	type,
 	avatar = '',

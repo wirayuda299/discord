@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { createError } from "@/utils/error";
+import GeneralLoader from "@/components/shared/loader/general";
 
 export default function VideoCall({ room, serverId }: { room: string; serverId:string }) {
 	const { user } = useUser();
@@ -36,9 +37,7 @@ export default function VideoCall({ room, serverId }: { room: string; serverId:s
 		})();
 	}, [room, user]);
 
-	if (token === '') {
-		return <div>Getting token...</div>;
-	}
+	if (token === '') return <GeneralLoader/>;
 
 	return (
 		<LiveKitRoom

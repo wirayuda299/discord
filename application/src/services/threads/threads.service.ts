@@ -18,6 +18,8 @@ export class ThreadsService {
     imageAssetId: string,
     threadId: string
   ) {
+    console.log('sendThreadMessage func run');
+
     try {
       const {
         rows: [threadMessage],
@@ -33,6 +35,8 @@ export class ThreadsService {
         [threadMessage.id, threadId]
       );
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }
@@ -78,57 +82,132 @@ export class ThreadsService {
     }
   }
 
+  getReplies = async (
+    message: any,
+    serverId: string,
+    messagesWithReactions: any[]
+  ) => {
+    const reactions = await this.messageService.getReactions(
+      message.message_id
+    );
+    const threads = await this.messageService.getThreadByMessage(
+      message.message_id,
+      serverId
+    );
+
+    message.threads = threads || [];
+    message.reactions = reactions;
+
+    messagesWithReactions.push(message);
+
+    const replies = await this.db.pool.query(
+      `
+        SELECT
+        sp.username AS username,
+        tmr.parent_message_id AS parent_message_id,
+        m."content" AS message,
+        m.is_read AS is_read,
+        m.id AS message_id,
+        m.user_id AS author,
+        m.image_url AS media_image,
+        m."type" AS message_type,
+        m.image_asset_id AS media_image_asset_id,
+        m.created_at AS created_at,
+        m.updated_at AS update_at
+        FROM thread_messages_replies AS tmr
+        JOIN messages AS m ON m.id = tmr.message_id
+        JOIN server_profile AS sp ON sp.user_id = m.user_id AND sp.server_id = $1
+        WHERE tmr.parent_message_id = $2
+      `,
+      [serverId, message.message_id]
+    );
+
+    for (const reply of replies.rows) {
+      await this.getReplies(reply, serverId, messagesWithReactions);
+    }
+  };
+
   async getThreadMessage(threadId: string, serverId: string) {
     try {
-      const allThreads = [];
-      const threads = await this.db.pool.query(
+      const messagesWithReactions = [];
+
+      const messages = await this.db.pool.query(
         `
-        select
-        sp.username as username,
-        sp.user_id as author_id,
-        t.name as thread_name,
-        t.id as thread_id,
-        t.channel_id as channel_id,
-        m."content" as message,
-        m.is_read as is_read,
-        m.id as message_id,
-        m.user_id as author,
-        m.image_url as media_image,
-        m."type" as message_type,
-        m.image_asset_id as media_image_asset_id,
-        m.created_at as created_at,
-        m.updated_at as update_at
-        from threads as t
-        join thread_messages as tm on t.id = tm.thread_id
-        join server_profile as sp on sp.user_id = t.author and sp.server_id = $2
-        join messages as m on m.id = tm.message_id 
-        where t.id = $1
-        `,
-        [threadId, serverId]
+      SELECT
+      tm.message_id AS message_id,
+      m."content" AS message,
+      m.is_read AS is_read,
+      m.user_id AS author,
+      m.image_url AS media_image,
+      m."type" AS message_type,
+      m.image_asset_id AS media_image_asset_id,
+      m.created_at AS created_at,
+      m.updated_at AS update_at,
+      sp.username AS username
+      FROM thread_messages AS tm
+      JOIN messages AS m ON tm.message_id = m.id
+      JOIN server_profile AS sp ON sp.user_id = m.user_id AND sp.server_id = $1
+      WHERE tm.thread_id = $2 AND m.type = 'threads'
+      ORDER BY m.created_at ASC
+    `,
+        [serverId, threadId]
       );
 
-      for await (const message of threads.rows) {
+      const processMessage = async (message) => {
         const reactions = await this.messageService.getReactions(
           message.message_id
         );
-        const thread = await this.messageService.getThreadByMessage(
+        const threads = await this.messageService.getThreadByMessage(
           message.message_id,
           serverId
         );
+
+        message.threads = threads || [];
         message.reactions = reactions;
-        message.threads = thread || [];
-        allThreads.push(message);
 
-        const replies = await this.messageService.getReplies(
-          message.message_id,
-          serverId
+        messagesWithReactions.push(message);
+
+        const replies = await this.db.pool.query(
+          `
+        SELECT
+        sp.username AS username,
+        tmr.parent_message_id AS parent_message_id,
+        m."content" AS message,
+        m.is_read AS is_read,
+        m.id AS message_id,
+        m.user_id AS author,
+        m.image_url AS media_image,
+        m."type" AS message_type,
+        m.image_asset_id AS media_image_asset_id,
+        m.created_at AS created_at,
+        m.updated_at AS update_at
+        FROM thread_messages_replies AS tmr
+        JOIN messages AS m ON m.id = tmr.message_id
+        JOIN server_profile AS sp ON sp.user_id = m.user_id AND sp.server_id = $1
+        WHERE tmr.parent_message_id = $2
+      `,
+          [serverId, message.message_id]
         );
 
-        allThreads.push(...replies.flat());
-      }
-      const groupedMessages = groupReactionsByEmoji(allThreads);
+        for (const reply of replies.rows) {
+          await processMessage(reply);
+        }
+      };
 
-      return groupedMessages;
+      for await (const message of messages.rows) {
+        await processMessage(message);
+      }
+
+      messagesWithReactions.sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+      const groupedMessages = groupReactionsByEmoji(messagesWithReactions);
+      const allMessages =
+        this.messageService.addLabelsToMessages(groupedMessages);
+
+      return allMessages;
     } catch (error) {
       throw error;
     }
@@ -151,13 +230,45 @@ export class ThreadsService {
         [channelId, serverId]
       );
 
-      const threads = groupReactionsByEmoji(allThreads.rows);
-
       return {
-        data: threads,
+        data: allThreads.rows,
         error: false,
       };
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async replyThreadMessage(
+    parentMessageId: string,
+    threadId: string,
+    content: string,
+    user_id: string,
+    imageUrl: string,
+    imageAssetId: string
+  ) {
+    try {
+      console.log('reply thread');
+
+      await this.db.pool.query('begin');
+
+      const {
+        rows: [msg],
+      } = await this.db.pool.query(
+        `insert into messages ("content", user_id, "type", image_url,image_asset_id)
+        values($1, $2, 'threads', $3,$4)
+        returning id`,
+        [content, user_id, imageUrl, imageAssetId]
+      );
+      await this.db.pool.query(
+        `insert into thread_messages_replies (parent_message_id,  message_id, thread_id)
+	      values($1, $2, $3)`,
+        [parentMessageId, msg.id, threadId]
+      );
+
+      await this.db.pool.query('commit');
+    } catch (error) {
+      await this.db.pool.query('rollback');
       throw error;
     }
   }

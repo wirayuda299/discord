@@ -19,7 +19,6 @@ import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from '../members/memberItem';
 import useSocket from '@/hooks/useSocket';
-import { Message } from '@/types/messages';
 import { PinnedMessage, getPinnedMessages } from '@/helper/message';
 import { Member } from '@/types/server';
 import { SocketStates } from '@/types/socket-states';
@@ -201,7 +200,7 @@ export default function ChannelInfo() {
 			getPinnedMessages(params?.channelId as string)
 		);
 
-	const media = (states.channel_messages as Message[])
+	const media = (states?.channel_messages ||[])
 		.filter((message) => message.media_image)
 		.map((message) => message.media_image);
 

@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import { toast } from 'sonner';
+import type { Socket } from 'socket.io-client';
+import Link from 'next/link';
 
 import {
 	ContextMenu,
@@ -12,22 +14,20 @@ import { Member } from '@/types/server';
 import { SocketStates } from '@/types/socket-states';
 import { createError } from '@/utils/error';
 import { banMember, kickMember } from '@/actions/members';
-import Link from 'next/link';
 import { copyText } from '@/utils/copy';
-import { Socket } from 'socket.io-client';
 
 export default function MemberItem({
 	member,
 	currentUser,
 	states,
 	ownerId,
-	socket
+	socket,
 }: {
 	member: Member;
 	ownerId: string;
 	currentUser: string;
-		states: SocketStates;
-	socket:Socket|null
+	states: SocketStates;
+	socket: Socket | null;
 }) {
 	const handleKickMember = async () => {
 		try {
@@ -44,12 +44,12 @@ export default function MemberItem({
 
 	const handleBanMember = async () => {
 		try {
-			await banMember(member.server_id, member.user_id, currentUser)
-			socket?.emit('banned_members', {serverId:member.server_id})
+			await banMember(member.server_id, member.user_id, currentUser);
+			socket?.emit('banned_members', { serverId: member.server_id });
 		} catch (error) {
-			createError(error)
+			createError(error);
 		}
-	}
+	};
 
 	return (
 		<ContextMenu>
