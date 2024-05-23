@@ -1,4 +1,4 @@
-import ChatList from "@/components/shared/messages/chat-list";
+import PersonalMessages from "@/components/user/personal-messages";
 import { cn } from "@/lib/utils/mergeStyle";
 
 type Props = {
@@ -19,7 +19,7 @@ export default function Messages({ searchParams }: Props) {
           : "right-0",
       )}
     >
-      <ChatList />
+      <PersonalMessages />
     </div>
   );
 }

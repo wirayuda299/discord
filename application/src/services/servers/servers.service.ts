@@ -180,6 +180,27 @@ export class ServersService {
     }
   }
 
+  groupChannel(channels: any[]) {
+    const grouped = channels.reduce((acc, channel) => {
+      const existingCategory = acc.find(
+        (cat) => cat.channel_type === channel.channel_type
+      );
+      if (existingCategory) {
+        existingCategory.channels.push(channel);
+      } else {
+        acc.push({
+          ...channel,
+          channels: [channel],
+        });
+      }
+      return acc;
+    }, []);
+
+    return grouped.sort((a, b) =>
+      a.channel_type === 'text' ? -1 : b.channel_type === 'text' ? 1 : 0
+    );
+  }
+
   async getServerById(id: string) {
     try {
       const server = await this.databaseService.pool.query(
@@ -208,7 +229,7 @@ export class ServersService {
         [id]
       );
 
-      const channels = channelsQuery.rows;
+      const channels = this.groupChannel(channelsQuery.rows);
       const serverSettings = await this.databaseService.pool.query(
         `select * from server_settings where server_id=$1`,
         [server.rows[0].id]

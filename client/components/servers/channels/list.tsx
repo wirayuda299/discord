@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
 import { Channel } from '@/types/channels';
@@ -15,7 +15,13 @@ import CreateChannelModals from '@/components/servers/channels/create-channel-mo
 import AddUser from '@/components/servers/add-user';
 import useSocket from '@/hooks/useSocket';
 
-export default function ChannelList({ channels, server }:{channels:Channel[], server:Servers}) {
+export default function ChannelList({
+	channels,
+	server,
+}: {
+	channels: Channel[];
+	server: Servers;
+}) {
 	const {
 		serversState: { selectedChannel },
 		setServerStates,
@@ -23,49 +29,30 @@ export default function ChannelList({ channels, server }:{channels:Channel[], se
 	const { states, userId, params } = useSocket();
 	const [selectedCategory, setSelectedCategory] = useState('');
 
-	const toggleCategory = useCallback((categoryName:string) => {
+	const toggleCategory = useCallback((categoryName: string) => {
 		setSelectedCategory((prev) => (prev === categoryName ? '' : categoryName));
 	}, []);
 
-	const selectChannel = useCallback((channel:Channel|null) => {
-		setServerStates((prev) => ({ ...prev, selectedChannel: channel }));
-	}, [setServerStates]);
+	const selectChannel = useCallback(
+		(channel: Channel | null) => {
+			setServerStates((prev) => ({ ...prev, selectedChannel: channel }));
+		},
+		[setServerStates]
+	);
 
-	const groupedChannels = useMemo(() => {
-		const grouped = channels.reduce((acc:Channel[], channel) => {
-			const existingCategory = acc.find(
-				(cat) => cat.channel_type === channel.channel_type
-			);
-			if (existingCategory) {
-				existingCategory.channels.push(channel);
-			} else {
-				acc.push({
-					...channel,
-					channels: [channel],
-				});
+	useEffect(() => {
+		const channel = channels.find((c) => c.channel_id === params.channelId);
+		setServerStates((prev) => {
+			if (prev.selectedChannel !== channel) {
+				return { ...prev, selectedChannel: channel || null };
 			}
-			return acc;
-		}, [])
-		
-		return grouped.sort((a, b) =>
-			a.channel_type === 'text' ? -1 : b.channel_type === 'text' ? 1 : 0
-		);
-	}, [channels]);
-
-useEffect(() => {
-	const channel = channels.find((c) => c.channel_id === params.channelId);
-	setServerStates((prev) => {
-		if (prev.selectedChannel !== channel) {
-			return { ...prev, selectedChannel: channel || null };
-		}
-		return prev;
-	});
-}, [params.channelId, channels]);
-
+			return prev;
+		});
+	}, [params.channelId, channels]);
 
 	return (
 		<ul className='text-gray-2'>
-			{groupedChannels.map((channel) => (
+			{channels?.map((channel) => (
 				<li className='my-4' key={channel.category_id}>
 					<div className='flex w-full items-center justify-between pr-2'>
 						<div
@@ -90,7 +77,7 @@ useEffect(() => {
 								serverId={server.id}
 								type={channel.channel_type}
 							>
-								<button title='create channel'>
+								<button role='button' title='create channel'>
 									<Plus size={18} />
 								</button>
 							</CreateChannelModals>

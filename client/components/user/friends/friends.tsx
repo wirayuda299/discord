@@ -16,7 +16,7 @@ import { getMyInvitation } from "@/helper/user";
 import { Button } from "@/components/ui/button";
 import { createError } from "@/utils/error";
 import { acceptinvitation } from "@/actions/invitation";
-import Inbox from "@/components/servers/channels/inbox";
+import Inbox from "@/components/shared/inbox";
 
 import { useUserContext } from "@/providers/users";
 const PendingInvitation = dynamic(

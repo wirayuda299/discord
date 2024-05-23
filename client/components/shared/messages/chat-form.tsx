@@ -266,8 +266,6 @@ function ChatForm({
 
 	const image = form.watch('image');
 
-	// console.log({selectedMessage, selectedThread});
-
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='relative w-full'>

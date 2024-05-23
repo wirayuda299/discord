@@ -5,7 +5,7 @@ import ServerSidebarLinksItem from '@/components/shared/sidebar/server-sidebar-l
 import { serverSidebarLinks } from '@/constants/sidebarLinks';
 import { getConversationList } from '@/helper/conversations';
 import Conversation from '@/components/shared/messages/conversation';
-import SearchForm from '@/components/servers/channels/search-form';
+import SearchForm from '@/components/shared/search-form';
 
 export default async function DirectMessagesLayout({
 	children,

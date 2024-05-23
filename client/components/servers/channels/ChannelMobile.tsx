@@ -7,7 +7,7 @@ import ChannelList from "../channels/list";
 import { Servers } from "@/types/server";
 import { Channel } from "@/types/channels";
 import AddUser from "@/components/servers/add-user";
-import SearchForm from "./search-form";
+import SearchForm from "../../shared/search-form";
 
 export default function ChannelDrawerMobile({
   channels,

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
-import SearchForm from '../../channels/search-form';
+import SearchForm from '../../../shared/search-form';
 import AssignRole from './AssignRole';
 import { Role, removeRoleFromUser } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';

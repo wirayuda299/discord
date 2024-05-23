@@ -10,13 +10,13 @@ import { cn } from '@/lib/utils/mergeStyle';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
-import SearchForm from './search-form';
+import SearchForm from '../../shared/search-form';
 import { useServerContext } from '@/providers/server';
 import useSocket from '@/hooks/useSocket';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
 
-const Inbox = dynamic(() => import('./inbox'), { ssr: false });
+const Inbox = dynamic(() => import('../../shared/inbox'), { ssr: false });
 const PinnedMessage = dynamic(
 	() => import('@/components/shared/messages/pinned-message'),
 	{ ssr: false }

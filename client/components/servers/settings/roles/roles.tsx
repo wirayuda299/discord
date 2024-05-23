@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import useFetch from "@/hooks/useFetch";
 import { Role, getAllRoles } from "@/helper/roles";
-import SearchForm from "../../channels/search-form";
+import SearchForm from "../../../shared/search-form";
 import { Button } from "@/components/ui/button";
 import GeneralLoader from "@/components/shared/loader/general";
 
