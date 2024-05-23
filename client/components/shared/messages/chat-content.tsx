@@ -1,4 +1,4 @@
-import { ReactNode, memo, useCallback, useState } from 'react';
+import { ReactNode, memo, useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 import type { Socket } from 'socket.io-client';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 
 import { ServerStates, useServerContext } from '@/providers/server';
 import { Message } from '@/types/messages';
+import { SocketStates } from '@/types/socket-states';
+import { findBannedMembers } from '@/utils/banned_members';
 const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
 const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {
 	ssr: false,
@@ -14,9 +16,11 @@ const MessageMenu = dynamic(() => import('./menu'), { ssr: false });
 
 type Props = {
 	userId: string;
+	channelId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	serverStates: ServerStates;
+	socketStates:SocketStates
 	message: Message;
 	socket: Socket | null;
 	handleClick: (e: any) => void;
@@ -54,12 +58,19 @@ function ChatContent({
 	children,
 	reloadMessage,
 	styles,
+	socketStates,
 	replyType,
+	channelId
 }: Props) {
 	const searchParams = useSearchParams();
 	const { setServerStates } = useServerContext();
 	const router = useRouter();
 	const [formOpen, setFormOpen] = useState<boolean>(false);
+
+const isCurrentUserBanned = useMemo(
+	() => findBannedMembers(socketStates.banned_members, userId!),
+	[socketStates.banned_members, userId]
+);
 
 	const handleSelectedMessage = useCallback((msg: Message ) => {
 			setServerStates((prev) => ({
@@ -126,39 +137,40 @@ function ChatContent({
 						))}
 					</div>
 				</div>
-
-				<div className='absolute right-0 h-7  rounded bg-background/50 opacity-0 shadow-lg group-hover:opacity-100 sm:right-0 md:brightness-110'>
-					<div className='flex size-full min-w-24 items-center gap-4 px-2'>
-						<EmojiPickerButton handleClick={handleClick} />
-						{message.author === userId && (
-							<button
-								name='Edit message'
-								title='Edit message'
-								type='button'
-								className='min-w-5'
-								onClick={() => setFormOpen((prev) => !prev)}
-							>
-								<Image
-									src={'/icons/pencil.svg'}
-									width={20}
-									height={20}
-									alt='pencil'
-								/>
-							</button>
-						)}
-						{children}
-						<MessageMenu
-							type={replyType}
-							styles={styles}
-							socket={socket}
-							handleSelectedMessage={handleSelectedMessage}
-							currentUser={userId}
-							channelId={serverStates.selectedChannel?.channel_id!}
-							message={message}
-							serverId={serverStates.selectedServer?.id!}
-						/>
+				{!isCurrentUserBanned && (
+					<div className='absolute right-0 h-7  rounded bg-background/50 opacity-0 shadow-lg group-hover:opacity-100 sm:right-0 md:brightness-110'>
+						<div className='flex size-full min-w-24 items-center gap-4 px-2'>
+							<EmojiPickerButton handleClick={handleClick} />
+							{message.author === userId && (
+								<button
+									name='Edit message'
+									title='Edit message'
+									type='button'
+									className='min-w-5'
+									onClick={() => setFormOpen((prev) => !prev)}
+								>
+									<Image
+										src={'/icons/pencil.svg'}
+										width={20}
+										height={20}
+										alt='pencil'
+									/>
+								</button>
+							)}
+							{children}
+							<MessageMenu
+								type={replyType}
+								styles={styles}
+								socket={socket}
+								handleSelectedMessage={handleSelectedMessage}
+								currentUser={userId}
+								channelId={channelId}
+								message={message}
+								serverId={serverStates.selectedServer?.id!}
+							/>
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 			{formOpen && (
 				<EditMessageForm

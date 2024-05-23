@@ -27,15 +27,13 @@ export default function ServerSidebar({
 						src={data.server.banner}
 						width={500}
 						height={300}
-						className='aspect-auto w-full object-cover'
+						className='aspect-video max-h-28 w-full object-cover object-center'
 						alt='banner'
 						priority
 						fetchPriority="high"
 					/>
 				)}
-				{data.server && (
-					<ServerMenu server={data.server} />
-				)}
+				{data.server && <ServerMenu server={data.server} />}
 				{data.server.settings.show_progress_bar && (
 					<div className='w-full p-2'>
 						<div className='flex w-full justify-between'>

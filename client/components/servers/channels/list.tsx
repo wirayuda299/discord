@@ -41,15 +41,13 @@ export default function ChannelList({
 	);
 
 	useEffect(() => {
-		const channel = channels.find((c) => c.channel_id === params.channelId);
+		const channel = channels.map(c => c.channels)[0].find(c => c.channel_id === params.channelId)
+		
 		setServerStates((prev) => {
-			if (prev.selectedChannel !== channel) {
 				return { ...prev, selectedChannel: channel || null };
-			}
-			return prev;
 		});
-	}, [params.channelId, channels]);
-
+	}, [params.channelId, channels, setServerStates]);
+	
 	return (
 		<ul className='text-gray-2'>
 			{channels?.map((channel) => (

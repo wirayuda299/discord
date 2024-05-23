@@ -1,43 +1,27 @@
-import { useCallback, useState } from "react";
-import { Cog, X } from "lucide-react";
+import { useCallback, useState } from 'react';
+import { Cog, X } from 'lucide-react';
 
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTrigger,
-} from "../../ui/dialog";
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogTrigger,
+} from '../../ui/dialog';
 
-import { getServerSettings } from "@/constants/settings";
-import { cn } from "@/lib/utils/mergeStyle";
-import ServerOverview from "./overview";
-import Roles from "./roles/roles";
+import { getServerSettings } from '@/constants/settings';
+import { cn } from '@/lib/utils/mergeStyle';
+import ServerOverview from './overview';
+import Roles from './roles/roles';
+import { Servers } from '@/types/server';
+import ServerBanList from './bans';
 
-export default function ServerSetting({
-	logo,
-	name,
-	logoAssetId,
-	serverId,
-	showProgressBar,
-	showBanner,
-	banner,
-	bannerAssetId,
-  serverAuthor,
-  
-}: {
-	logo: string;
-	logoAssetId: string;
-	name: string;
-	serverId: string;
-	serverAuthor: string;
-	showProgressBar: boolean;
-	showBanner: boolean;
-	banner: string | null;
-	bannerAssetId: string | null;
-}) {
+export default function ServerSetting({ server }: { server: Servers }) {
 	const [selectedSetting, setSelectedSetting] = useState<string>('overview');
 
-	const serverSettings = useCallback(() => getServerSettings(name), [name]);
+	const serverSettings = useCallback(
+		() => getServerSettings(server.name),
+		[server.name]
+	);
 
 	return (
 		<Dialog modal>
@@ -82,20 +66,15 @@ export default function ServerSetting({
 					</div>
 					<div className='no-scrollbar h-screen w-full overflow-y-auto py-10'>
 						{selectedSetting === 'overview' && (
-							<ServerOverview
-								banner={banner}
-								bannerAssetId={bannerAssetId}
-								logo={logo}
-								logoAssetId={logoAssetId}
-								name={name}
-								serverId={serverId}
-								showBanner={showBanner}
-								showProgressBar={showProgressBar}
-							/>
+							<ServerOverview server={server} />
 						)}
 
 						{selectedSetting === 'roles' && (
-							<Roles serverId={serverId} serverAuthor={serverAuthor} />
+							<Roles serverId={server.id} serverAuthor={server.owner_id} />
+						)}
+
+						{selectedSetting === 'bans' && (
+							<ServerBanList serverId={server.id} serverAuthor={server.owner_id } />
 						)}
 					</div>
 					<div className=' min-w-24 pt-10'>

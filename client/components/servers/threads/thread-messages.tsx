@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { useRef, ReactNode, memo } from 'react';
+import { useRef, ReactNode, memo, useMemo } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -11,6 +11,7 @@ import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
+import { findBannedMembers } from '@/utils/banned_members';
 
 type Props = {
 	threadId: string;
@@ -23,30 +24,33 @@ function ThreadMessages({ threadId, children }: Props) {
 	const { states, reloadThreadMessages, socket, userId, searchParams, params } =
 		useSocket();
 	const { serversState, setServerStates } = useServerContext();
-	const { selectedServer, selectedChannel, selectedMessage } = serversState;
+	const { selectedServer, selectedChannel, selectedMessage, selectedThread } = serversState;
+
+	
+	const isCurrentUserBanned = useMemo(
+		() => findBannedMembers(states.banned_members, userId!),
+		[states.banned_members, userId]
+	);
 
 	const path = 
 			`/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`
 
 	useScroll(messageRef, states.thread_messages);
 
-	console.log(states.thread_messages);
-	
-
-
 	return (
-		<Sheet onOpenChange={(isOpen) => {
-			if (!isOpen) {
-				setServerStates(prev => ({
-					...prev,
-					selectedThread: null,
-					selectedMessage:null,
-				}))
-			} else {
-				reloadThreadMessages(threadId);
-			}
-		}
-		}>
+		<Sheet
+			onOpenChange={(isOpen) => {
+				if (!isOpen) {
+					setServerStates((prev) => ({
+						...prev,
+						selectedThread: null,
+						selectedMessage: null,
+					}));
+				} else {
+					reloadThreadMessages(threadId);
+				}
+			}}
+		>
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent
 				side='right'
@@ -64,15 +68,16 @@ function ThreadMessages({ threadId, children }: Props) {
 						<h3 className='text-base font-semibold text-gray-2'>
 							Thread -{' '}
 							<span className=' uppercase text-gray-2'>
-								{states.thread_messages?.[0]?.thread_name}
+								{selectedThread?.thread_name}
 							</span>
 						</h3>
 					</header>
 					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
 						{states.thread_messages?.map((message: Message) => (
 							<ChatItem
+								channelId={params.channelId as string}
 								setServerStates={setServerStates}
-								searchParams={searchParams}
+								socketStates={states}
 								replyType='thread'
 								reloadMessage={() => reloadThreadMessages(threadId)}
 								socket={socket}
@@ -108,17 +113,19 @@ function ThreadMessages({ threadId, children }: Props) {
 							</Link>
 						</div>
 					)}
-					<ChatForm
-						reloadMessage={() => reloadThreadMessages(threadId)}
-						params={params}
-						searchParams={searchParams}
-						userId={userId!!}
-						placeholder='Send message'
-						serverStates={serversState}
-						setServerStates={setServerStates}
-						socket={socket}
-						type='thread'
-					/>
+					{!isCurrentUserBanned && (
+						<ChatForm
+							reloadMessage={() => reloadThreadMessages(threadId)}
+							params={params}
+							searchParams={searchParams}
+							userId={userId!!}
+							placeholder='Send message'
+							serverStates={serversState}
+							setServerStates={setServerStates}
+							socket={socket}
+							type='thread'
+						/>
+					)}
 				</div>
 			</SheetContent>
 		</Sheet>

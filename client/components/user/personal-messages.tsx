@@ -52,8 +52,9 @@ export default function ChatList() {
 				<ul className='h-full overflow-y-auto p-3'>
 					{messages?.map((message) => (
 						<ChatItem
+							channelId=""
 							setServerStates={setServerStates}
-							searchParams={searchParams}
+							socketStates={states}
 							replyType='personal'
 							key={message.created_at}
 							styles='hidden'

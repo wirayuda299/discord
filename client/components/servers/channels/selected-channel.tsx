@@ -15,6 +15,7 @@ import { useServerContext } from '@/providers/server';
 import useSocket from '@/hooks/useSocket';
 import useScroll from '@/hooks/useScroll';
 import { Message } from '@/types/messages';
+import { findBannedMembers } from '@/utils/banned_members';
 
 const Inbox = dynamic(() => import('../../shared/inbox'), { ssr: false });
 const PinnedMessage = dynamic(
@@ -40,18 +41,12 @@ function SelectedChannel() {
 	const { selectedChannel } = serversState;
 
 
-	const isCurrentUserBanned = useMemo(
-		() =>
-			states.banned_members.length >= 1 &&
-			states.banned_members.find(
-				(member) => member.member_id === userId
-			), [states.banned_members, userId]
+	const isCurrentUserBanned = useMemo(() =>findBannedMembers(states.banned_members, userId!), [states.banned_members, userId]
 	)
 
 	const handleBackClick = useCallback(() => setServerStates((prev) => ({ ...prev, selectedChannel: null })), [setServerStates]);
 
 	useScroll(ref, states.channel_messages);
-
 	
 
 	return (
@@ -127,23 +122,24 @@ function SelectedChannel() {
 				>
 					{states.channel_messages?.map((msg: Message) => (
 						<ChatItem
+							channelId={params?.channelId as string||''}
 							setServerStates={setServerStates}
-							searchParams={searchParams}
-								replyType='channel'
-								reloadMessage={() =>
-									reloadChannelMessage(
-										params.channelId as string,
-										params.serverId as string
-									)
-								}
-								socket={socket}
-								serverStates={serversState}
-								messages={states.channel_messages}
-								userId={userId!!}
-								msg={msg}
-								key={msg.message_id}
-							/>
-						))}
+							socketStates={states}
+							replyType='channel'
+							reloadMessage={() =>
+								reloadChannelMessage(
+									params.channelId as string,
+									params.serverId as string
+								)
+							}
+							socket={socket}
+							serverStates={serversState}
+							messages={states.channel_messages}
+							userId={userId!!}
+							msg={msg}
+							key={msg.message_id}
+						/>
+					))}
 				</ul>
 				{!isCurrentUserBanned ? (
 					<ChatForm
@@ -159,12 +155,11 @@ function SelectedChannel() {
 							)
 						}
 						setServerStates={setServerStates}
-
 						serverStates={serversState}
 						placeholder={`Message #${selectedChannel?.channel_name}`}
 					/>
 				) : (
-					<p className='text-center text-white'>You are banned </p>
+					<p className='text-center text-red-600'>You are banned </p>
 				)}
 			</div>
 		</div>

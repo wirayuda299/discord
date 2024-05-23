@@ -364,10 +364,14 @@ export class MessagesService {
 
   async pinMessage(messageId: string, channel_id: string, pinnedBy: string) {
     try {
+      console.log({ messageId, channel_id, pinnedBy });
+
       const channelExists = await this.db.pool.query(
         `SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1)`,
         [channel_id]
       );
+
+      console.log(channelExists.rows);
 
       const messageExists = await this.db.pool.query(
         `SELECT EXISTS(SELECT 1 FROM messages WHERE id = $1)`,

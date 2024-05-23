@@ -180,7 +180,7 @@ export class ServersService {
     }
   }
 
-  groupChannel(channels: any[]) {
+  private groupChannel(channels: any[]) {
     const grouped = channels.reduce((acc, channel) => {
       const existingCategory = acc.find(
         (cat) => cat.channel_type === channel.channel_type
@@ -238,7 +238,7 @@ export class ServersService {
 
       return {
         data: {
-          channels,
+          channels: channels,
           server: server.rows,
         },
         error: false,
@@ -292,6 +292,20 @@ export class ServersService {
         throw new HttpException(
           'You already an admin of this server',
           HttpStatus.BAD_REQUEST
+        );
+      }
+
+      const banned_members = await this.databaseService.pool.query(
+        `SELECT * 
+       FROM banned_members AS bm
+       JOIN server_profile AS sp ON sp.user_id = bm.member_id 
+       WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
+        [server_id, userId]
+      );
+      if (banned_members.rows.length >= 1) {
+        throw new HttpException(
+          'You are banned from this server, ask the author to remove you from banned list to join again',
+          HttpStatus.FORBIDDEN
         );
       }
 

@@ -3,6 +3,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Patch,
   Post,
   Query,
   Req,
@@ -21,6 +22,18 @@ export class MembersController {
       throw new HttpException('Server Id is required', HttpStatus.BAD_REQUEST);
     }
     return this.memberService.getMemberInServer(id);
+  }
+  @Get('/banned')
+  getBannedMembers(@Query('serverId') id: string) {
+    if (!id) {
+      throw new HttpException('Server Id is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.memberService.getBannedMembers(id);
+  }
+  @Patch('/revoke')
+  removeMemberFromBanedList(@Req() req: Request) {
+    const { serverId, memberId } = req.body;
+    return this.memberService.revokeBannedMember(serverId, memberId);
   }
 
   @Get('/is-member-or-author')

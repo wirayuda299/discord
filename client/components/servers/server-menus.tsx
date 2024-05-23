@@ -33,7 +33,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
-					<p className='truncate text-wrap'>{server.name ?? ''}</p>
+					<p className='truncate text-wrap'>{server.name || 'server name'}</p>
 					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
 				</button>
 			</DropdownMenuTrigger>
@@ -67,21 +67,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 					</DropdownMenuItem>
 				</AddUser>
 				{serversState.selectedServer && server.owner_id === userId && (
-					<ServerSetting
-						banner={serversState.selectedServer.banner}
-						bannerAssetId={serversState.selectedServer.banner_asset_id}
-						showBanner={
-							serversState.selectedServer.settings.show_banner_background
-						}
-						showProgressBar={
-							serversState.selectedServer.settings.show_progress_bar
-						}
-						logo={serversState.selectedServer?.logo || ''}
-						logoAssetId={serversState.selectedServer?.logo_asset_id || ''}
-						name={serversState.selectedServer?.name || ''}
-						serverId={server.id}
-						serverAuthor={server.owner_id}
-					/>
+					<ServerSetting server={server} />
 				)}
 				{(serverOwnerId === userId ||
 					(states.user_roles && states.user_roles.manage_channel)) && (

@@ -10,18 +10,19 @@ import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
-import type { ReadonlyURLSearchParams } from 'next/navigation';
+import { SocketStates } from '@/types/socket-states';
 
 type Props = {
 	socket: Socket | null;
 	msg: Message & { shouldAddLabel?: boolean };
 	userId: string;
+	channelId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	messages: Message[];
 	serverStates: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-	searchParams: ReadonlyURLSearchParams;
+socketStates:SocketStates
 	reloadMessage: () => void;
 };
 
@@ -34,7 +35,8 @@ function ChatItem({
 	socket,
 	reloadMessage,
 	styles,
-	searchParams,
+	socketStates,
+	channelId,
 	setServerStates
 }: Props) {
 	const { selectedServer } = serverStates;
@@ -89,6 +91,8 @@ function ChatItem({
 				</Link>
 			)}
 			<ChatContent
+				channelId={channelId}
+				socketStates={socketStates}
 				replyType={replyType}
 				styles={styles}
 				reloadMessage={reloadMessage}

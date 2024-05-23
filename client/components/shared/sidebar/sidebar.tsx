@@ -24,6 +24,7 @@ export default async function Sidebar() {
 	}
 	const [conversations, servers] = results;
 
+
 	return (
 		<aside className='flex size-full min-h-screen min-w-[80px] max-w-[80px]  shrink flex-col items-center overflow-y-auto overflow-x-hidden border-r-2 border-r-foreground bg-black/50 p-4 md:bg-foreground'>
 			<Link

@@ -1,8 +1,10 @@
 import { Suspense, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 
 import Sidebar from "@/components/shared/sidebar/sidebar";
-import SidebarMobile from "@/components/shared/sidebar/mobile";
-
+const SidebarMobile = dynamic(
+	() => import('@/components/shared/sidebar/mobile')
+);
 export default async function MainLayout({
   children,
 }: {

@@ -6,12 +6,14 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { ServersService } from '../servers/servers.service';
+import { ImagehandlerService } from '../imagehandler/imagehandler.service';
 
 @Injectable()
 export class MembersService {
   constructor(
     private db: DatabaseService,
-    private serverService: ServersService
+    private serverService: ServersService,
+    private imageService: ImagehandlerService
   ) {}
 
   async isAllowedToKickMember(serverId: string, userId: string) {
@@ -153,9 +155,11 @@ export class MembersService {
         `select * from members where server_id = $1 and user_id = $2`,
         [serverId, memberId]
       );
-      if (foundMember.rows.length < 1) {
-        throw new NotFoundException('Member not found');
-      }
+
+      const serverProfile = await this.serverService.getServerProfile(
+        serverId,
+        memberId
+      );
       const roles = await this.db.pool.query(
         ` select * from user_roles as ur
           join roles as r on r.id = ur.role_id 
@@ -163,7 +167,20 @@ export class MembersService {
           where ur.user_id = $1 and p.server_id = $2`,
         [memberId, serverId]
       );
+
+      console.log(serverProfile.data);
+
+      const serverProfileAssetId = serverProfile.data?.avatar_asset_id;
       await this.db.pool.query(`begin`);
+
+      if (serverProfileAssetId) {
+        await this.imageService.deleteImage(serverProfileAssetId);
+      }
+
+      if (foundMember.rows.length < 1) {
+        throw new NotFoundException('Member not found');
+      }
+
       await this.db.pool.query(
         `delete from members where user_id = $1 and server_id = $2`,
         [memberId, serverId]
@@ -180,6 +197,11 @@ export class MembersService {
           [memberId, serverId]
         );
       }
+
+      await this.db.pool.query(
+        `delete from server_profile as sp where sp.server_id = $1 and sp.user_id = $2`,
+        [serverId, memberId]
+      );
       await this.db.pool.query(`commit`);
       return {
         messages: 'Member kicked from server',
@@ -206,10 +228,28 @@ export class MembersService {
     }
   }
 
+  async revokeBannedMember(serverId: string, memberId: string) {
+    try {
+      await this.db.pool.query(
+        `delete from banned_members as bm where bm.server_id= $1 and bm.member_id = $2 `,
+        [serverId, memberId]
+      );
+      return {
+        message: 'Member removed from banned member list',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getBannedMembers(serverId: string) {
     try {
       const bannedMembers = await this.db.pool.query(
-        `select * from banned_members where server_id = $1`,
+        `SELECT * 
+       FROM banned_members AS bm
+       JOIN users AS u ON u.id = bm.member_id 
+       WHERE bm.server_id = $1 AND bm.server_id = $1`,
         [serverId]
       );
       return bannedMembers.rows;

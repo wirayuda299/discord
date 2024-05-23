@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { Channel } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
 import { prepareHeaders } from './cookies';
+import { revalidate } from '@/utils/cache';
 
 const serverUrl = process.env.SERVER_URL;
 
@@ -155,8 +156,8 @@ export async function updateServer(
 				bannerAssetId,
 			}),
 		});
-		revalidatePath('/server');
-		revalidatePath('/server/' + serverId);
+		revalidate('/server');
+		revalidate('/server/' + serverId);
 	} catch (error) {
 		throw error;
 	}

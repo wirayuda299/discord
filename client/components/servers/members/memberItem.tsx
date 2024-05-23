@@ -31,6 +31,7 @@ export default function MemberItem({
 }) {
 	const handleKickMember = async () => {
 		try {
+		
 			await kickMember(
 				member.server_id,
 				member.user_id,

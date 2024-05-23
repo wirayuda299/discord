@@ -156,6 +156,7 @@ export default function useSocket() {
 		socket,
 		userId,
 		getUserRole,
+		getBannedMembers,
 		params: { serverId, channelId },
 	};
 }

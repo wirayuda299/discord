@@ -22,35 +22,22 @@ import { updateServer } from "@/helper/server";
 import { UpdateServerSchemaType, updateServerSchema } from "@/validations";
 import { createError } from "@/utils/error";
 import { Switch } from "@/components/ui/switch";
+import { Servers } from "@/types/server";
 
 export default function ServerOverview({
-  logo,
-  name,
-  logoAssetId,
-  serverId,
-  showBanner,
-  showProgressBar,
-  banner,
-  bannerAssetId,
+server
 }: {
-  logo: string;
-  logoAssetId: string;
-  name: string;
-  serverId: string;
-  showProgressBar: boolean;
-  showBanner: boolean;
-  banner: string | null;
-  bannerAssetId: string | null;
+  server:Servers
 }) {
   const { userId } = useAuth();
   const form = useForm<UpdateServerSchemaType>({
     resolver: zodResolver(updateServerSchema),
     defaultValues: {
-      logo,
-      name,
-      showBanner,
-      showProgressBar,
-      banner,
+      logo: server.logo ||'',
+      name: server.name,
+      showBanner:server.settings.show_banner_background,
+      showProgressBar: server.settings.show_progress_bar,
+      banner:server.banner,
     },
   });
   const { handleChange, preview, files } = useUploadFile(form);
@@ -71,7 +58,7 @@ export default function ServerOverview({
         banner: { url: string; id: string },
       ) => {
         await updateServer(
-          serverId,
+          server.id,
           data.name,
           logo.url!,
           logo.id!,
@@ -95,18 +82,18 @@ export default function ServerOverview({
       };
 
       if (editedFields.logo) {
-        const logo = await handleFileUpload("logo", logoAssetId);
+        const logo = await handleFileUpload("logo", server.logo_asset_id);
         await updateServerData(
           {
             url: logo?.url,
             id: logo?.publicId,
           },
-          { id: bannerAssetId!!, url: data?.banner!! },
+          { id: server.banner_asset_id!, url: data?.banner!! },
         );
       } else if (editedFields.banner) {
-        const banner = await handleFileUpload("banner", bannerAssetId!);
+        const banner = await handleFileUpload("banner", server.banner_asset_id!!);
         await updateServerData(
-          { id: logoAssetId, url: data.logo },
+          { id: server.logo_asset_id, url: data.logo },
           {
             url: banner?.url,
             id: banner?.publicId,
@@ -115,10 +102,10 @@ export default function ServerOverview({
       } else if (editedFields.logo && editedFields.banner) {
         const [logo, banner] = await Promise.all([
           editedFields.logo
-            ? handleFileUpload("logo", logoAssetId)
+            ? handleFileUpload("logo", server.logo_asset_id)
             : Promise.resolve(null),
           editedFields.banner
-            ? handleFileUpload("banner", bannerAssetId!)
+            ? handleFileUpload("banner", server.banner_asset_id ||'')
             : Promise.resolve(null),
         ]);
         await updateServerData(
@@ -127,9 +114,9 @@ export default function ServerOverview({
         );
       } else {
         await updateServerData(
-          { id: logoAssetId, url: data.logo },
-          { id: bannerAssetId!!, url: data?.banner!! },
-        );
+					{ id: server.logo_asset_id, url: data.logo },
+					{ id: server.banner_asset_id!, url: data?.banner!! }
+				);
       }
     } catch (error) {
       createError(error);
@@ -293,7 +280,7 @@ export default function ServerOverview({
 									</div>
 									{localBanner || (preview && preview.banner) ? (
 										<Image
-											className='w-full rounded-md object-cover'
+											className='max-h-52 w-full rounded-md object-cover'
 											src={form.getValues('banner') || preview?.banner || ''}
 											width={300}
 											height={300}
