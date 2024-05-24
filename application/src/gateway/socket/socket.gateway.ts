@@ -131,6 +131,12 @@ export class SocketGateway implements OnModuleInit {
           payload.imageAssetId,
           payload.recipientId
         );
+
+        const message = await this.messagesService.getPersonalMessage(
+          payload.conversationId,
+          payload.user_id
+        );
+        this.server.emit('set-personal-messages', message);
         break;
       default:
         this.logger.warn(`Unknown message type: ${payload.type}`);
@@ -141,8 +147,6 @@ export class SocketGateway implements OnModuleInit {
   async getChannelMessage(
     @MessageBody() payload: { channelId: string; serverId: string }
   ) {
-    console.log(payload);
-
     try {
       const messages = await this.messagesService.getMessageByChannelId(
         payload.channelId,
