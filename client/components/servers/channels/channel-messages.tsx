@@ -1,12 +1,13 @@
+import { Dispatch, SetStateAction, useMemo, useRef } from 'react';
+
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
 import useScroll from '@/hooks/useScroll';
 import useSocket from '@/hooks/useSocket';
 import { ServerStates } from '@/providers/server';
 import { findBannedMembers } from '@/utils/banned_members';
-import { Dispatch, SetStateAction, memo, useMemo, useRef } from 'react';
 
-function ChannelMessages({
+export default function ChannelMessages({
 	serverStates,
 	setServerStates,
 }: {
@@ -14,15 +15,19 @@ function ChannelMessages({
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
 	const ref = useRef<HTMLUListElement>(null);
-  const { reloadChannelMessage, states, socket, params, userId, searchParams} = useSocket();
-  
-  	const isCurrentUserBanned = useMemo(
-			() => findBannedMembers(states.banned_members, userId!),
-			[states.banned_members, userId]
-  );
-  
+	const { reloadChannelMessage, states, socket, params, userId, searchParams } =
+		useSocket();
+
+	const isCurrentUserBanned = useMemo(
+		() => findBannedMembers(states.banned_members, userId!),
+		[states.banned_members, userId]
+	);
+
 	useScroll(ref, states.channel_messages);
 
+	const reloadChannelMessages = () => {
+		reloadChannelMessage(params.channelId as string, params.serverId as string);
+	};
 
 	return (
 		<>
@@ -36,12 +41,7 @@ function ChannelMessages({
 						setServerStates={setServerStates}
 						socketStates={states}
 						replyType='channel'
-						reloadMessage={() =>
-							reloadChannelMessage(
-								params.channelId as string,
-								params.serverId as string
-							)
-						}
+						reloadMessage={reloadChannelMessages}
 						socket={socket}
 						serverStates={serverStates}
 						messages={states.channel_messages}
@@ -60,12 +60,7 @@ function ChannelMessages({
 					params={params}
 					searchParams={searchParams}
 					userId={userId!!}
-					reloadMessage={() =>
-						reloadChannelMessage(
-							params.channelId as string,
-							params.serverId as string
-						)
-					}
+					reloadMessage={reloadChannelMessages}
 					setServerStates={setServerStates}
 					serverStates={serverStates}
 					placeholder={`Message #${serverStates.selectedChannel?.channel_name}`}
@@ -76,4 +71,4 @@ function ChannelMessages({
 		</>
 	);
 }
-export default memo(ChannelMessages)
+// export default memo(ChannelMessages);
