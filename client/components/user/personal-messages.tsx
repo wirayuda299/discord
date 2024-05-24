@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
 
 import { useUserContext } from "@/providers/users";
 import SearchForm from "@/components/shared/search-form";
@@ -10,16 +11,16 @@ import ChatForm from "../shared/messages/chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "../shared/messages/chat-item";
 import useSocket from "@/hooks/useSocket";
-import { useMemo } from "react";
+import { Virtuoso } from "react-virtuoso";
 
 export default function ChatList() {
   const { selectedUser, handleSelectUser } = useUserContext();
   const { setServerStates, serversState } = useServerContext();
 	const { states, reloadPersonalMessage, socket, params, searchParams, userId } = useSocket();
 	
-	const messages= useMemo(()=>states.personal_messages, [states.personal_messages])
+	const messages = useMemo(() => states.personal_messages, [states.personal_messages])
 
-  if (!searchParams.get("chat")) return null;
+	if (!searchParams.get("chat")) return null;
 
 
   return (
@@ -49,23 +50,28 @@ export default function ChatList() {
 				</Link>
 			</header>
 			<div className='flex h-[calc(100vh-50px)] flex-col justify-end overflow-y-auto'>
-				<ul className='h-full overflow-y-auto p-3'>
-					{messages?.map((message) => (
-						<ChatItem
-							channelId=''
-							setServerStates={setServerStates}
-							socketStates={states}
-							replyType='personal'
-							key={message.created_at}
-							styles='hidden'
-							reloadMessage={reloadPersonalMessage}
-							messages={states.personal_messages}
-							msg={message}
-							socket={socket}
-							userId={userId || ''}
-							serverStates={serversState}
-						/>
-					))}
+				<ul className='h-full p-3'>
+					<Virtuoso
+						style={{ height: '100%' }}
+						data={messages}
+						totalCount={messages.length}
+						itemContent={(index, message) => (
+							<ChatItem
+								channelId={params.channelId as string}
+								setServerStates={setServerStates}
+								socketStates={states}
+								replyType='personal'
+								key={message.created_at}
+								styles='hidden'
+								reloadMessage={reloadPersonalMessage}
+								messages={states.personal_messages}
+								msg={message}
+								socket={socket}
+								userId={userId || ''}
+								serverStates={serversState}
+							/>
+						)}
+					/>
 				</ul>
 				<ChatForm
 					socketStates={states}

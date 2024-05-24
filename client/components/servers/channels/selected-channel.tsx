@@ -10,8 +10,10 @@ import { cn } from '@/lib/utils/mergeStyle';
 
 import SearchForm from '../../shared/search-form';
 import { useServerContext } from '@/providers/server';
-import ChannelMessages from './channel-messages';
 
+const ChannelMessages = dynamic(() => import('./channel-messages'), {
+	ssr: false,
+});
 const Inbox = dynamic(() => import('../../shared/inbox'), { ssr: false });
 const PinnedMessage = dynamic(
 	() => import('@/components/shared/messages/pinned-message'),
@@ -42,8 +44,6 @@ function SelectedChannel({
 		() => setServerStates((prev) => ({ ...prev, selectedChannel: null })),
 		[setServerStates]
 	);
-
-	console.log('selected channel');
 
 	return (
 		<div
@@ -106,9 +106,9 @@ function SelectedChannel({
 					/>
 				</div>
 			</header>
-				<ChannelMessages
-					serverStates={serversState}
-					setServerStates={setServerStates}
+			<ChannelMessages
+				serversState={serversState}
+				setServerStates={setServerStates}
 				/>
 		</div>
 	);

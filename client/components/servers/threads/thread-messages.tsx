@@ -73,6 +73,7 @@ function ThreadMessages({ threadId, children }: Props) {
 						</h3>
 					</header>
 					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
+					
 						{states.thread_messages?.map((message: Message) => (
 							<ChatItem
 								channelId={params.channelId as string}

@@ -103,7 +103,6 @@ function ChatItem({
 				userId={userId}
 				socket={socket}
 			/>
-
 			{msg.media_image && !msg.parent_message_id && (
 				<Image
 					src={msg.media_image}

@@ -28,11 +28,11 @@ export default function useSocket() {
 
 	const reloadChannelMessage = useCallback(
 		(channelId: string, serverId: string) => {
-			if (socket) {
+			if (socket && channelId && serverId) {
 				socket.emit('get-channel-message', { channelId, serverId });
 			}
 		},
-		[socket]
+		[socket, serverId, channelId]
 	);
 
 	const reloadPersonalMessage = useCallback(() => {
@@ -79,6 +79,13 @@ export default function useSocket() {
 
 	useEffect(() => {
 		if (!socket || !userId) return;
+
+		  socket.off('set-personal-messages');
+			socket.off('set-message');
+			socket.off('set-banned-members');
+			socket.off('set-active-users');
+			socket.off('set-current-user-role');
+			socket.off('set-thread-messages');
 
 		if (chat) {
 			reloadPersonalMessage();
