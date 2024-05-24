@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@clerk/nextjs';
 
 import { cn } from '@/lib/utils/mergeStyle';
@@ -28,7 +29,9 @@ import { deleteImage, uploadFile } from '@/helper/file';
 import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
 
-import MemberWithRole from './MemberWithRole';
+const MemberWithRole = dynamic(() => import('./MemberWithRole'), {
+	ssr: false,
+});
 
 const schema = z.object({
 	name: z.string().min(4).max(20),
@@ -96,8 +99,8 @@ export default function RolesSettings({
 
 	const onSubmit = async (data: z.infer<typeof schema>) => {
 		let media = null;
-		if (!userId) return 
-		
+		if (!userId) return;
+
 		try {
 			if (files && files.icon) {
 				const [, file] = await Promise.all([
@@ -199,7 +202,7 @@ export default function RolesSettings({
 			selectRole(null);
 		}
 		selectTab('display');
-	}, [selectedRole, type]);
+	}, [form, selectRole, selectTab, selectType, selectedRole, type]);
 
 	return (
 		<div className={cn('flex w-full gap-3 overflow-y-auto', styles)}>

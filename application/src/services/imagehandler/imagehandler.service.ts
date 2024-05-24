@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { v2 } from 'cloudinary';
 import { ConfigService } from '@nestjs/config';
 
-import { cloudinaryConfig } from 'src/config/cloudinary';
+import { cloudinaryConfig } from 'src/common/config/cloudinary';
 
 const configService = new ConfigService();
 

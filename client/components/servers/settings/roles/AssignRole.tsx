@@ -24,11 +24,11 @@ export default function AssignRole({
 	children: ReactNode;
 	role: Role | null;
 }) {
-	const { mutate } = useSWRConfig();
-	const { getUserRole, reloadChannelMessage,params  } = useSocket();
 	const { data, isLoading, error } = useFetch('members', () =>
 		getMemberWithoutRole(params.serverId as string)
 	);
+	const { mutate } = useSWRConfig();
+	const { getUserRole, reloadChannelMessage,params  } = useSocket();
 
 	const handleAssignRole = async (userId: string) => {
 		try {
@@ -80,32 +80,38 @@ export default function AssignRole({
 						</p>
 					) : (
 						<>
-							<h4 className='pb-2 text-sm font-semibold text-white'>Members</h4>
-							{data?.map((member) => (
-								<li
-									key={member.id}
-									className='flex items-center justify-between gap-3 p-2 hover:bg-background hover:brightness-110'
-								>
-									<div className='flex items-center gap-3'>
-										<Image
-											src={member.avatar}
-											width={45}
-											height={45}
-											alt='member'
-											className='size-11 rounded-full object-cover'
-										/>
-										<div>
-											<h4 className='text-base font-semibold capitalize text-gray-2'>
-												{member.username}
-											</h4>
-										</div>
-									</div>
+							{data && (
+								<>
+									<h4 className='pb-2 text-sm font-semibold text-white'>
+										Members
+									</h4>
+									{data?.map((member) => (
+										<li
+											key={member.id}
+											className='flex items-center justify-between gap-3 p-2 hover:bg-background hover:brightness-110'
+										>
+											<div className='flex items-center gap-3'>
+												<Image
+													src={member.avatar}
+													width={45}
+													height={45}
+													alt='member'
+													className='size-11 rounded-full object-cover'
+												/>
+												<div>
+													<h4 className='text-base font-semibold capitalize text-gray-2'>
+														{member.username}
+													</h4>
+												</div>
+											</div>
 
-									<Button onClick={() => handleAssignRole(member.user_id)}>
-										Add
-									</Button>
-								</li>
-							))}
+											<Button onClick={() => handleAssignRole(member.user_id)}>
+												Add
+											</Button>
+										</li>
+									))}
+								</>
+							)}
 						</>
 					)}
 				</ul>

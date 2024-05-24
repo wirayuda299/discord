@@ -1,15 +1,16 @@
 import { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 import { Button } from '@/components/ui/button';
 import SearchForm from '../../../shared/search-form';
-import AssignRole from './AssignRole';
 import { Role, removeRoleFromUser } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import { getMembersByRole } from '@/helper/server';
 import { createError } from '@/utils/error';
 import useSocket from '@/hooks/useSocket';
+const AssignRole = dynamic(() => import('./AssignRole'), { ssr: false });
 
 export default function MemberWithRole({
 	serverId,
@@ -18,10 +19,10 @@ export default function MemberWithRole({
 	serverId: string;
 	selectedRole: Role | null;
 }) {
+	const { mutate } = useSWRConfig();
 	const { data, isLoading, error } = useFetch('members-by-role', () =>
 		getMembersByRole(serverId, selectedRole?.name || '')
 	);
-	const { mutate } = useSWRConfig();
 	const { getUserRole } = useSocket();
 
 	const handleDeleteRole = async (userId: string) => {
@@ -44,13 +45,11 @@ export default function MemberWithRole({
 		<div className='w-full '>
 			<div className='flex gap-3 py-3'>
 				<SearchForm styles='max-w-full py-2.5' />
-				<AssignRole
-					role={selectedRole}
-				>
+				<AssignRole role={selectedRole}>
 					<Button>Add Members</Button>
 				</AssignRole>
 			</div>
-			{data && data?.length < 1 ? (
+			{data && data.length < 1 ? (
 				<div className='flex gap-2'>
 					<Image
 						src={'/icons/members.svg'}
@@ -59,9 +58,7 @@ export default function MemberWithRole({
 						alt='members'
 					/>
 					<p className='text-sm text-gray-2'>No members were found.</p>
-					<AssignRole
-						role={selectedRole}
-					>
+					<AssignRole role={selectedRole}>
 						<p className='cursor-pointer text-sm font-semibold text-blue-400'>
 							Add member to this role
 						</p>

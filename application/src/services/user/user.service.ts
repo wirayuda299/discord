@@ -4,27 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { idSchema } from '../../schema/zodSchema/user';
-import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class UserService {
-  constructor(
-    private validationService: ValidationService,
-    private databaseService: DatabaseService
-  ) {}
+  constructor(private databaseService: DatabaseService) {}
 
   async createUser(id: string, name: string, email: string, image: string) {
     try {
-      // const body = {
-      //   id,
-      //   name,
-      //   image,
-      //   email,
-      // };
-
-      // this.validationService.validate(createUserSchema, body);
       await this.databaseService.pool.query(
         `INSERT INTO USERS(id, username, image, email) 
         VALUES($1, $2, $3, $4)`,
@@ -60,8 +47,6 @@ export class UserService {
 
   async getUserById(id: string): Promise<NotFoundException | any> {
     try {
-      this.validationService.validate(idSchema, id);
-
       const user = await this.databaseService.pool.query(
         `select * from users where id = $1`,
         [id]
@@ -131,9 +116,7 @@ export class UserService {
 
   async deleteUser(id: string) {
     try {
-      const idData = this.validationService.validate(idSchema, id);
-
-      const user = await this.getUserById(idData);
+      const user = await this.getUserById(id);
       if (user.status === 404) throw new NotFoundException('User not found');
 
       await this.databaseService.pool.query(`delete from users where id = $1`, [

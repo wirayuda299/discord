@@ -96,7 +96,7 @@ export default function MemberItem({
 						</Link>
 					</ContextMenuItem>
 				)}
-				{!isCurrentUserBanned && (
+				{!isCurrentUserBanned && currentUser !== member.user_id && (
 					<>
 						{(currentUser === ownerId ||
 							(states.user_roles && states.user_roles.kick_member)) && (

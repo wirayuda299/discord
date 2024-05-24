@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService {
   pool: Pool;
-  constructor() {
+
+  constructor(private configService: ConfigService) {
     this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: this.configService.get('DATABASE_URL'),
     });
   }
 }

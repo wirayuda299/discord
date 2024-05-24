@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
-import { groupReactionsByEmoji } from 'src/utils/groupMessageByEmoji';
+import { groupReactionsByEmoji } from 'src/common/utils/groupMessageByEmoji';
 import { MessagesService } from '../messages/messages.service';
 
 @Injectable()

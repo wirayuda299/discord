@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { DatabaseService } from '../database/database.service';
-import { groupReactionsByEmoji } from '../../utils/groupMessageByEmoji';
+import { groupReactionsByEmoji } from '../../common/utils/groupMessageByEmoji';
 import { RolesService } from '../roles/roles.service';
 
 export type Permission = {
@@ -364,8 +364,6 @@ export class MessagesService {
 
   async pinMessage(messageId: string, channel_id: string, pinnedBy: string) {
     try {
-      console.log({ messageId, channel_id, pinnedBy });
-
       const channelExists = await this.db.pool.query(
         `SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1)`,
         [channel_id]
