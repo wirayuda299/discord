@@ -4,18 +4,13 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { MoveLeft } from 'lucide-react';
 import Image from 'next/image';
-import { Suspense, memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback } from 'react';
 
 import { cn } from '@/lib/utils/mergeStyle';
 
-import ChatForm from '@/components/shared/messages/chat-form';
-import ChatItem from '@/components/shared/messages/chat-item';
 import SearchForm from '../../shared/search-form';
 import { useServerContext } from '@/providers/server';
-import useSocket from '@/hooks/useSocket';
-import useScroll from '@/hooks/useScroll';
-import { Message } from '@/types/messages';
-import { findBannedMembers } from '@/utils/banned_members';
+import ChannelMessages from './channel-messages';
 
 const Inbox = dynamic(() => import('../../shared/inbox'), { ssr: false });
 const PinnedMessage = dynamic(
@@ -32,22 +27,23 @@ const ChanelInfo = dynamic(
 	{ ssr: false }
 );
 
-function SelectedChannel() {
-	const ref = useRef<HTMLUListElement>(null);
-
+function SelectedChannel({
+	serverId,
+	channelId,
+	userId
+}: {
+	serverId: string;
+	channelId: string;
+	userId: string;
+}) {
 	const { serversState, setServerStates } = useServerContext();
-	const { reloadChannelMessage, states, socket, params, searchParams, userId } =
-		useSocket();
-	const { selectedChannel } = serversState;
 
+	const handleBackClick = useCallback(
+		() => setServerStates((prev) => ({ ...prev, selectedChannel: null })),
+		[setServerStates]
+	);
 
-	const isCurrentUserBanned = useMemo(() =>findBannedMembers(states.banned_members, userId!), [states.banned_members, userId]
-	)
-
-	const handleBackClick = useCallback(() => setServerStates((prev) => ({ ...prev, selectedChannel: null })), [setServerStates]);
-
-	useScroll(ref, states.channel_messages);
-	
+	console.log('selected channel');
 
 	return (
 		<div
@@ -60,7 +56,7 @@ function SelectedChannel() {
 				<div className='flex items-center gap-3'>
 					<Link
 						aria-label='Go back'
-						href={'/server/' + params.serverId}
+						href={'/server/' + serverId}
 						className='block md:hidden'
 						onClick={handleBackClick}
 					>
@@ -83,23 +79,18 @@ function SelectedChannel() {
 					</div>
 				</div>
 				<div className='hidden items-center gap-4 md:flex'>
-					<Suspense
-						fallback={
-							<div className='aspect-square h-6 w-12 rounded-md bg-background brightness-110'></div>
-						}
-					>
+				
 						<Thread
-							channelId={params.channelId as string}
-							serverId={params.serverId as string}
+							channelId={channelId as string}
+							serverId={serverId as string}
 						/>
-					</Suspense>
 					<NotificationSettings />
 
-					<PinnedMessage channelId={params.channelId as string} />
+					<PinnedMessage channelId={channelId as string} />
 
 					<MemberSheet
 						userId={userId!!}
-						serverId={params.serverId as string}
+						serverId={serverId }
 						selectedServer={serversState.selectedServer}
 					/>
 					<SearchForm />
@@ -116,32 +107,11 @@ function SelectedChannel() {
 				</div>
 			</header>
 			<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
-				<ul
-					className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
-					ref={ref}
-				>
-					{states.channel_messages?.map((msg: Message) => (
-						<ChatItem
-							channelId={(params?.channelId as string) || ''}
-							setServerStates={setServerStates}
-							socketStates={states}
-							replyType='channel'
-							reloadMessage={() =>
-								reloadChannelMessage(
-									params.channelId as string,
-									params.serverId as string
-								)
-							}
-							socket={socket}
-							serverStates={serversState}
-							messages={states.channel_messages}
-							userId={userId!!}
-							msg={msg}
-							key={msg.message_id}
-						/>
-					))}
-				</ul>
-				{!isCurrentUserBanned ? (
+				<ChannelMessages
+					serverStates={serversState}
+					setServerStates={setServerStates}
+				/>
+				{/* {!isCurrentUserBanned ? (
 					<ChatForm
 						socketStates={states}
 						socket={socket}
@@ -161,7 +131,7 @@ function SelectedChannel() {
 					/>
 				) : (
 					<p className='text-center text-red-600'>You are banned </p>
-				)}
+				)} */}
 			</div>
 		</div>
 	);

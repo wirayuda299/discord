@@ -37,11 +37,12 @@ function ChatItem({
 	styles,
 	socketStates,
 	channelId,
-	setServerStates
-}: Props) {
+	setServerStates,
+}:Props) {
 	const { selectedServer } = serverStates;
+
 	const handleAppendOrRemoveEmoji = useEmoji(
-		selectedServer?.id!!,
+		selectedServer?.id || '',
 		userId,
 		reloadMessage
 	);
@@ -70,7 +71,7 @@ function ChatItem({
 						alt='line'
 					/>
 
-					<div className='flex w-full gap-2 overflow-x-hidden md:max-w-[200px] lg:max-w-[500px] '>
+					<div className='flex w-full gap-2 overflow-x-hidden md:max-w-[200px] lg:max-w-[500px]'>
 						<div className='flex size-4 items-center justify-center rounded-full bg-foreground'>
 							<svg width='10' height='10' viewBox='0 0 12 8'>
 								<path
@@ -114,15 +115,15 @@ function ChatItem({
 					loading='lazy'
 				/>
 			)}
-			<div className=' mt-1'>
+			<div className='mt-1'>
 				{(msg?.threads || []).map((thread) => (
 					<ThreadMessages
-						username={serverStates.selectedServer?.name!}
+						username={serverStates.selectedServer?.name || ''}
 						key={thread.thread_id}
 						threadId={thread.thread_id}
 					>
 						<button
-							onClick={(e) =>
+							onClick={() =>
 								setServerStates((prev) => ({
 									...prev,
 									selectedThread: thread,
@@ -140,7 +141,7 @@ function ChatItem({
 								<span className='font-medium text-white'>
 									{thread.username}
 								</span>{' '}
-								started a thread :{' '}
+								started a thread:{' '}
 								<span className='text-white'>{thread.thread_name}</span>
 							</p>
 						</button>
