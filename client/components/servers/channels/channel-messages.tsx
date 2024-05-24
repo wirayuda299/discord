@@ -6,7 +6,6 @@ import useScroll from '@/hooks/useScroll';
 import useSocket from '@/hooks/useSocket';
 import { ServerStates } from '@/providers/server';
 import { findBannedMembers } from '@/utils/banned_members';
-import GeneralLoader from '@/components/shared/loader/general';
 
 export default function ChannelMessages({
 	serverStates,
@@ -23,7 +22,6 @@ export default function ChannelMessages({
 		params,
 		userId,
 		searchParams,
-		loading,
 	} = useSocket();
 
 	const isCurrentUserBanned = useMemo(
@@ -39,9 +37,7 @@ export default function ChannelMessages({
 				className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
 				ref={ref}
 			>
-				{loading ? (
-					<GeneralLoader/>
-				) : (
+				{
 					states.channel_messages?.map((msg) => (
 						<ChatItem
 							channelId={(params?.channelId as string) || ''}
@@ -62,7 +58,7 @@ export default function ChannelMessages({
 							key={msg.message_id}
 						/>
 					))
-				)}
+				}
 			</ul>
 
 			{!isCurrentUserBanned ? (
