@@ -109,7 +109,6 @@ function ChatItem({
 					src={msg.media_image}
 					width={200}
 					height={100}
-					placeholder='blur'
 					alt='media'
 					className='ml-9 mt-3 aspect-auto rounded-md object-cover'
 					loading='lazy'

@@ -111,27 +111,6 @@ function SelectedChannel({
 					serverStates={serversState}
 					setServerStates={setServerStates}
 				/>
-				{/* {!isCurrentUserBanned ? (
-					<ChatForm
-						socketStates={states}
-						socket={socket}
-						type='channel'
-						params={params}
-						searchParams={searchParams}
-						userId={userId!!}
-						reloadMessage={() =>
-							reloadChannelMessage(
-								params.channelId as string,
-								params.serverId as string
-							)
-						}
-						setServerStates={setServerStates}
-						serverStates={serversState}
-						placeholder={`Message #${selectedChannel?.channel_name}`}
-					/>
-				) : (
-					<p className='text-center text-red-600'>You are banned </p>
-				)} */}
 			</div>
 		</div>
 	);

@@ -83,42 +83,42 @@ const handlePersonalMessages = useCallback(
 	(messages:Message[]) => {
 		dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
 	},
-	[dispatch]
+	[]
 );
 
 const handleChannelMessages = useCallback(
 	(data:Message[]) => {
 		dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
 	},
-	[dispatch]
+	[]
 );
 
 const handleBannedMembers = useCallback(
 	(data:BannedMembers[]) => {
 		dispatch({ type: 'BANNED_MEMBERS', payload: data });
 	},
-	[dispatch]
+	[]
 );
 
 const handleActiveUsers = useCallback(
 	(data:string[]) => {
 		dispatch({ type: 'ACTIVE_USERS', payload: data });
 	},
-	[dispatch]
+	[]
 );
 
 const handleCurrentUserRole = useCallback(
 	(data:Permission) => {
 		dispatch({ type: 'SET_USER_ROLES', payload: data });
 	},
-	[dispatch]
+	[]
 );
 
 const handleThreadMessages = useCallback(
 	(data:Message[]) => {
 		dispatch({ type: 'THREAD_MESSAGES', payload: data });
 	},
-	[dispatch]
+	[]
 );
 
 useEffect(() => {

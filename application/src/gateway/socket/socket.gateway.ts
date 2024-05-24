@@ -105,6 +105,11 @@ export class SocketGateway implements OnModuleInit {
     switch (payload.type) {
       case 'channel':
         await this.messagesService.sendMessage(payload);
+        const messages = await this.messagesService.getMessageByChannelId(
+          payload.channelId,
+          payload.serverId
+        );
+        this.server.emit('set-message', messages);
         break;
       case 'reply':
         await this.handleReplyMessage(payload);
@@ -136,6 +141,8 @@ export class SocketGateway implements OnModuleInit {
   async getChannelMessage(
     @MessageBody() payload: { channelId: string; serverId: string }
   ) {
+    console.log(payload);
+
     try {
       const messages = await this.messagesService.getMessageByChannelId(
         payload.channelId,

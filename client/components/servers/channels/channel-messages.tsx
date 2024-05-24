@@ -25,9 +25,8 @@ export default function ChannelMessages({
 
 	useScroll(ref, states.channel_messages);
 
-	const reloadChannelMessages = () => {
-		reloadChannelMessage(params.channelId as string, params.serverId as string);
-	};
+	console.log(states.channel_messages);
+	
 
 	return (
 		<>
@@ -41,7 +40,12 @@ export default function ChannelMessages({
 						setServerStates={setServerStates}
 						socketStates={states}
 						replyType='channel'
-						reloadMessage={reloadChannelMessages}
+						reloadMessage={() =>
+							reloadChannelMessage(
+								params.channelId as string,
+								params.serverId as string
+							)
+						}
 						socket={socket}
 						serverStates={serverStates}
 						messages={states.channel_messages}
@@ -60,7 +64,12 @@ export default function ChannelMessages({
 					params={params}
 					searchParams={searchParams}
 					userId={userId!!}
-					reloadMessage={reloadChannelMessages}
+					reloadMessage={() =>
+						reloadChannelMessage(
+							params.channelId as string,
+							params.serverId as string
+						)
+					}
 					setServerStates={setServerStates}
 					serverStates={serverStates}
 					placeholder={`Message #${serverStates.selectedChannel?.channel_name}`}
