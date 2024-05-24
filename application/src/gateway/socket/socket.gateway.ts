@@ -71,7 +71,9 @@ export class SocketGateway implements OnModuleInit {
   }
 
   private broadcastActiveUsers() {
-    this.server.emit('set-active-users', Array.from(this.activeUsers.keys()));
+    process.nextTick(() => {
+      this.server.emit('set-active-users', Array.from(this.activeUsers.keys()));
+    });
   }
 
   private async handleReplyMessage(payload: PayloadTypes) {
@@ -109,19 +111,23 @@ export class SocketGateway implements OnModuleInit {
           payload.channelId,
           payload.serverId
         );
-        this.server.emit('set-message', messages);
+        process.nextTick(() => {
+          this.server.emit('set-message', messages);
+        });
         break;
       case 'reply':
         await this.handleReplyMessage(payload);
         break;
       case 'thread':
-        await this.threadsService.sendThreadMessage(
-          payload.content,
-          payload.user_id,
-          payload.imageUrl,
-          payload.imageAssetId,
-          payload.threadId
-        );
+        process.nextTick(async () => {
+          await this.threadsService.sendThreadMessage(
+            payload.content,
+            payload.user_id,
+            payload.imageUrl,
+            payload.imageAssetId,
+            payload.threadId
+          );
+        });
         break;
       case 'personal':
         await this.messagesService.sendPersonalMessage(
@@ -136,7 +142,9 @@ export class SocketGateway implements OnModuleInit {
           payload.conversationId,
           payload.user_id
         );
-        this.server.emit('set-personal-messages', message);
+        process.nextTick(() => {
+          this.server.emit('set-personal-messages', message);
+        });
         break;
       default:
         this.logger.warn(`Unknown message type: ${payload.type}`);
@@ -152,7 +160,9 @@ export class SocketGateway implements OnModuleInit {
         payload.channelId,
         payload.serverId
       );
-      this.server.emit('set-message', messages);
+      process.nextTick(() => {
+        this.server.emit('set-message', messages);
+      });
     } catch (error) {
       this.logger.error('Error getting channel messages', error);
     }
@@ -172,7 +182,9 @@ export class SocketGateway implements OnModuleInit {
         payload.threadId,
         payload.serverId
       );
-      this.server.emit('set-thread-messages', messages);
+      process.nextTick(() => {
+        this.server.emit('set-thread-messages', messages);
+      });
     } catch (error) {
       this.logger.error('Error getting thread messages', error);
     }
@@ -187,7 +199,9 @@ export class SocketGateway implements OnModuleInit {
         payload.conversationId,
         payload.userId
       );
-      this.server.emit('set-personal-messages', messages);
+      process.nextTick(() => {
+        this.server.emit('set-personal-messages', messages);
+      });
     } catch (error) {
       this.logger.error('Error getting personal messages', error);
     }
@@ -202,7 +216,9 @@ export class SocketGateway implements OnModuleInit {
         payload.userId,
         payload.serverId
       );
-      this.server.emit('set-current-user-role', role);
+      process.nextTick(() => {
+        this.server.emit('set-current-user-role', role);
+      });
     } catch (error) {
       this.logger.error('Error getting member role', error);
     }
@@ -214,7 +230,9 @@ export class SocketGateway implements OnModuleInit {
       const members = await this.membersService.getBannedMembers(
         payload.serverId
       );
-      this.server.emit('set-banned-members', members);
+      process.nextTick(() => {
+        this.server.emit('set-banned-members', members);
+      });
     } catch (error) {
       this.logger.error('Error getting banned members', error);
     }
