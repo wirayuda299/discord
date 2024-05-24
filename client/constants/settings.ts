@@ -59,4 +59,4 @@ export const getServerSettings = (serverName: string) => [
     label: "user management",
     items: ["members", "invites"],
   },
-];
+] as const

@@ -34,9 +34,11 @@ export default function AssignRole({
 		try {
 			if (!role) return;
 
-			await assignRole(userId, role?.id, role?.permissions.id);
+			await assignRole(userId, role?.id, role?.permissions.id).then(() => {
+				toast.success('Role has been added to user');
+				mutate('members')
+			})
 
-			toast.success('Role has been added to user');
 		} catch (error) {
 			createError(error);
 		} finally {
