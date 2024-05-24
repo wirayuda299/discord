@@ -1,4 +1,5 @@
 import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { useServerContext } from '@/providers/server';
 
@@ -15,10 +16,16 @@ import AddUser from '@/components/servers/add-user';
 import { Servers } from '@/types/server';
 import useSocket from '@/hooks/useSocket';
 import RolesModal from './settings/roles/rolesModal';
+import { findBannedMembers } from '@/utils/banned_members';
 
 export default function ServerMenu({ server }: { server: Servers }) {
 	const { setServerStates, serversState } = useServerContext();
 	const { states, userId } = useSocket();
+
+const isCurrentUserBanned = useMemo(
+	() => findBannedMembers(states.banned_members, userId!),
+	[states.banned_members, userId]
+);
 
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
@@ -69,24 +76,28 @@ export default function ServerMenu({ server }: { server: Servers }) {
 				{serversState.selectedServer && server.owner_id === userId && (
 					<ServerSetting server={server} />
 				)}
-				{(serverOwnerId === userId ||
-					(states.user_roles && states.user_roles.manage_channel)) && (
-					<CreateChannelModals
-						serverId={server.id}
-						serverAuthor={server.owner_id!}
-						type='text'
-					>
-						<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
-							<span>create channel </span>
-							<div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
-								<Plus size={15} className='text-gray-1 ' />
-							</div>
-						</div>
-					</CreateChannelModals>
-				)}
-				{(serverOwnerId === userId ||
-					(states.user_roles && states.user_roles.manage_role)) && (
-					<RolesModal serverId={server.id} serverAuthor={server.owner_id} />
+				{!isCurrentUserBanned && (
+					<>
+						{(serverOwnerId === userId ||
+							(states.user_roles && states.user_roles.manage_channel)) && (
+							<CreateChannelModals
+								serverId={server.id}
+								serverAuthor={server.owner_id!}
+								type='text'
+							>
+								<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
+									<span>create channel </span>
+									<div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
+										<Plus size={15} className='text-gray-1 ' />
+									</div>
+								</div>
+							</CreateChannelModals>
+						)}
+						{(serverOwnerId === userId ||
+							(states.user_roles && states.user_roles.manage_role)) && (
+							<RolesModal serverId={server.id} serverAuthor={server.owner_id} />
+						)}
+					</>
 				)}
 				<UserSettingsModals>
 					<div

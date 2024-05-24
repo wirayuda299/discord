@@ -47,6 +47,8 @@ export default function ServerBanList({
 				toast.success('Member kicked from server')
 			);
 		} catch (error) {
+			console.log(error);
+			
 			createError(error);
 		}
   };

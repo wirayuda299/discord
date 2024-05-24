@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
 import { Channel } from '@/types/channels';
@@ -14,6 +14,7 @@ import { useServerContext } from '@/providers/server';
 import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
 import AddUser from '@/components/servers/add-user';
 import useSocket from '@/hooks/useSocket';
+import { findBannedMembers } from '@/utils/banned_members';
 
 export default function ChannelList({
 	channels,
@@ -28,7 +29,11 @@ export default function ChannelList({
 	} = useServerContext();
 	const { states, userId, params } = useSocket();
 	const [selectedCategory, setSelectedCategory] = useState('');
-
+	
+	const isCurrentUserBanned = useMemo(
+		() => findBannedMembers(states.banned_members, userId!),
+		[states.banned_members, userId]
+	);
 	const toggleCategory = useCallback((categoryName: string) => {
 		setSelectedCategory((prev) => (prev === categoryName ? '' : categoryName));
 	}, []);
@@ -41,13 +46,15 @@ export default function ChannelList({
 	);
 
 	useEffect(() => {
-		const channel = channels.map(c => c.channels)[0].find(c => c.channel_id === params.channelId)
-		
+		const channel = channels
+			.map((c) => c.channels)[0]
+			.find((c) => c.channel_id === params.channelId);
+
 		setServerStates((prev) => {
-				return { ...prev, selectedChannel: channel || null };
+			return { ...prev, selectedChannel: channel || null };
 		});
 	}, [params.channelId, channels, setServerStates]);
-	
+
 	return (
 		<ul className='text-gray-2'>
 			{channels?.map((channel) => (
@@ -68,17 +75,21 @@ export default function ChannelList({
 								{channel.category_name} channel
 							</h3>
 						</div>
-						{(server.owner_id === userId ||
-							(states.user_roles && states.user_roles.manage_channel)) && (
-							<CreateChannelModals
-								serverAuthor={server.owner_id}
-								serverId={server.id}
-								type={channel.channel_type}
-							>
-								<button role='button' title='create channel'>
-									<Plus size={18} />
-								</button>
-							</CreateChannelModals>
+						{!isCurrentUserBanned && (
+							<>
+								{(server.owner_id === userId ||
+									(states.user_roles && states.user_roles.manage_channel)) && (
+									<CreateChannelModals
+										serverAuthor={server.owner_id}
+										serverId={server.id}
+										type={channel.channel_type}
+									>
+										<button role='button' title='create channel'>
+											<Plus size={18} />
+										</button>
+									</CreateChannelModals>
+								)}
+							</>
 						)}
 					</div>
 					<ul

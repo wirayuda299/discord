@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import type { Socket } from 'socket.io-client';
 import Link from 'next/link';
@@ -15,6 +16,7 @@ import { SocketStates } from '@/types/socket-states';
 import { createError } from '@/utils/error';
 import { banMember, kickMember } from '@/actions/members';
 import { copyText } from '@/utils/copy';
+import { findBannedMembers } from '@/utils/banned_members';
 
 export default function MemberItem({
 	member,
@@ -29,9 +31,12 @@ export default function MemberItem({
 	states: SocketStates;
 	socket: Socket | null;
 }) {
+	const isCurrentUserBanned = useMemo(
+		() => findBannedMembers(states.banned_members, currentUser!),
+		[states.banned_members, currentUser]
+	);
 	const handleKickMember = async () => {
 		try {
-		
 			await kickMember(
 				member.server_id,
 				member.user_id,
@@ -84,26 +89,34 @@ export default function MemberItem({
 				</div>
 			</ContextMenuTrigger>
 			<ContextMenuContent className='flex flex-col gap-3 border-none bg-black text-white'>
-				<ContextMenuItem className='hover:!bg-primary hover:!text-white'>
-					<Link href={`/direct-messages?chat=${member.user_id}`}>Message</Link>
-				</ContextMenuItem>
-				{(currentUser === ownerId ||
-					(states.user_roles && states.user_roles.kick_member)) && (
-					<ContextMenuItem
-						onClick={handleKickMember}
-						className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'
-					>
-						Kick <span className='capitalize'> {member.username}</span>
+				{currentUser !== member.user_id && (
+					<ContextMenuItem className='hover:!bg-primary hover:!text-white'>
+						<Link href={`/direct-messages?chat=${member.user_id}`}>
+							Message
+						</Link>
 					</ContextMenuItem>
 				)}
-				{(currentUser === ownerId ||
-					(states.user_roles && states.user_roles.ban_member)) && (
-					<ContextMenuItem
-						onClick={handleBanMember}
-						className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'
-					>
-						Ban <span className='capitalize'> {member.username}</span>
-					</ContextMenuItem>
+				{!isCurrentUserBanned && (
+					<>
+						{(currentUser === ownerId ||
+							(states.user_roles && states.user_roles.kick_member)) && (
+							<ContextMenuItem
+								onClick={handleKickMember}
+								className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'
+							>
+								Kick <span className='capitalize'> {member.username}</span>
+							</ContextMenuItem>
+						)}
+						{(currentUser === ownerId ||
+							(states.user_roles && states.user_roles.ban_member)) && (
+							<ContextMenuItem
+								onClick={handleBanMember}
+								className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'
+							>
+								Ban <span className='capitalize'> {member.username}</span>
+							</ContextMenuItem>
+						)}
+					</>
 				)}
 
 				<ContextMenuItem

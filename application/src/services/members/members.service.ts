@@ -143,6 +143,8 @@ export class MembersService {
     currentUser: string
   ) {
     try {
+      console.log({ serverId, memberId, serverAuthor, currentUser });
+
       const isAllowed = await this.isAllowedToKickMember(serverId, memberId);
       if (isAllowed.length < 1 && serverAuthor !== currentUser) {
         throw new HttpException(
@@ -167,8 +169,6 @@ export class MembersService {
           where ur.user_id = $1 and p.server_id = $2`,
         [memberId, serverId]
       );
-
-      console.log(serverProfile.data);
 
       const serverProfileAssetId = serverProfile.data?.avatar_asset_id;
       await this.db.pool.query(`begin`);
@@ -208,6 +208,8 @@ export class MembersService {
         error: false,
       };
     } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }

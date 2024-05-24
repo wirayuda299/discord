@@ -276,6 +276,23 @@ export class ServersService {
           HttpStatus.BAD_REQUEST
         );
 
+      const banned_members = await this.databaseService.pool.query(
+        `SELECT * 
+       FROM banned_members AS bm
+       JOIN server_profile AS sp ON sp.user_id = bm.member_id 
+       WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
+        [server_id, userId]
+      );
+      console.log(banned_members);
+
+      if (banned_members.rows.length >= 1) {
+        throw new HttpException(
+          'You are banned from this server, ask the author to remove you from banned list to join again',
+          HttpStatus.FORBIDDEN,
+          { cause: 'You are banned from this server' }
+        );
+      }
+
       const isServerExists = await this.databaseService.pool.query(
         `SELECT * FROM servers WHERE invite_code = $1`,
         [inviteCode]
@@ -292,20 +309,6 @@ export class ServersService {
         throw new HttpException(
           'You already an admin of this server',
           HttpStatus.BAD_REQUEST
-        );
-      }
-
-      const banned_members = await this.databaseService.pool.query(
-        `SELECT * 
-       FROM banned_members AS bm
-       JOIN server_profile AS sp ON sp.user_id = bm.member_id 
-       WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
-        [server_id, userId]
-      );
-      if (banned_members.rows.length >= 1) {
-        throw new HttpException(
-          'You are banned from this server, ask the author to remove you from banned list to join again',
-          HttpStatus.FORBIDDEN
         );
       }
 
