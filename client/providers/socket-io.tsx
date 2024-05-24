@@ -11,8 +11,9 @@ import {
 } from "react";
 
 export type SocketContextType = {
-  socket: Socket | null;
-  isConnected: boolean;
+	socket: Socket | null;
+	isConnected: boolean;
+	userId: string;
 };
 
 export const SocketContext = createContext<SocketContextType>(
@@ -60,15 +61,16 @@ export const SocketContextProvider = ({
   }, [socket]);
 
   return (
-    <SocketContext.Provider
-      value={{
-        isConnected,
-        socket,
-      }}
-    >
-      {children}
-    </SocketContext.Provider>
-  );
+		<SocketContext.Provider
+			value={{
+				isConnected,
+				socket,
+				userId: userId as string,
+			}}
+		>
+			{children}
+		</SocketContext.Provider>
+	);
 };
 
 export function useSocketContext() {

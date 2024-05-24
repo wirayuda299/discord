@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useReducer, useMemo } from 'react';
 import { socketReducer } from '@/reducer/socket';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 import { useSocketContext } from '@/providers/socket-io';
 import { Permission } from '@/types/server';
 import { BannedMembers, SocketStates } from '@/types/socket-states';
@@ -17,10 +16,9 @@ const initialValues: SocketStates = {
 };
 
 export default function useSocket() {
-	const { userId } = useAuth();
+	const { socket, userId } = useSocketContext();
 	const searchParams = useSearchParams();
 	const { id: serverId, channel_id: channelId } = useParams();
-	const { socket } = useSocketContext();
 	const [states, dispatch] = useReducer(socketReducer, initialValues);
 
 	const chat = useMemo(() => searchParams.get('chat'), [searchParams]);
@@ -81,7 +79,7 @@ export default function useSocket() {
 	}, [socket, serverId]);
 
 	useEffect(() => {
-		if (!socket) return;
+		if (!socket || !userId) return;
 
 		const handlePersonalMessages = (messages: Message[]) => {
 			dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
@@ -119,9 +117,11 @@ export default function useSocket() {
 			socket.on('set-message', handleChannelMessages);
 			socket.on('set-banned-members', handleBannedMembers);
 		}
+		if (userId) {
+			getUserRole(userId!);
+		}
 
 		socket.on('set-active-users', handleActiveUsers);
-		getUserRole(userId!);
 		socket.on('set-current-user-role', handleCurrentUserRole);
 		socket.on('set-thread-messages', handleThreadMessages);
 
@@ -132,6 +132,7 @@ export default function useSocket() {
 			socket.off('set-active-users', handleActiveUsers);
 			socket.off('set-current-user-role', handleCurrentUserRole);
 			socket.off('set-thread-messages', handleThreadMessages);
+			socket.off('member-roles', getUserRole);
 		};
 	}, [
 		socket,
