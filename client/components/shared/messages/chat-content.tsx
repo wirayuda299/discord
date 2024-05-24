@@ -159,6 +159,8 @@ const isCurrentUserBanned = useMemo(
 							)}
 							{children}
 							<MessageMenu
+								serverAuthor={serverStates.selectedServer?.owner_id||''}
+								socketStates={socketStates}
 								type={replyType}
 								styles={styles}
 								socket={socket}

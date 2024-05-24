@@ -1,20 +1,21 @@
-import type { Socket } from "socket.io-client";
-import Image from "next/image";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { Copy, Ellipsis, Reply, Trash } from "lucide-react";
+import type { Socket } from 'socket.io-client';
+import Image from 'next/image';
+import { toast } from 'sonner';
+import { useSWRConfig } from 'swr';
+import { Copy, Ellipsis, Reply, Trash } from 'lucide-react';
 
 import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-} from "../../ui/dropdown-menu";
-import { pinMessage } from "@/actions/messages";
-import { Message } from "@/types/messages";
-import { createError } from "@/utils/error";
-import { copyText } from "@/utils/copy";
-import CreateThread from "../../servers/threads/create-thread";
+	DropdownMenu,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuContent,
+} from '../../ui/dropdown-menu';
+import { pinMessage } from '@/actions/messages';
+import { Message } from '@/types/messages';
+import { createError } from '@/utils/error';
+import { copyText } from '@/utils/copy';
+import CreateThread from '../../servers/threads/create-thread';
+import { SocketStates } from '@/types/socket-states';
 
 type Props = {
 	channelId: string;
@@ -29,78 +30,102 @@ type Props = {
 		action: string
 	) => void;
 	socket: Socket | null;
+	socketStates: SocketStates;
+	serverAuthor: string;
 };
 
 export default function MessageMenu({
-  channelId,
-  serverId,
-  message,
-  currentUser,
-  handleSelectedMessage,
-  socket,
-  styles,
-  type,
+	channelId,
+	serverAuthor,
+	serverId,
+	message,
+	currentUser,
+	handleSelectedMessage,
+	socket,
+	styles,
+	type,
+	socketStates,
 }: Props) {
-  const { mutate } = useSWRConfig();
+	const { mutate } = useSWRConfig();
 
-  const handlePinMessage = async () => {
-    try {
-      await pinMessage(
-        channelId,
-        message.message_id,
-        currentUser,
-        `/server/${serverId}`,
-      ).then(() => {
-        toast.success("Message pinned");
-        mutate("pinned-messages");
-      });
-    } catch (error) {
-      createError(error);
-    }
-  };
+	const handlePinMessage = async () => {
+		try {
+			await pinMessage(
+				channelId,
+				message.message_id,
+				currentUser,
+				`/server/${serverId}`
+			).then(() => {
+				toast.success('Message pinned');
+				mutate('pinned-messages');
+			});
+		} catch (error) {
+			createError(error);
+		}
+	};
 
-		return (
-			<DropdownMenu>
-				<DropdownMenuTrigger>
-					<Ellipsis size={25} color='#fff' className='text-white' />
-				</DropdownMenuTrigger>
-				<DropdownMenuContent className='flex flex-col gap-2 border-none bg-[#111214] text-gray-2'>
-					{type !== 'personal' && message.author === currentUser && (
-						<DropdownMenuItem
-							className='inline-flex w-full min-w-40 cursor-pointer justify-between bg-transparent hover:!bg-primary hover:!text-white'
-							onClick={handlePinMessage}
-						>
-							<span> Pin Message</span>{' '}
-							<Image src={'/icons/pin.svg'} width={20} height={20} alt='pin' />
-						</DropdownMenuItem>
-					)}
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger>
+				<Ellipsis size={25} color='#fff' className='text-white' />
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className='flex flex-col gap-2 border-none bg-[#111214] text-gray-2'>
+				{type !== 'personal' && (
+					<>
+						{(serverAuthor === currentUser ||
+							(socketStates.user_roles &&
+								socketStates.user_roles.manage_message)) && (
+							<DropdownMenuItem
+								className='inline-flex w-full min-w-40 cursor-pointer justify-between bg-transparent hover:!bg-primary hover:!text-white'
+								onClick={handlePinMessage}
+							>
+								<span> Pin Message</span>{' '}
+								<Image
+									src={'/icons/pin.svg'}
+									width={20}
+									height={20}
+									alt='pin'
+								/>
+							</DropdownMenuItem>
+						)}
+					</>
+				)}
 
-					<DropdownMenuItem
-						onClick={() => handleSelectedMessage(message, type, 'reply')}
-						className='w-full justify-between bg-transparent hover:!bg-primary hover:!text-white '
-					>
-						<span>Reply</span>
-						<Reply />
-					</DropdownMenuItem>
-					{type !== 'personal' && (
-						<CreateThread
-							styles={styles}
-							channelId={channelId}
-							message={message}
-							serverId={serverId}
-							socket={socket}
-							text={<span>Create Thread</span>}
-						/>
-					)}
+				<DropdownMenuItem
+					onClick={() => handleSelectedMessage(message, type, 'reply')}
+					className='w-full justify-between bg-transparent hover:!bg-primary hover:!text-white '
+				>
+					<span>Reply</span>
+					<Reply />
+				</DropdownMenuItem>
+				{type !== 'personal' && (
+					<>
+						{(serverAuthor === currentUser ||
+							(socketStates.user_roles &&
+								socketStates.user_roles.manage_thread)) && (
+							<CreateThread
+								styles={styles}
+								channelId={channelId}
+								message={message}
+								serverId={serverId}
+								socket={socket}
+								text={<span>Create Thread</span>}
+							/>
+						)}
+					</>
+				)}
 
-					<DropdownMenuItem
-						onClick={() => copyText(message.message, 'Message copied')}
-						className='inline-flex w-full justify-between bg-transparent hover:!bg-primary hover:!text-white'
-					>
-						<span>Copy Text</span>
-						<Copy size={20} />
-					</DropdownMenuItem>
-					{message.author === currentUser && (
+				<DropdownMenuItem
+					onClick={() => copyText(message.message, 'Message copied')}
+					className='inline-flex w-full justify-between bg-transparent hover:!bg-primary hover:!text-white'
+				>
+					<span>Copy Text</span>
+					<Copy size={20} />
+				</DropdownMenuItem>
+				{(type === 'personal' && message.author === currentUser) ||
+					((serverAuthor === currentUser ||
+						(socketStates.user_roles &&
+							socketStates.user_roles.manage_message)) && (
 						<DropdownMenuItem className='group inline-flex w-full cursor-pointer justify-between bg-transparent text-red-600 hover:!bg-primary hover:!text-white'>
 							<span>Delete Message</span>
 							<Trash
@@ -109,15 +134,15 @@ export default function MessageMenu({
 								className='ease transition-colors group-hover:fill-red-600'
 							/>
 						</DropdownMenuItem>
-					)}
-					<DropdownMenuItem
-						onClick={() => copyText(message.message, 'Message ID copied')}
-						className='inline-flex justify-between bg-transparent hover:!bg-primary hover:!text-white'
-					>
-						<span>Copy Message ID</span>
-						<Copy size={20} />
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		);
+					))}
+				<DropdownMenuItem
+					onClick={() => copyText(message.message, 'Message ID copied')}
+					className='inline-flex justify-between bg-transparent hover:!bg-primary hover:!text-white'
+				>
+					<span>Copy Message ID</span>
+					<Copy size={20} />
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 }
