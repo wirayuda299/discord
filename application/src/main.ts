@@ -16,6 +16,7 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   app.use(compression());
+  app.enableShutdownHooks();
   // app.useGlobalGuards(new AuthGuard());
   app.useGlobalFilters(new ValidationFilter());
 

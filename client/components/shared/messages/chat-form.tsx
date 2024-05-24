@@ -3,8 +3,7 @@
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { z } from 'zod';
 import { Dispatch, SetStateAction, memo, useEffect, useMemo } from 'react';
-import Image from 'next/image';
-import { X, SendHorizontal, Plus } from 'lucide-react';
+import { X, SendHorizontal } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
 import type { Socket } from 'socket.io-client';
@@ -25,6 +24,7 @@ import { uploadFile } from '@/helper/file';
 import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
 import { SocketStates } from '@/types/socket-states';
+import FileUpload from './fileUpload';
 
 type Props = {
 	styles?: string;
@@ -301,54 +301,28 @@ function ChatForm({
 						styles
 					)}
 				>
-					{type !== 'thread' && type !== 'personal' && (
-						<>
-							{(selectedServer?.owner_id === userId ||
-								(socketStates.user_roles && socketStates.user_roles.attach_file)) && (
-								<div className='relative'>
-									{image && preview && preview.image && (
-										<div className='absolute -top-32 w-max'>
-											<Image
-												className='aspect-square rounded-md object-cover '
-												priority
-												fetchPriority='high'
-												src={(preview && preview?.image)!}
-												width={100}
-												height={100}
-												alt='image'
-											/>
-											{!isSubmitting && (
-												<button
-													type='button'
-													onClick={deleteImage}
-													className='absolute -right-4 -top-3 min-h-5 min-w-5 rounded-full border bg-white p-1'
-												>
-													<X className='text-sm text-red-600' size={18} />
-												</button>
-											)}
-										</div>
-									)}
-									<label
-										aria-disabled={isSubmitting}
-										title='Upload image'
-										htmlFor='image-upload'
-										className='flex size-6 min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-background disabled:cursor-not-allowed md:h-7 md:min-h-7 md:min-w-7 md:bg-gray-2 md:p-1'
-									>
-										<Plus className='text-base text-gray-2 md:text-lg md:text-foreground' />
-									</label>
-									<input
-										onChange={(e) => handleChange(e, 'image')}
-										aria-disabled={isSubmitting}
-										disabled={isSubmitting}
-										type='file'
-										name='file'
-										id='image-upload'
-										className='hidden disabled:cursor-not-allowed'
-									/>
-								</div>
-							)}
-						</>
+					{type === 'personal' ? (
+						<FileUpload
+							deleteImage={deleteImage}
+							handleChange={handleChange}
+							image={image}
+							isSubmitting={isSubmitting}
+							preview={preview}
+						/>
+					) : (
+						(selectedServer?.owner_id === userId ||
+							(socketStates.user_roles &&
+								socketStates.user_roles.attach_file)) && (
+							<FileUpload
+								deleteImage={deleteImage}
+								handleChange={handleChange}
+								image={image}
+								isSubmitting={isSubmitting}
+								preview={preview}
+							/>
+						)
 					)}
+
 					<FormField
 						name={'message'}
 						control={form.control}

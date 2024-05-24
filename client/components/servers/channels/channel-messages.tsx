@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useMemo, useRef } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
@@ -15,19 +15,17 @@ export default function ChannelMessages({
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
 	const ref = useRef<HTMLUListElement>(null);
-	const {
-		reloadChannelMessage,
-		states,
-		socket,
-		params,
-		userId,
-		searchParams,
-	} = useSocket();
+	const { reloadChannelMessage, states, socket, params, userId, searchParams } =
+		useSocket();
 
 	const isCurrentUserBanned = useMemo(
 		() => findBannedMembers(states.banned_members, userId!),
 		[states.banned_members, userId]
 	);
+
+	useEffect(() => {
+		reloadChannelMessage(params.channelId as string, params.serverId as string);
+	}, [params.channelId, params.serverId, reloadChannelMessage]);
 
 	useScroll(ref, states.channel_messages);
 
@@ -37,28 +35,26 @@ export default function ChannelMessages({
 				className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
 				ref={ref}
 			>
-				{
-					states.channel_messages?.map((msg) => (
-						<ChatItem
-							channelId={(params?.channelId as string) || ''}
-							setServerStates={setServerStates}
-							socketStates={states}
-							replyType='channel'
-							reloadMessage={() =>
-								reloadChannelMessage(
-									params.channelId as string,
-									params.serverId as string
-								)
-							}
-							socket={socket}
-							serverStates={serverStates}
-							messages={states.channel_messages}
-							userId={userId!!}
-							msg={msg}
-							key={msg.message_id}
-						/>
-					))
-				}
+				{states.channel_messages?.map((msg) => (
+					<ChatItem
+						channelId={(params?.channelId as string) || ''}
+						setServerStates={setServerStates}
+						socketStates={states}
+						replyType='channel'
+						reloadMessage={() =>
+							reloadChannelMessage(
+								params.channelId as string,
+								params.serverId as string
+							)
+						}
+						socket={socket}
+						serverStates={serverStates}
+						messages={states.channel_messages}
+						userId={userId!!}
+						msg={msg}
+						key={msg.message_id}
+					/>
+				))}
 			</ul>
 
 			{!isCurrentUserBanned ? (
