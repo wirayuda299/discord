@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
+import * as compression from 'compression';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ValidationFilter } from './common/errorhandler/error-handler';
-
-import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,6 +15,7 @@ async function bootstrap() {
     },
   });
   app.use(cookieParser());
+  app.use(compression());
   // app.useGlobalGuards(new AuthGuard());
   app.useGlobalFilters(new ValidationFilter());
 
