@@ -122,7 +122,7 @@ function SelectedChannel() {
 				>
 					{states.channel_messages?.map((msg: Message) => (
 						<ChatItem
-							channelId={params?.channelId as string||''}
+							channelId={(params?.channelId as string) || ''}
 							setServerStates={setServerStates}
 							socketStates={states}
 							replyType='channel'
@@ -143,6 +143,7 @@ function SelectedChannel() {
 				</ul>
 				{!isCurrentUserBanned ? (
 					<ChatForm
+						socketStates={states}
 						socket={socket}
 						type='channel'
 						params={params}

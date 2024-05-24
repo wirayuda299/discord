@@ -202,7 +202,7 @@ export default function RolesSettings({
 			selectRole(null);
 		}
 		selectTab('display');
-	}, [form, selectRole, selectTab, selectType, selectedRole, type]);
+	}, [form, selectedRole, type]);
 
 	return (
 		<div className={cn('flex w-full gap-3 overflow-y-auto', styles)}>

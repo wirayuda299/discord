@@ -115,6 +115,7 @@ function ThreadMessages({ threadId, children }: Props) {
 					)}
 					{!isCurrentUserBanned && (
 						<ChatForm
+							socketStates={states}
 							reloadMessage={() => reloadThreadMessages(threadId)}
 							params={params}
 							searchParams={searchParams}

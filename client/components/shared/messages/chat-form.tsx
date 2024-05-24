@@ -24,6 +24,7 @@ import { createError } from '@/utils/error';
 import { uploadFile } from '@/helper/file';
 import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
+import { SocketStates } from '@/types/socket-states';
 
 type Props = {
 	styles?: string;
@@ -32,6 +33,7 @@ type Props = {
 	type: string;
 	placeholder: string;
 	params: Params;
+	socketStates: SocketStates;
 	searchParams: ReadonlyURLSearchParams;
 	serverStates: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
@@ -63,6 +65,7 @@ function ChatForm({
 	searchParams,
 	userId,
 	reloadMessage,
+	socketStates,
 }: Props) {
 	const form = useForm({
 		resolver: zodResolver(personalChatSchema),
@@ -72,7 +75,10 @@ function ChatForm({
 		},
 	});
 	const { mutate } = useSWRConfig();
-	const { selectedMessage, selectedThread} = useMemo(() => serverStates, [serverStates]);
+	const { selectedMessage, selectedThread, selectedServer } = useMemo(
+		() => serverStates,
+		[serverStates]
+	);
 
 	const { preview, files, handleChange } = useUploadFile(form);
 
@@ -113,7 +119,12 @@ function ChatForm({
 			revalidate('/direct-messages');
 		}
 		// reply of personal message
-		if (type === 'personal' && selectedMessage && selectedMessage.message && selectedMessage.type === 'personal') {
+		if (
+			type === 'personal' &&
+			selectedMessage &&
+			selectedMessage.message &&
+			selectedMessage.type === 'personal'
+		) {
 			const values = messageData({
 				content: data.message,
 				conversationId: searchParams.get('conversationId') as string,
@@ -173,9 +184,7 @@ function ChatForm({
 		}
 
 		// create thread
-		if (
-			selectedMessage && selectedMessage.action === 'create_thread'
-		) {
+		if (selectedMessage && selectedMessage.action === 'create_thread') {
 			if (!threadName) {
 				toast.error('Thread name is required');
 				return;
@@ -212,11 +221,11 @@ function ChatForm({
 			}
 		}
 
-
 		if (
-			selectedThread && 
+			selectedThread &&
 			selectedMessage &&
-			selectedMessage?.type === 'thread' && selectedMessage.action === 'reply'
+			selectedMessage?.type === 'thread' &&
+			selectedMessage.action === 'reply'
 		) {
 			const values = messageData({
 				content: data.message,
@@ -229,11 +238,10 @@ function ChatForm({
 				username: serverStates.selectedServer?.serverProfile.username,
 				parentMessageId: selectedMessage?.message.message_id,
 				messageId: selectedMessage?.message.message_id,
-				threadId: selectedThread?.thread_id ,
+				threadId: selectedThread?.thread_id,
 			});
 			if (socket) {
 				socket.emit('message', values);
-			
 			}
 		}
 
@@ -270,7 +278,8 @@ function ChatForm({
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='relative w-full'>
 				{selectedMessage &&
-					selectedMessage.type === type && selectedMessage.action === 'reply'&& (
+					selectedMessage.type === type &&
+					selectedMessage.action === 'reply' && (
 						<div className='absolute -top-9 left-0 flex w-full items-center justify-between rounded-t-xl bg-[#2b2d31] p-2'>
 							<p className='bottom-16 text-sm text-gray-2'>
 								Replying to{' '}
@@ -292,48 +301,53 @@ function ChatForm({
 						styles
 					)}
 				>
-					{type !== 'thread' && (
-						<div className='relative'>
-							{image && preview && preview.image && (
-								<div className='absolute -top-32 w-max'>
-									<Image
-										className='aspect-square rounded-md object-cover '
-										priority
-										fetchPriority='high'
-										src={(preview && preview?.image)!}
-										width={100}
-										height={100}
-										alt='image'
-									/>
-									{!isSubmitting && (
-										<button
-											type='button'
-											onClick={deleteImage}
-											className='absolute -right-4 -top-3 min-h-5 min-w-5 rounded-full border bg-white p-1'
-										>
-											<X className='text-sm text-red-600' size={18} />
-										</button>
+					{type !== 'thread' && type !== 'personal' && (
+						<>
+							{(selectedServer?.owner_id === userId ||
+								(socketStates.user_roles && socketStates.user_roles.attach_file)) && (
+								<div className='relative'>
+									{image && preview && preview.image && (
+										<div className='absolute -top-32 w-max'>
+											<Image
+												className='aspect-square rounded-md object-cover '
+												priority
+												fetchPriority='high'
+												src={(preview && preview?.image)!}
+												width={100}
+												height={100}
+												alt='image'
+											/>
+											{!isSubmitting && (
+												<button
+													type='button'
+													onClick={deleteImage}
+													className='absolute -right-4 -top-3 min-h-5 min-w-5 rounded-full border bg-white p-1'
+												>
+													<X className='text-sm text-red-600' size={18} />
+												</button>
+											)}
+										</div>
 									)}
+									<label
+										aria-disabled={isSubmitting}
+										title='Upload image'
+										htmlFor='image-upload'
+										className='flex size-6 min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-background disabled:cursor-not-allowed md:h-7 md:min-h-7 md:min-w-7 md:bg-gray-2 md:p-1'
+									>
+										<Plus className='text-base text-gray-2 md:text-lg md:text-foreground' />
+									</label>
+									<input
+										onChange={(e) => handleChange(e, 'image')}
+										aria-disabled={isSubmitting}
+										disabled={isSubmitting}
+										type='file'
+										name='file'
+										id='image-upload'
+										className='hidden disabled:cursor-not-allowed'
+									/>
 								</div>
 							)}
-							<label
-								aria-disabled={isSubmitting}
-								title='Upload image'
-								htmlFor='image-upload'
-								className='flex size-6 min-h-6 min-w-6 cursor-pointer items-center justify-center rounded-full bg-background disabled:cursor-not-allowed md:h-7 md:min-h-7 md:min-w-7 md:bg-gray-2 md:p-1'
-							>
-								<Plus className='text-base text-gray-2 md:text-lg md:text-foreground' />
-							</label>
-							<input
-								onChange={(e) => handleChange(e, 'image')}
-								aria-disabled={isSubmitting}
-								disabled={isSubmitting}
-								type='file'
-								name='file'
-								id='image-upload'
-								className='hidden disabled:cursor-not-allowed'
-							/>
-						</div>
+						</>
 					)}
 					<FormField
 						name={'message'}
@@ -343,7 +357,7 @@ function ChatForm({
 								<FormControl className='w-full'>
 									<Textarea
 										rows={1}
-									cols={1}
+										cols={1}
 										{...field}
 										autoFocus
 										aria-disabled={isSubmitting}

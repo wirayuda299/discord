@@ -52,7 +52,7 @@ export default function ChatList() {
 				<ul className='h-full overflow-y-auto p-3'>
 					{messages?.map((message) => (
 						<ChatItem
-							channelId=""
+							channelId=''
 							setServerStates={setServerStates}
 							socketStates={states}
 							replyType='personal'
@@ -68,6 +68,7 @@ export default function ChatList() {
 					))}
 				</ul>
 				<ChatForm
+					socketStates={states}
 					reloadMessage={reloadPersonalMessage}
 					params={params}
 					searchParams={searchParams}
