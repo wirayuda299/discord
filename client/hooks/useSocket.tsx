@@ -86,6 +86,7 @@ export default function useSocket() {
 		};
 
 		const handleChannelMessages = (data: Message[]) => {
+			
 			dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
 		};
 

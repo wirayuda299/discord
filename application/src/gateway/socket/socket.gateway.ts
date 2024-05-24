@@ -1,3 +1,4 @@
+import { Server, Socket } from 'socket.io';
 import { Logger, OnModuleInit } from '@nestjs/common';
 import {
   MessageBody,
@@ -5,7 +6,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+
 import { MembersService } from 'src/services/members/members.service';
 import { MessagesService } from 'src/services/messages/messages.service';
 import { RolesService } from 'src/services/roles/roles.service';
@@ -73,19 +74,6 @@ export class SocketGateway implements OnModuleInit {
     this.server.emit('set-active-users', Array.from(this.activeUsers.keys()));
   }
 
-  private async handleSendMessage(payload: PayloadTypes) {
-    try {
-      await this.messagesService.sendMessage(payload);
-      const messages = await this.messagesService.getMessageByChannelId(
-        payload.channelId,
-        payload.serverId
-      );
-      this.server.emit('set-message', messages);
-    } catch (error) {
-      this.logger.error('Error sending message', error);
-    }
-  }
-
   private async handleReplyMessage(payload: PayloadTypes) {
     try {
       if (payload.parentMessageId && payload.threadId) {
@@ -107,16 +95,21 @@ export class SocketGateway implements OnModuleInit {
           payload.type
         );
       }
-
-      await this.updateMessagesBasedOnPayload(payload);
     } catch (error) {
       this.logger.error('Error replying to message', error);
     }
   }
 
-  private async handleThreadMessage(payload: PayloadTypes) {
-    try {
-      if (payload.threadId && payload.type !== 'reply') {
+  @SubscribeMessage('message')
+  async handleMessage(@MessageBody() payload: PayloadTypes) {
+    switch (payload.type) {
+      case 'channel':
+        await this.messagesService.sendMessage(payload);
+        break;
+      case 'reply':
+        await this.handleReplyMessage(payload);
+        break;
+      case 'thread':
         await this.threadsService.sendThreadMessage(
           payload.content,
           payload.user_id,
@@ -124,80 +117,15 @@ export class SocketGateway implements OnModuleInit {
           payload.imageAssetId,
           payload.threadId
         );
-      }
-      const messages = await this.threadsService.getThreadMessage(
-        payload.threadId,
-        payload.serverId
-      );
-      this.server.emit('set-thread-messages', messages);
-    } catch (error) {
-      this.logger.error('Error handling thread message', error);
-    }
-  }
-
-  private async handlePersonalMessage(payload: PayloadTypes) {
-    try {
-      await this.messagesService.sendPersonalMessage(
-        payload.content,
-        payload.user_id,
-        payload.imageUrl,
-        payload.imageAssetId,
-        payload.recipientId
-      );
-      const messages = await this.messagesService.getPersonalMessage(
-        payload.conversationId,
-        payload.user_id
-      );
-      this.server.emit('set-personal-messages', messages);
-    } catch (error) {
-      console.log(error);
-
-      this.logger.error('Error handling personal message', error);
-    }
-  }
-
-  private async updateMessagesBasedOnPayload(payload: PayloadTypes) {
-    try {
-      if (payload.threadId) {
-        const messages = await this.threadsService.getThreadMessage(
-          payload.threadId,
-          payload.serverId
-        );
-        this.server.emit('set-thread-messages', messages);
-      } else if (payload.recipientId) {
-        const messages = await this.messagesService.getPersonalMessage(
-          payload.conversationId,
-          payload.user_id
-        );
-        this.server.emit('set-personal-messages', messages);
-      } else if (payload.channelId && payload.serverId) {
-        const messages = await this.messagesService.getMessageByChannelId(
-          payload.channelId,
-          payload.serverId
-        );
-        this.server.emit('set-message', messages);
-      }
-    } catch (error) {
-      this.logger.error('Error updating messages based on payload', error);
-    }
-  }
-
-  @SubscribeMessage('message')
-  async handleMessage(@MessageBody() payload: PayloadTypes) {
-    this.logger.log(payload);
-
-    switch (payload.type) {
-      case 'channel':
-        await this.handleSendMessage(payload);
-        break;
-      case 'reply':
-        await this.handleReplyMessage(payload);
-        break;
-      case 'thread':
-        await this.handleThreadMessage(payload);
         break;
       case 'personal':
-        await this.handlePersonalMessage(payload);
+        await this.messagesService.sendPersonalMessage(
+          payload.content,
+          payload.user_id,
+          payload.imageUrl,
+          payload.imageAssetId,
+          payload.recipientId
+        );
         break;
       default:
         this.logger.warn(`Unknown message type: ${payload.type}`);

@@ -84,7 +84,6 @@ const isCurrentUserBanned = useMemo(
 		},
 		[router, searchParams]
 	);
-console.log(message);
 
 	return (
 		<div className='w-full'>
