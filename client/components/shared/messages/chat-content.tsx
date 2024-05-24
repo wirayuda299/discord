@@ -84,6 +84,7 @@ const isCurrentUserBanned = useMemo(
 		},
 		[router, searchParams]
 	);
+console.log(message);
 
 	return (
 		<div className='w-full'>
@@ -106,6 +107,9 @@ const isCurrentUserBanned = useMemo(
 							>
 								{message.username}
 							</p>
+							{message.role && message.role.icon && (
+								<Image src={message.role.icon} width={20} height={20} alt='role icon' className='size-5 rounded-full object-cover'/>
+							)}
 						</div>
 						{!formOpen && (
 							<p
