@@ -252,7 +252,9 @@ function ChatForm({
 			resetSelectedMessage();
 		}
 
-		
+		if (type === 'channel') {
+			socket?.emit('get-channel-message', {channelId: serverStates.selectedChannel?.channel_id, serverId: serverStates.selectedServer?.id})
+		}
 	};
 
 	const resetSelectedMessage = () => {
