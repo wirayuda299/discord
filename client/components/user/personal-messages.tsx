@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import { Virtuoso } from "react-virtuoso";
 
 import { useUserContext } from "@/providers/users";
 import SearchForm from "@/components/shared/search-form";
@@ -11,7 +12,6 @@ import ChatForm from "../shared/messages/chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "../shared/messages/chat-item";
 import useSocket from "@/hooks/useSocket";
-import { Virtuoso } from "react-virtuoso";
 
 export default function ChatList() {
   const { selectedUser, handleSelectUser } = useUserContext();
@@ -49,10 +49,9 @@ export default function ChatList() {
 					Back
 				</Link>
 			</header>
-			<div className='flex h-[calc(100vh-50px)] flex-col justify-end overflow-y-auto'>
-				<ul className='h-full p-3'>
+			<div className='flex h-[calc(100vh-50px)] flex-col justify-end'>
+				<ul className='h-dvh space-y-5 p-3 md:h-screen'>
 					<Virtuoso
-						style={{ height: '100%' }}
 						data={messages}
 						totalCount={messages.length}
 						itemContent={(index, message) => (

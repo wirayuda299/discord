@@ -66,6 +66,7 @@ function ChatForm({
 	userId,
 	reloadMessage,
 	socketStates,
+
 }: Props) {
 	const form = useForm({
 		resolver: zodResolver(personalChatSchema),
@@ -250,6 +251,8 @@ function ChatForm({
 		if (selectedMessage) {
 			resetSelectedMessage();
 		}
+
+		
 	};
 
 	const resetSelectedMessage = () => {

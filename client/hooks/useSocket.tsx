@@ -15,7 +15,7 @@ const initialValues: SocketStates = {
 };
 
 export default function useSocket() {
-	const { socket, userId } = useSocketContext();
+	const { socket, userId, isConnected} = useSocketContext();
 	const searchParams = useSearchParams();
 	const { id: serverId, channel_id: channelId } = useParams();
 	const [states, dispatch] = useReducer(socketReducer, initialValues);
@@ -78,14 +78,14 @@ export default function useSocket() {
 	}, [socket, serverId]);
 
 	useEffect(() => {
-		if (!socket || !userId) return;
+		if (!socket || !userId || !isConnected) return;
 
-		  socket.off('set-personal-messages');
-			socket.off('set-message');
-			socket.off('set-banned-members');
-			socket.off('set-active-users');
-			socket.off('set-current-user-role');
-			socket.off('set-thread-messages');
+		  // socket.off('set-personal-messages');
+			// socket.off('set-message');
+			// socket.off('set-banned-members');
+			// socket.off('set-active-users');
+			// socket.off('set-current-user-role');
+			// socket.off('set-thread-messages');
 
 		if (chat) {
 			reloadPersonalMessage();
@@ -117,18 +117,7 @@ export default function useSocket() {
 		socket.on('set-thread-messages', (data: Message[]) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		});
-	}, [
-		socket,
-		chat,
-		conversationId,
-		channelId,
-		serverId,
-		reloadPersonalMessage,
-		reloadChannelMessage,
-		getBannedMembers,
-		getUserRole,
-		userId,
-	]);
+	}, [socket, chat, conversationId, channelId, serverId, reloadPersonalMessage, reloadChannelMessage, getBannedMembers, getUserRole, userId, isConnected]);
 	return {
 		reloadChannelMessage,
 		states,

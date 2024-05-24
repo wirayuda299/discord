@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { useRef, ReactNode, memo, useMemo } from 'react';
+import { ReactNode, memo, useMemo, useEffect } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -9,8 +9,6 @@ import ChatItem from '../../shared/messages/chat-item';
 
 import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';
-import useScroll from '@/hooks/useScroll';
-import { Message } from '@/types/messages';
 import { findBannedMembers } from '@/utils/banned_members';
 
 type Props = {
@@ -20,22 +18,27 @@ type Props = {
 };
 
 function ThreadMessages({ threadId, children }: Props) {
-	const messageRef = useRef<HTMLDivElement>(null);
 	const { states, reloadThreadMessages, socket, userId, searchParams, params } =
 		useSocket();
 	const { serversState, setServerStates } = useServerContext();
-	const { selectedServer, selectedChannel, selectedMessage, selectedThread } = serversState;
+	const { selectedServer, selectedChannel, selectedMessage, selectedThread } =
+		serversState;
 
-	
+	const messages = useMemo(
+		() => states.thread_messages,
+		[states.thread_messages]
+	);
+
 	const isCurrentUserBanned = useMemo(
 		() => findBannedMembers(states.banned_members, userId!),
 		[states.banned_members, userId]
 	);
 
-	const path = 
-			`/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`
+	useEffect(() => {
+		reloadThreadMessages(threadId);
+	}, [reloadThreadMessages, threadId]);
 
-	useScroll(messageRef, states.thread_messages);
+	const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
 	return (
 		<Sheet
@@ -46,8 +49,6 @@ function ThreadMessages({ threadId, children }: Props) {
 						selectedThread: null,
 						selectedMessage: null,
 					}));
-				} else {
-					reloadThreadMessages(threadId);
 				}
 			}}
 		>
@@ -55,7 +56,6 @@ function ThreadMessages({ threadId, children }: Props) {
 			<SheetContent
 				side='right'
 				className='flex h-screen flex-col justify-between overflow-y-auto border-l-2 border-none border-l-foreground bg-black p-0 md:bg-background'
-				ref={messageRef}
 			>
 				<div className='w-full '>
 					<header className='sticky top-0 z-10 flex w-full items-center gap-4 border-b border-b-foreground bg-black p-4 md:bg-background'>
@@ -73,8 +73,7 @@ function ThreadMessages({ threadId, children }: Props) {
 						</h3>
 					</header>
 					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
-					
-						{states.thread_messages?.map((message: Message) => (
+						{messages?.map((message) => (
 							<ChatItem
 								channelId={params.channelId as string}
 								setServerStates={setServerStates}
