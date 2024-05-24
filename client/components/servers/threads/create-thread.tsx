@@ -29,7 +29,7 @@ export default function CreateThread({
 }: Props) {
 	const [threadName, setThreadName] = useState<string>('');
 	const { serversState, setServerStates } = useServerContext();
-	const { reloadChannelMessage, searchParams, params, userId } = useSocket();
+	const { reloadChannelMessage, searchParams, params, userId, states } = useSocket();
 
 	const setSelectedMessage = (message: Message ) => {
 		setServerStates((prev) => ({
@@ -144,6 +144,7 @@ export default function CreateThread({
 						</div>
 
 						<ChatForm
+							socketStates={states}
 							params={params}
 							userId={userId!!}
 							searchParams={searchParams}
