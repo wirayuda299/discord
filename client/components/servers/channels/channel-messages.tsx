@@ -6,6 +6,7 @@ import useScroll from '@/hooks/useScroll';
 import useSocket from '@/hooks/useSocket';
 import { ServerStates } from '@/providers/server';
 import { findBannedMembers } from '@/utils/banned_members';
+import GeneralLoader from '@/components/shared/loader/general';
 
 export default function ChannelMessages({
 	serverStates,
@@ -15,8 +16,15 @@ export default function ChannelMessages({
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
 	const ref = useRef<HTMLUListElement>(null);
-	const { reloadChannelMessage, states, socket, params, userId, searchParams } =
-		useSocket();
+	const {
+		reloadChannelMessage,
+		states,
+		socket,
+		params,
+		userId,
+		searchParams,
+		loading,
+	} = useSocket();
 
 	const isCurrentUserBanned = useMemo(
 		() => findBannedMembers(states.banned_members, userId!),
@@ -25,35 +33,36 @@ export default function ChannelMessages({
 
 	useScroll(ref, states.channel_messages);
 
-	console.log(states.channel_messages);
-	
-
 	return (
-		<>
+		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
 			<ul
 				className='ease flex min-h-full flex-col gap-5 overflow-y-auto p-2 transition-all duration-500 md:p-5'
 				ref={ref}
 			>
-				{states.channel_messages?.map((msg) => (
-					<ChatItem
-						channelId={(params?.channelId as string) || ''}
-						setServerStates={setServerStates}
-						socketStates={states}
-						replyType='channel'
-						reloadMessage={() =>
-							reloadChannelMessage(
-								params.channelId as string,
-								params.serverId as string
-							)
-						}
-						socket={socket}
-						serverStates={serverStates}
-						messages={states.channel_messages}
-						userId={userId!!}
-						msg={msg}
-						key={msg.message_id}
-					/>
-				))}
+				{loading ? (
+					<GeneralLoader/>
+				) : (
+					states.channel_messages?.map((msg) => (
+						<ChatItem
+							channelId={(params?.channelId as string) || ''}
+							setServerStates={setServerStates}
+							socketStates={states}
+							replyType='channel'
+							reloadMessage={() =>
+								reloadChannelMessage(
+									params.channelId as string,
+									params.serverId as string
+								)
+							}
+							socket={socket}
+							serverStates={serverStates}
+							messages={states.channel_messages}
+							userId={userId!!}
+							msg={msg}
+							key={msg.message_id}
+						/>
+					))
+				)}
 			</ul>
 
 			{!isCurrentUserBanned ? (
@@ -77,7 +86,6 @@ export default function ChannelMessages({
 			) : (
 				<p className='text-center text-red-600'>You are banned </p>
 			)}
-		</>
+		</div>
 	);
 }
-// export default memo(ChannelMessages);

@@ -106,12 +106,10 @@ function SelectedChannel({
 					/>
 				</div>
 			</header>
-			<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
 				<ChannelMessages
 					serverStates={serversState}
 					setServerStates={setServerStates}
 				/>
-			</div>
 		</div>
 	);
 }
