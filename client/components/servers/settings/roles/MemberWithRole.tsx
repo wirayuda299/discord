@@ -1,4 +1,4 @@
-import { useSWRConfig } from 'swr';
+import {  useSWRConfig } from 'swr';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -9,7 +9,6 @@ import { Role, removeRoleFromUser } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import { getMembersByRole } from '@/helper/server';
 import { createError } from '@/utils/error';
-import useSocket from '@/hooks/useSocket';
 const AssignRole = dynamic(() => import('./AssignRole'), { ssr: false });
 
 export default function MemberWithRole({
@@ -23,7 +22,6 @@ export default function MemberWithRole({
 	const { data, isLoading, error } = useFetch('members-by-role', () =>
 		getMembersByRole(serverId, selectedRole?.name || '')
 	);
-	const { getUserRole } = useSocket();
 
 	const handleDeleteRole = async (userId: string) => {
 		try {
@@ -32,7 +30,7 @@ export default function MemberWithRole({
 		} catch (error) {
 			createError(error);
 		} finally {
-			getUserRole(userId);
+			mutate('user-permissions');
 			mutate('members');
 			mutate('members-by-role');
 		}

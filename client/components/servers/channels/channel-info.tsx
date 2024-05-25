@@ -84,6 +84,7 @@ function renderMembers(
 			) : (
 				membersData?.map((member) => (
 					<MemberItem
+						serverId={member.server_id}
 						currentUser={currentUser}
 						ownerId={ownerId}
 						socket={socket}

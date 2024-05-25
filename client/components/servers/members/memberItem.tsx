@@ -17,6 +17,10 @@ import { createError } from '@/utils/error';
 import { banMember, kickMember } from '@/actions/members';
 import { copyText } from '@/utils/copy';
 import { findBannedMembers } from '@/utils/banned_members';
+import { useSWRConfig } from 'swr';
+import useFetch from '@/hooks/useFetch';
+import { getBannedMembers } from '@/helper/members';
+import { getCurrentUserPermissions } from '@/helper/roles';
 
 export default function MemberItem({
 	member,
@@ -24,16 +28,32 @@ export default function MemberItem({
 	states,
 	ownerId,
 	socket,
+	serverId
 }: {
 	member: Member;
 	ownerId: string;
+	serverId: string;
 	currentUser: string;
 	states: SocketStates;
 	socket: Socket | null;
-}) {
+	}) {
+		const {
+			data: permissions,
+			error,
+			isLoading,
+		} = useFetch('user-permissions', () =>
+			getCurrentUserPermissions(currentUser!!, serverId)
+		);
+	
+	const {
+		data: bannedMembers,
+		error: bannedMembersError,
+		isLoading: bannedMembersLoading,
+	} = useFetch('banned-members', () => getBannedMembers(serverId as string));
+	const { mutate } = useSWRConfig();
 	const isCurrentUserBanned = useMemo(
-		() => findBannedMembers(states.banned_members, currentUser!),
-		[states.banned_members, currentUser]
+		() => findBannedMembers(bannedMembers||[], currentUser!),
+		[bannedMembers, currentUser]
 	);
 	const handleKickMember = async () => {
 		try {
@@ -43,6 +63,7 @@ export default function MemberItem({
 				ownerId,
 				currentUser
 			).then(() => toast.success('Member kicked from server'));
+			mutate('banned-members');
 		} catch (error) {
 			createError(error);
 		}
@@ -56,6 +77,13 @@ export default function MemberItem({
 			createError(error);
 		}
 	};
+
+	if (isLoading || bannedMembersLoading)
+		return (
+			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
+		);
+	if (error || bannedMembersError)
+		return <p>{error.message ?? bannedMembersError.message}</p>;
 
 	return (
 		<ContextMenu>
@@ -99,7 +127,7 @@ export default function MemberItem({
 				{!isCurrentUserBanned && currentUser !== member.user_id && (
 					<>
 						{(currentUser === ownerId ||
-							(states.user_roles && states.user_roles.kick_member)) && (
+							(permissions && permissions.kick_member)) && (
 							<ContextMenuItem
 								onClick={handleKickMember}
 								className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'
@@ -108,7 +136,7 @@ export default function MemberItem({
 							</ContextMenuItem>
 						)}
 						{(currentUser === ownerId ||
-							(states.user_roles && states.user_roles.ban_member)) && (
+							(permissions && permissions.ban_member)) && (
 							<ContextMenuItem
 								onClick={handleBanMember}
 								className='inline-flex gap-2 !text-red-600 hover:!bg-red-600 hover:!text-white'

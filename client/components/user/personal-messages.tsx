@@ -56,9 +56,9 @@ export default function ChatList() {
 						totalCount={messages.length}
 						itemContent={(index, message) => (
 							<ChatItem
+								serverId={params.serverId as string}
 								channelId={params.channelId as string}
 								setServerStates={setServerStates}
-								socketStates={states}
 								replyType='personal'
 								key={message.created_at}
 								styles='hidden'

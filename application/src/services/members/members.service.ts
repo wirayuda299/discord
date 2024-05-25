@@ -255,7 +255,10 @@ export class MembersService {
        WHERE bm.server_id = $1 AND bm.server_id = $1`,
         [serverId]
       );
-      return bannedMembers.rows;
+      return {
+        data: bannedMembers.rows,
+        error: false,
+      };
     } catch (error) {
       throw error;
     }

@@ -15,7 +15,7 @@ import { Message } from '@/types/messages';
 import { createError } from '@/utils/error';
 import { copyText } from '@/utils/copy';
 import CreateThread from '../../servers/threads/create-thread';
-import { SocketStates } from '@/types/socket-states';
+import { Permission } from '@/types/server';
 
 type Props = {
 	channelId: string;
@@ -30,8 +30,8 @@ type Props = {
 		action: string
 	) => void;
 	socket: Socket | null;
-	socketStates: SocketStates;
 	serverAuthor: string;
+	permissions:Permission|undefined
 };
 
 export default function MessageMenu({
@@ -44,7 +44,7 @@ export default function MessageMenu({
 	socket,
 	styles,
 	type,
-	socketStates,
+	permissions,
 }: Props) {
 	const { mutate } = useSWRConfig();
 
@@ -73,8 +73,7 @@ export default function MessageMenu({
 				{type !== 'personal' && (
 					<>
 						{(serverAuthor === currentUser ||
-							(socketStates.user_roles &&
-								socketStates.user_roles.manage_message)) && (
+							(permissions && permissions.manage_message)) && (
 							<DropdownMenuItem
 								className='inline-flex w-full min-w-40 cursor-pointer justify-between bg-transparent hover:!bg-primary hover:!text-white'
 								onClick={handlePinMessage}
@@ -101,8 +100,7 @@ export default function MessageMenu({
 				{type !== 'personal' && (
 					<>
 						{(serverAuthor === currentUser ||
-							(socketStates.user_roles &&
-								socketStates.user_roles.manage_thread)) && (
+							(permissions && permissions.manage_thread)) && (
 							<CreateThread
 								styles={styles}
 								channelId={channelId}
@@ -124,8 +122,7 @@ export default function MessageMenu({
 				</DropdownMenuItem>
 				{(type === 'personal' && message.author === currentUser) ||
 					((serverAuthor === currentUser ||
-						(socketStates.user_roles &&
-							socketStates.user_roles.manage_message)) && (
+						(permissions && permissions.manage_message)) && (
 						<DropdownMenuItem className='group inline-flex w-full cursor-pointer justify-between bg-transparent text-red-600 hover:!bg-primary hover:!text-white'>
 							<span>Delete Message</span>
 							<Trash

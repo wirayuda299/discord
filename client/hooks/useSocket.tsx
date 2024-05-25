@@ -10,12 +10,10 @@ const initialValues: SocketStates = {
 	channel_messages: [],
 	personal_messages: [],
 	thread_messages: [],
-	user_roles: null,
-	banned_members: [],
 };
 
 export default function useSocket() {
-	const { socket, userId, isConnected} = useSocketContext();
+	const { socket, userId, isConnected } = useSocketContext();
 	const searchParams = useSearchParams();
 	const { id: serverId, channel_id: channelId } = useParams();
 	const [states, dispatch] = useReducer(socketReducer, initialValues);
@@ -57,35 +55,8 @@ export default function useSocket() {
 		[socket, serverId, channelId]
 	);
 
-	const getUserRole = useCallback(
-		(userId: string) => {
-			if (socket && serverId) {
-				socket.emit('member-roles', {
-					serverId,
-					userId,
-				});
-			}
-		},
-		[socket, serverId]
-	);
-
-	const getBannedMembers = useCallback(() => {
-		if (socket && serverId) {
-			socket.emit('banned-members', {
-				serverId,
-			});
-		}
-	}, [socket, serverId]);
-
 	useEffect(() => {
 		if (!socket || !userId || !isConnected) return;
-
-		  // socket.off('set-personal-messages');
-			// socket.off('set-message');
-			// socket.off('set-banned-members');
-			// socket.off('set-active-users');
-			// socket.off('set-current-user-role');
-			// socket.off('set-thread-messages');
 
 		if (chat) {
 			reloadPersonalMessage();
@@ -96,28 +67,30 @@ export default function useSocket() {
 
 		if (channelId && serverId) {
 			reloadChannelMessage(channelId as string, serverId as string);
-			getBannedMembers();
 
 			socket.on('set-message', (data) => {
 				dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
 			});
-			socket.on('set-banned-members', (data) => {
-				dispatch({ type: 'BANNED_MEMBERS', payload: data });
-			});
 		}
-
-		getUserRole(userId);
 
 		socket.on('set-active-users', (data) => {
 			dispatch({ type: 'ACTIVE_USERS', payload: data });
 		});
-		socket.on('set-current-user-role', (data) => {
-			dispatch({ type: 'SET_USER_ROLES', payload: data });
-		});
+
 		socket.on('set-thread-messages', (data: Message[]) => {
 			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		});
-	}, [socket, chat, conversationId, channelId, serverId, reloadPersonalMessage, reloadChannelMessage, getBannedMembers, getUserRole, userId, isConnected]);
+	}, [
+		socket,
+		chat,
+		conversationId,
+		channelId,
+		serverId,
+		reloadPersonalMessage,
+		reloadChannelMessage,
+		userId,
+		isConnected,
+	]);
 	return {
 		reloadChannelMessage,
 		states,
@@ -127,10 +100,6 @@ export default function useSocket() {
 		searchParams,
 		socket,
 		userId,
-		getUserRole,
-		getBannedMembers,
 		params: { serverId, channelId },
 	};
 }
-
-

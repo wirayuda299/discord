@@ -15,6 +15,14 @@ import { RolesService } from 'src/services/roles/roles.service';
 export class RolesController {
   constructor(private roleService: RolesService) {}
 
+  @Get()
+  getCurrentUserRole(
+    @Query('userId') id: string,
+    @Query('serverId') serverId: string
+  ) {
+    return this.roleService.getCurrentUserRole(id, serverId);
+  }
+
   @Get('all-roles')
   getAllRoles(@Query('serverId') id: string) {
     return this.roleService.getAllRolesInAServer(id);

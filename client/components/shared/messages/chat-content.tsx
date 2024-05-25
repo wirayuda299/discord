@@ -1,13 +1,15 @@
-import { ReactNode, memo, useCallback, useMemo, useState } from 'react';
+import { ReactNode, memo, useCallback, useState } from 'react';
 import Image from 'next/image';
 import type { Socket } from 'socket.io-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
+import { getCurrentUserPermissions } from '@/helper/roles';
+import useFetch from '@/hooks/useFetch';
+import { getBannedMembers } from '@/helper/members';
+import { findBannedMembers } from '@/utils/banned_members';
 import { ServerStates, useServerContext } from '@/providers/server';
 import { Message } from '@/types/messages';
-import { SocketStates } from '@/types/socket-states';
-import { findBannedMembers } from '@/utils/banned_members';
 const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
 const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {
 	ssr: false,
@@ -17,10 +19,10 @@ const MessageMenu = dynamic(() => import('./menu'), { ssr: false });
 type Props = {
 	userId: string;
 	channelId: string;
+	serverId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	serverStates: ServerStates;
-	socketStates:SocketStates
 	message: Message;
 	socket: Socket | null;
 	handleClick: (e: any) => void;
@@ -58,32 +60,51 @@ function ChatContent({
 	children,
 	reloadMessage,
 	styles,
-	socketStates,
 	replyType,
-	channelId
+	channelId,
+	serverId
 }: Props) {
 	const searchParams = useSearchParams();
 	const { setServerStates } = useServerContext();
 	const router = useRouter();
 	const [formOpen, setFormOpen] = useState<boolean>(false);
 
-const isCurrentUserBanned = useMemo(
-	() => findBannedMembers(socketStates.banned_members, userId!),
-	[socketStates.banned_members, userId]
-);
-
-	const handleSelectedMessage = useCallback((msg: Message ) => {
+	const handleSelectedMessage = useCallback(
+		(msg: Message) => {
 			setServerStates((prev) => ({
 				...prev,
 				selectedMessage: {
 					message: msg,
 					type: replyType,
-					action:'reply'
-				}
+					action: 'reply',
+				},
 			}));
 		},
 		[router, searchParams]
 	);
+	
+
+	const {
+		data: permissions,
+		error,
+		isLoading,
+	} = useFetch('user-permissions', () =>
+		getCurrentUserPermissions(userId!!, serverId)
+	);
+	const {
+		data: bannedMembers,
+		error: bannedMembersError,
+		isLoading: bannedMembersLoading,
+	} = useFetch('banned-members', () => getBannedMembers(serverId));
+	
+	
+	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
+
+
+	if (isLoading || bannedMembersLoading || isCurrentUserBanned) return null;
+
+	if (error || bannedMembersError)
+		return <p>{error.message ?? bannedMembersError.message}</p>;
 
 	return (
 		<div className='w-full'>
@@ -107,7 +128,13 @@ const isCurrentUserBanned = useMemo(
 								{message.username}
 							</p>
 							{message.role && message.role.icon && (
-								<Image src={message.role.icon} width={20} height={20} alt='role icon' className='size-5 rounded-full object-cover'/>
+								<Image
+									src={message.role.icon}
+									width={20}
+									height={20}
+									alt='role icon'
+									className='size-5 rounded-full object-cover'
+								/>
 							)}
 						</div>
 						{!formOpen && (
@@ -162,8 +189,8 @@ const isCurrentUserBanned = useMemo(
 							)}
 							{children}
 							<MessageMenu
-								serverAuthor={serverStates.selectedServer?.owner_id||''}
-								socketStates={socketStates}
+								permissions={permissions}
+								serverAuthor={serverStates.selectedServer?.owner_id || ''}
 								type={replyType}
 								styles={styles}
 								socket={socket}

@@ -10,6 +10,8 @@ import ChatItem from '../../shared/messages/chat-item';
 import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';
 import { findBannedMembers } from '@/utils/banned_members';
+import useFetch from '@/hooks/useFetch';
+import { getBannedMembers } from '@/helper/members';
 
 type Props = {
 	threadId: string;
@@ -29,16 +31,21 @@ function ThreadMessages({ threadId, children }: Props) {
 		[states.thread_messages]
 	);
 
-	const isCurrentUserBanned = useMemo(
-		() => findBannedMembers(states.banned_members, userId!),
-		[states.banned_members, userId]
-	);
+	const {
+		data: bannedMembers,
+		error: bannedMembersError,
+		isLoading: bannedMembersLoading,
+	} = useFetch('banned-members', () => getBannedMembers(params.serverId as string));
+	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
 
 	useEffect(() => {
 		reloadThreadMessages(threadId);
 	}, [reloadThreadMessages, threadId]);
 
 	const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
+
+	if(bannedMembersLoading) return <p>loading....</p>
+	if(bannedMembersError) return <p>error....</p>
 
 	return (
 		<Sheet
@@ -75,9 +82,9 @@ function ThreadMessages({ threadId, children }: Props) {
 					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
 						{messages?.map((message) => (
 							<ChatItem
+								serverId={params.serverId as string}
 								channelId={params.channelId as string}
 								setServerStates={setServerStates}
-								socketStates={states}
 								replyType='thread'
 								reloadMessage={() => reloadThreadMessages(threadId)}
 								socket={socket}

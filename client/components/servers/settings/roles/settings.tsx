@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import dynamic from 'next/dynamic';
+import { useAuth } from '@clerk/nextjs';
 
 import { cn } from '@/lib/utils/mergeStyle';
 import {
@@ -27,7 +28,8 @@ import { createRole } from '@/actions/roles';
 import { deleteImage, uploadFile } from '@/helper/file';
 import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
-import useSocket from '@/hooks/useSocket';
+import { revalidate } from '@/utils/cache';
+import { useParams } from 'next/navigation';
 
 const MemberWithRole = dynamic(() => import('./MemberWithRole'), {
 	ssr: false,
@@ -73,7 +75,9 @@ export default function RolesSettings({
 	serverAuthor,
 }: Props) {
 	const { mutate } = useSWRConfig();
-	const {getUserRole, userId}=useSocket()
+	const { userId } = useAuth();
+	const params = useParams();
+
 	const form = useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
 		defaultValues: {
@@ -162,10 +166,12 @@ export default function RolesSettings({
 			}
 
 			mutate('roles');
+			mutate('user-permissions');
 			toast.success(
 				type === 'create' ? 'New role created' : 'Role has been updated'
 			);
-			getUserRole(userId)
+			revalidate(`/server/${serverId}`);
+			revalidate(`/server/${serverId}/${params.channel_id}`);
 		} catch (error) {
 			createError(error);
 			console.log(error);

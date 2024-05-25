@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
 
 import { Channel } from '@/types/channels';
@@ -13,8 +13,12 @@ import { useServerContext } from '@/providers/server';
 
 import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
 import AddUser from '@/components/servers/add-user';
-import useSocket from '@/hooks/useSocket';
 import { findBannedMembers } from '@/utils/banned_members';
+import useFetch from '@/hooks/useFetch';
+import { getBannedMembers } from '@/helper/members';
+import { useParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
+import { getCurrentUserPermissions } from '@/helper/roles';
 
 export default function ChannelList({
 	channels,
@@ -27,13 +31,24 @@ export default function ChannelList({
 		serversState: { selectedChannel },
 		setServerStates,
 	} = useServerContext();
-	const { states, userId, params } = useSocket();
+	const params = useParams();
+	const { userId } = useAuth();
 	const [selectedCategory, setSelectedCategory] = useState('');
-	
-	const isCurrentUserBanned = useMemo(
-		() => findBannedMembers(states.banned_members, userId!),
-		[states.banned_members, userId]
+	const {
+		data: permissions,
+		error,
+		isLoading,
+	} = useFetch('user-permissions', () =>
+		getCurrentUserPermissions(userId!!, server.id)
 	);
+	const {
+		data: bannedMembers,
+		error: bannedMembersError,
+		isLoading: bannedMembersLoading,
+	} = useFetch('banned-members', () => getBannedMembers(server.id));
+
+	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
+
 	const toggleCategory = useCallback((categoryName: string) => {
 		setSelectedCategory((prev) => (prev === categoryName ? '' : categoryName));
 	}, []);
@@ -54,6 +69,12 @@ export default function ChannelList({
 			return { ...prev, selectedChannel: channel || null };
 		});
 	}, [params.channelId, channels, setServerStates]);
+	if (isLoading || bannedMembersLoading)
+		return (
+			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
+		);
+	if (error || bannedMembersError)
+		return <p>{error.message ?? bannedMembersError.message}</p>;
 
 	return (
 		<ul className='text-gray-2'>
@@ -78,7 +99,7 @@ export default function ChannelList({
 						{!isCurrentUserBanned && (
 							<>
 								{(server.owner_id === userId ||
-									(states.user_roles && states.user_roles.manage_channel)) && (
+									(permissions && permissions.manage_channel)) && (
 									<CreateChannelModals
 										serverAuthor={server.owner_id}
 										serverId={server.id}

@@ -79,6 +79,7 @@ function MemberSheet({
 					) : (
 						data?.map((member) => (
 							<MemberItem
+								serverId={selectedServer.id}
 								socket={socket}
 								currentUser={userId}
 								states={states}

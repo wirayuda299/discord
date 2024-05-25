@@ -16,6 +16,7 @@ import { Role } from '@/helper/roles';
 import useSocket from '@/hooks/useSocket';
 import useFetch from '@/hooks/useFetch';
 import { getMemberWithoutRole } from '@/helper/server';
+import { revalidate } from '@/utils/cache';
 
 export default function AssignRole({
 	children,
@@ -24,11 +25,12 @@ export default function AssignRole({
 	children: ReactNode;
 	role: Role | null;
 }) {
+	const { mutate } = useSWRConfig();
 	const { data, isLoading, error } = useFetch('members', () =>
 		getMemberWithoutRole(params.serverId as string)
 	);
-	const { mutate } = useSWRConfig();
-	const { getUserRole, reloadChannelMessage,params  } = useSocket();
+	const {  reloadChannelMessage,params  } = useSocket();
+
 
 	const handleAssignRole = async (userId: string) => {
 		try {
@@ -42,15 +44,17 @@ export default function AssignRole({
 		} catch (error) {
 			createError(error);
 		} finally {
-			getUserRole(userId);
 			reloadChannelMessage(params.channelId as string, params.serverId as string);
+			revalidate(`/server/${params.serverId}`)
+			revalidate(`/server/${params.serverId}/${params.channelId}`)
 			mutate('members');
 			mutate('members-by-role');
+			mutate('user-permissions');
 		}
 	};
 
-	if (isLoading) return <p>Loading...</p>;
-	if (error) return <p>{error.message}</p>;
+	if (isLoading ) return <p>Loading...</p>;
+	if (error ) return <p>{error.message}</p>;
 
 	return (
 		<Dialog>

@@ -10,19 +10,18 @@ import ChatLabel from './chat-label';
 import ChatContent from './chat-content';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
-import { SocketStates } from '@/types/socket-states';
 
 type Props = {
 	socket: Socket | null;
 	msg: Message & { shouldAddLabel?: boolean };
 	userId: string;
+	serverId: string;
 	channelId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	styles?: string;
 	messages: Message[];
 	serverStates: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-socketStates:SocketStates
 	reloadMessage: () => void;
 };
 
@@ -35,8 +34,8 @@ function ChatItem({
 	socket,
 	reloadMessage,
 	styles,
-	socketStates,
 	channelId,
+	serverId,
 	setServerStates,
 }:Props) {
 	const { selectedServer } = serverStates;
@@ -92,8 +91,8 @@ function ChatItem({
 				</Link>
 			)}
 			<ChatContent
+				serverId={serverId}
 				channelId={channelId}
-				socketStates={socketStates}
 				replyType={replyType}
 				styles={styles}
 				reloadMessage={reloadMessage}

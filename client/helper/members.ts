@@ -1,7 +1,7 @@
+import { BannedMembers } from "@/types/socket-states";
 import { prepareHeaders } from "./cookies";
-import { User } from "@/types/user";
 
-export async function getBannedMembers(serverId:string):Promise<User[]> {
+export async function getBannedMembers(serverId:string):Promise<BannedMembers[]> {
   try {
     const res = await fetch(process.env.SERVER_URL + `/members/banned?serverId=${serverId}`, {
       method: 'GET',
@@ -9,7 +9,7 @@ export async function getBannedMembers(serverId:string):Promise<User[]> {
       credentials:'include'
     });
     const bannedMembers = await res.json()
-    return bannedMembers
+    return bannedMembers.data
   } catch (error) {
     throw error
   }

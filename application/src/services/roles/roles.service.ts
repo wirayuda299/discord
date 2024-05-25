@@ -201,7 +201,10 @@ export class RolesService {
         [userId, serverId]
       );
 
-      return role.rows[0];
+      return {
+        data: role.rows[0],
+        error: false,
+      };
     } catch (error) {
       throw error;
     }

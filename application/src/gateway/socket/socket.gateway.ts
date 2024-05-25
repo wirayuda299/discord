@@ -206,35 +206,4 @@ export class SocketGateway implements OnModuleInit {
       this.logger.error('Error getting personal messages', error);
     }
   }
-
-  @SubscribeMessage('member-roles')
-  async getMemberRole(
-    @MessageBody() payload: { userId: string; serverId: string }
-  ) {
-    try {
-      const role = await this.rolesService.getCurrentUserRole(
-        payload.userId,
-        payload.serverId
-      );
-      process.nextTick(() => {
-        this.server.emit('set-current-user-role', role);
-      });
-    } catch (error) {
-      this.logger.error('Error getting member role', error);
-    }
-  }
-
-  @SubscribeMessage('banned-members')
-  async getBannedMembers(@MessageBody() payload: { serverId: string }) {
-    try {
-      const members = await this.membersService.getBannedMembers(
-        payload.serverId
-      );
-      process.nextTick(() => {
-        this.server.emit('set-banned-members', members);
-      });
-    } catch (error) {
-      this.logger.error('Error getting banned members', error);
-    }
-  }
 }

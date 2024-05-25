@@ -1,12 +1,12 @@
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useAuth } from '@clerk/nextjs';
 
 import GeneralLoader from '@/components/shared/loader/general';
 import SearchForm from '@/components/shared/search-form';
 import { Button } from '@/components/ui/button';
 import { getBannedMembers, revokeMember } from '@/helper/members';
 import useFetch from '@/hooks/useFetch';
-import useSocket from '@/hooks/useSocket';
 import { createError } from '@/utils/error';
 import { kickMember } from '@/actions/members';
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
@@ -17,11 +17,11 @@ export default function ServerBanList({
 }: {
 	serverId: string;
 	serverAuthor: string;
-}) {
+	}) {
+	const {userId}=useAuth()
 	const { data, isLoading, error, mutate } = useFetch('banned_members', () =>
 		getBannedMembers(serverId)
 	);
-	const { getBannedMembers: reloadBannedMembers, userId } = useSocket();
 	if (isLoading) return <GeneralLoader />;
 
 	if (error) return <p>{error.message}</p>;
@@ -29,7 +29,6 @@ export default function ServerBanList({
 	const handleRevokeMembers = async (memberId: string) => {
 		try {
 			await revokeMember(serverId, memberId).then(() => {
-				reloadBannedMembers();
 				mutate();
 				toast.success('Member removed from banned list');
 			});
@@ -76,7 +75,7 @@ export default function ServerBanList({
 			<ul className='mt-5'>
 				{data?.map((member) => (
 					<li
-						key={member.user_id}
+						key={member.id}
 						className='flex items-center justify-between rounded p-2 hover:bg-background hover:brightness-110'
 					>
 						<div className='flex items-center gap-2'>

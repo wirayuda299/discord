@@ -1,5 +1,4 @@
 import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
-import { useMemo } from 'react';
 
 import { useServerContext } from '@/providers/server';
 
@@ -14,18 +13,29 @@ import UserSettingsModals from '@/components/user/user-settings';
 import ServerSetting from '@/components/servers/settings/server-setting';
 import AddUser from '@/components/servers/add-user';
 import { Servers } from '@/types/server';
-import useSocket from '@/hooks/useSocket';
 import RolesModal from './settings/roles/rolesModal';
+import useFetch from '@/hooks/useFetch';
+import { getCurrentUserPermissions } from '@/helper/roles';
+import { useAuth } from '@clerk/nextjs';
+import { getBannedMembers } from '@/helper/members';
 import { findBannedMembers } from '@/utils/banned_members';
 
 export default function ServerMenu({ server }: { server: Servers }) {
+	const { userId } = useAuth();
 	const { setServerStates, serversState } = useServerContext();
-	const { states, userId } = useSocket();
-
-const isCurrentUserBanned = useMemo(
-	() => findBannedMembers(states.banned_members, userId!),
-	[states.banned_members, userId]
-);
+	const {
+		data: permissions,
+		error,
+		isLoading,
+	} = useFetch('user-permissions', () =>
+		getCurrentUserPermissions(userId!!, server.id)
+	);
+	const {
+		data: bannedMembers,
+		error: bannedMembersError,
+		isLoading: bannedMembersLoading,
+	} = useFetch('banned-members', () => getBannedMembers(server.id));
+	const isCurrentUserBanned = findBannedMembers(bannedMembers||[], userId!!);
 
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
@@ -36,11 +46,17 @@ const isCurrentUserBanned = useMemo(
 	};
 	const serverOwnerId = server.owner_id;
 
+	if (isLoading|| bannedMembersLoading)
+		return (
+			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
+		);
+	if (error|| bannedMembersError) return <p>{error.message ?? bannedMembersError.message}</p>;
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
-					<p className='truncate text-wrap'>{server.name || 'server name'}</p>
+					<p className='text-wrap'>{server.name || 'server name'}</p>
 					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
 				</button>
 			</DropdownMenuTrigger>
@@ -79,7 +95,7 @@ const isCurrentUserBanned = useMemo(
 				{!isCurrentUserBanned && (
 					<>
 						{(serverOwnerId === userId ||
-							(states.user_roles && states.user_roles.manage_channel)) && (
+							(permissions && permissions.manage_channel)) && (
 							<CreateChannelModals
 								serverId={server.id}
 								serverAuthor={server.owner_id!}
@@ -94,7 +110,7 @@ const isCurrentUserBanned = useMemo(
 							</CreateChannelModals>
 						)}
 						{(serverOwnerId === userId ||
-							(states.user_roles && states.user_roles.manage_role)) && (
+							(permissions && permissions.manage_role)) && (
 							<RolesModal serverId={server.id} serverAuthor={server.owner_id} />
 						)}
 					</>

@@ -25,6 +25,8 @@ import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
 import { SocketStates } from '@/types/socket-states';
 import FileUpload from './fileUpload';
+import { getCurrentUserPermissions } from '@/helper/roles';
+import useFetch from '@/hooks/useFetch';
 
 type Props = {
 	styles?: string;
@@ -85,7 +87,13 @@ function ChatForm({
 
 	const isSubmitting = form.formState.isSubmitting;
 	const isValid = form.formState.isValid;
-
+	const {
+		data: permissions,
+		error,
+		isLoading,
+	} = useFetch('user-permissions', () =>
+		getCurrentUserPermissions(userId!!, serverStates.selectedServer?.id??'')
+	);
 	const appendEmojiToMessage = (e: any) => {
 		const current = form.getValues('message');
 		form.setValue('message', (current + e.emoji) as any);
@@ -270,11 +278,11 @@ function ChatForm({
 		}
 	}, [handleSelectUser, searchParams]);
 
-	const deleteImage = () => {
-		form.setValue('image', null);
-	};
+	const deleteImage = () => form.setValue('image', null);
 
 	const image = form.watch('image');
+
+	if (isLoading || error) return null;
 
 	return (
 		<Form {...form}>
@@ -313,8 +321,8 @@ function ChatForm({
 						/>
 					) : (
 						(selectedServer?.owner_id === userId ||
-							(socketStates.user_roles &&
-								socketStates.user_roles.attach_file)) && (
+							(permissions &&
+								permissions.attach_file)) && (
 							<FileUpload
 								deleteImage={deleteImage}
 								handleChange={handleChange}
