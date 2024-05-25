@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react';
-import { Virtuoso } from 'react-virtuoso';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
@@ -16,8 +15,15 @@ export default function ChannelMessages({
 	serversState: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
-	const { states, socket, reloadChannelMessage, params, userId, searchParams } =
-		useSocket();
+	const {
+		states,
+		socket,
+		reloadChannelMessage,
+		params,
+		userId,
+		searchParams,
+		loading,
+	} = useSocket();
 
 	const {
 		data: bannedMembers,
@@ -47,17 +53,23 @@ export default function ChannelMessages({
 	return (
 		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
 			<ul className='ease relative flex h-dvh min-h-full flex-col gap-10 overflow-y-auto p-2 transition-all duration-500 md:h-screen md:p-5'>
-				<Virtuoso
-					style={{ height: '100%' }}
-					data={messages}
-					itemContent={(index, message) => (
+				{loading ? (
+					<div className='flex flex-col gap-5'>
+						{[1, 2, 3, 4, 5, 6].map((l) => (
+							<div
+								className='h-8 w-full animate-pulse bg-background brightness-110'
+								key={l}
+							></div>
+						))}
+					</div>
+				) : (
+					messages.map((message) => (
 						<ChatItem
 							serverId={params.serverId as string}
 							channelId={params.channelId as string}
 							setServerStates={setServerStates}
 							replyType='channel'
 							key={message.created_at}
-							styles='hidden'
 							reloadMessage={() =>
 								reloadChannelMessage(
 									params.channelId as string,
@@ -70,8 +82,8 @@ export default function ChannelMessages({
 							userId={userId || ''}
 							serverStates={serversState}
 						/>
-					)}
-				/>
+					))
+				)}
 			</ul>
 
 			{!isCurrentUserBanned ? (

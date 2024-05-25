@@ -20,7 +20,7 @@ type Props = {
 };
 
 function ThreadMessages({ threadId, children }: Props) {
-	const { states, reloadThreadMessages, socket, userId, searchParams, params } =
+	const { states, reloadThreadMessages, socket, userId,loading, searchParams, params } =
 		useSocket();
 	const { serversState, setServerStates } = useServerContext();
 	const { selectedServer, selectedChannel, selectedMessage, selectedThread } =
@@ -80,21 +80,32 @@ function ThreadMessages({ threadId, children }: Props) {
 						</h3>
 					</header>
 					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
-						{messages?.map((message) => (
-							<ChatItem
-								serverId={params.serverId as string}
-								channelId={params.channelId as string}
-								setServerStates={setServerStates}
-								replyType='thread'
-								reloadMessage={() => reloadThreadMessages(threadId)}
-								socket={socket}
-								serverStates={serversState}
-								messages={states.thread_messages}
-								userId={userId!!}
-								msg={message}
-								key={message.message_id}
-							/>
+						{loading ? (
+										<div className='flex flex-col gap-5'>
+						{[1, 2, 3, 4, 5, 6].map((l) => (
+							<div
+								className='h-8 w-full animate-pulse bg-background brightness-110'
+								key={l}
+							></div>
 						))}
+					</div>
+						) : (
+							messages?.map((message) => (
+								<ChatItem
+									serverId={params.serverId as string}
+									channelId={params.channelId as string}
+									setServerStates={setServerStates}
+									replyType='thread'
+									reloadMessage={() => reloadThreadMessages(threadId)}
+									socket={socket}
+									serverStates={serversState}
+									messages={states.thread_messages}
+									userId={userId!!}
+									msg={message}
+									key={message.message_id}
+								/>
+							))
+						)}
 					</ul>
 				</div>
 				<div className=' sticky bottom-0 flex w-full flex-col justify-end backdrop-blur-md'>

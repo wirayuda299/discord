@@ -99,13 +99,14 @@ function ChatContent({
 	
 	
 	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
-
+	
 
 	if (isLoading || bannedMembersLoading || isCurrentUserBanned) return null;
 
 	if (error || bannedMembersError)
 		return <p>{error.message ?? bannedMembersError.message}</p>;
 
+	console.log(permissions);
 	return (
 		<div className='w-full'>
 			<div className='group !relative flex items-center'>
