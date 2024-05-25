@@ -1,4 +1,5 @@
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { memo } from "react";
 import Image from "next/image";
 
 import {
@@ -7,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 
-export default function EmojiPickerButton({
+ function EmojiPickerButton({
   handleClick,
 }: {
   handleClick: (emoji: string) => void;
@@ -36,3 +37,5 @@ export default function EmojiPickerButton({
     </DropdownMenu>
   );
 }
+
+export default memo(EmojiPickerButton)

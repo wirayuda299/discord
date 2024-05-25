@@ -2,7 +2,7 @@
 
 import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { z } from 'zod';
-import { Dispatch, SetStateAction, memo, useEffect, useMemo } from 'react';
+import { Dispatch, SetStateAction, memo, useCallback, useEffect, useMemo } from 'react';
 import { X, SendHorizontal } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
@@ -90,10 +90,11 @@ const {  isError, loading, permissions } = usePermissions(
 	userId,
 	selectedServer?.id!! || ''
 );
-	const appendEmojiToMessage = (e: any) => {
+	const appendEmojiToMessage = useCallback((e:any) => {
 		const current = form.getValues('message');
-		form.setValue('message', (current + e.emoji) as any);
-	};
+			form.setValue('message', (current + e.emoji) as any);
+	}, [form])
+	
 
 	const onSubmit = async (data: z.infer<typeof personalChatSchema>) => {
 		let image: ImageRes = null;

@@ -1,44 +1,73 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Dispatch, SetStateAction, memo } from 'react';
-import type { Socket } from 'socket.io-client';
+import { memo, useCallback, useMemo, useState } from 'react';
 
-import { Message } from '@/types/messages';
-import { ServerStates } from '@/providers/server';
+import { Message, Thread } from '@/types/messages';
+import { useServerContext } from '@/providers/server';
 import ThreadMessages from '../../servers/threads/thread-messages';
-import ChatLabel from './chat-label';
-import ChatContent from './chat-content';
+import EmojiPickerButton from './emoji-picker';
 import { foundMessage } from '@/utils/messages';
 import useEmoji from '@/hooks/useEmoji';
+import MessageMenu from './menu';
+import EditMessageForm from './edit-message';
+import { formatDate, formatMessageTimestamp } from '@/utils/createdDate';
+import { useSocketContext } from '@/providers/socket-io';
+import { Permission } from '@/types/server';
+import { BannedMembers } from '@/types/socket-states';
 
 type Props = {
-	socket: Socket | null;
-	msg: Message & { shouldAddLabel?: boolean };
+	msg: Message;
+	permissions: Permission | undefined;
+	isCurrentUserBanned: false | BannedMembers | undefined;
 	userId: string;
 	serverId: string;
 	channelId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
-	styles?: string;
 	messages: Message[];
-	serverStates: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 	reloadMessage: () => void;
 };
 
-function ChatItem({
-	msg,
-	userId,
-	messages,
-	replyType,
-	serverStates,
-	socket,
-	reloadMessage,
-	styles,
-	channelId,
-	serverId,
-	setServerStates,
-}:Props) {
-	const { selectedServer } = serverStates;
+const highlightLinks = (text: string) => {
+	const urlRegex = /(https?:\/\/[^\s]+)/g;
+	const segments = text.split(urlRegex);
+	return segments.map((segment, index) => {
+		if (segment.match(urlRegex)) {
+			return (
+				<a
+					key={index}
+					href={segment}
+					target='_blank'
+					className='text-blue-600 hover:border-b hover:border-blue-500'
+				>
+					{segment}
+				</a>
+			);
+		} else {
+			return segment;
+		}
+	});
+};
+
+const ChatItem = (props: Props) => {
+	const {
+		msg,
+		messages,
+		userId,
+		reloadMessage,
+		serverId,
+		replyType,
+		channelId,
+		permissions,
+		isCurrentUserBanned,
+	} = props;
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	
+	const { serversState, setServerStates } = useServerContext();
+	const { selectedServer } = serversState;
+	const { socket } = useSocketContext();
+
+	const isEdited = () =>
+		new Date(msg.update_at).getTime() > new Date(msg.created_at).getTime();
 
 	const handleAppendOrRemoveEmoji = useEmoji(
 		selectedServer?.id || '',
@@ -46,18 +75,41 @@ function ChatItem({
 		reloadMessage
 	);
 
-	const repliedMessage = foundMessage(messages, msg)
+	const handleSelectedMessage = useCallback((msg: Message) => {
+		setServerStates((prev) => ({
+			...prev,
+			selectedMessage: {
+				message: msg,
+				type: replyType,
+				action: 'reply',
+			},
+		}));
+	}, []);
+
+	const repliedMessage = useMemo(() => foundMessage(messages, msg), []);
+
+	const selectThread = useCallback((thread: Thread) => {
+		setServerStates((prev) => ({
+			...prev,
+			selectedThread: thread,
+		}));
+	}, []);
 
 	return (
-		<li
-			id={msg.message_id}
-			className='scroll-mt-5 rounded-md p-1 target:!bg-primary hover:bg-foreground/50 md:hover:bg-background md:hover:brightness-110'
-		>
-			{msg?.shouldAddLabel && <ChatLabel createdAt={msg.created_at} />}
+		<li className='group !relative w-full rounded p-2 text-gray-2 hover:bg-background hover:brightness-110'>
+			{msg?.shouldAddLabel && (
+				<div className='flex w-full items-center gap-2 pb-5'>
+					<div className='h-px w-full bg-gray-1'></div>
+					<p className='min-w-min text-nowrap text-sm '>
+						{formatMessageTimestamp(msg.created_at)}
+					</p>
+					<div className='h-px w-full bg-gray-1'></div>
+				</div>
+			)}
 			{msg.parent_message_id && (
 				<Link
 					href={`#${msg.parent_message_id || msg.message_id}`}
-					className='group flex w-auto items-center pl-5'
+					className='flex items-center gap-2'
 				>
 					<Image
 						className='mt-2 aspect-auto min-w-8 object-contain'
@@ -67,38 +119,103 @@ function ChatItem({
 						alt='line'
 					/>
 
-					<div className='flex w-full gap-2 overflow-x-hidden md:max-w-[200px] lg:max-w-[500px]'>
+					<div className='flex w-full items-center gap-2 overflow-hidden md:max-w-[200px] lg:max-w-[500px] '>
 						<div className='flex size-4 items-center justify-center rounded-full bg-foreground'>
-							<svg width='10' height='10' viewBox='0 0 12 8'>
-								<path
-									d='M0.809739 3.59646L5.12565 0.468433C5.17446 0.431163 5.23323 0.408043 5.2951 0.401763C5.35698 0.395482 5.41943 0.406298 5.4752 0.432954C5.53096 0.45961 5.57776 0.50101 5.61013 0.552343C5.64251 0.603676 5.65914 0.662833 5.6581 0.722939V2.3707C10.3624 2.3707 11.2539 5.52482 11.3991 7.21174C11.4028 7.27916 11.3848 7.34603 11.3474 7.40312C11.3101 7.46021 11.2554 7.50471 11.1908 7.53049C11.1262 7.55626 11.0549 7.56204 10.9868 7.54703C10.9187 7.53201 10.857 7.49695 10.8104 7.44666C8.72224 5.08977 5.6581 5.63359 5.6581 5.63359V7.28135C5.65831 7.34051 5.64141 7.39856 5.60931 7.44894C5.5772 7.49932 5.53117 7.54004 5.4764 7.5665C5.42163 7.59296 5.3603 7.60411 5.29932 7.59869C5.23834 7.59328 5.18014 7.57151 5.13128 7.53585L0.809739 4.40892C0.744492 4.3616 0.691538 4.30026 0.655067 4.22975C0.618596 4.15925 0.599609 4.08151 0.599609 4.00269C0.599609 3.92386 0.618596 3.84612 0.655067 3.77562C0.691538 3.70511 0.744492 3.64377 0.809739 3.59646Z'
-									fill='#B5BAC1'
-								></path>
-							</svg>
+							<Image
+								className=' size-3 object-contain'
+								src='/icons/reply-small.svg'
+								width={20}
+								height={20}
+								alt='line'
+							/>
 						</div>
 						<h6 className='text-xs text-gray-2 group-hover:brightness-150 md:text-sm'>
 							{repliedMessage?.username}
 						</h6>
-						<div className='flex gap-2 overflow-hidden'>
-							<span className='truncate text-sm text-gray-2 group-hover:brightness-150'>
-								{repliedMessage?.message}
-							</span>
-						</div>
+						<p className='text-xs text-gray-2'>{repliedMessage?.message}</p>
 					</div>
 				</Link>
 			)}
-			<ChatContent
-				serverId={serverId}
-				channelId={channelId}
-				replyType={replyType}
-				styles={styles}
-				reloadMessage={reloadMessage}
-				handleClick={(e) => handleAppendOrRemoveEmoji(e, msg.message_id)}
-				message={msg}
-				serverStates={serverStates}
-				userId={userId}
-				socket={socket}
-			/>
+
+			{!isOpen && (
+				<div className='flex flex-wrap items-center gap-2'>
+					<div className='flex items-center gap-2'>
+						<div className='flex gap-3'>
+							<span className='text-nowrap text-xs'>
+								{formatDate(msg.created_at)}
+							</span>
+							<h5
+								className='text-sm font-semibold group-hover:text-white'
+								style={{
+									...(msg.role && { color: msg.role.role_color }),
+								}}
+							>
+								{msg.username}
+							</h5>
+						</div>
+						<div className='flex items-center gap-2'>
+							{msg.role && msg.role.icon && (
+								<Image
+									src={msg.role.icon}
+									width={20}
+									height={20}
+									alt='role icon'
+									className='size-5 min-w-5 rounded-full object-cover'
+								/>
+							)}
+						</div>
+					</div>
+					<p className='text-wrap break-all  text-sm group-hover:text-white'>
+						{highlightLinks(msg.message)}{' '}
+						{isEdited() && <span className='text-xs '>(edited)</span>}
+					</p>
+				</div>
+			)}
+			{isOpen && (
+				<EditMessageForm
+					reloadMessage={reloadMessage}
+					currentUser={userId!}
+					messageAuthor={msg.author}
+					messageId={msg.message_id}
+					message={msg.message}
+					handleClose={() => setIsOpen(false)}
+				/>
+			)}
+
+			{!isCurrentUserBanned && (
+				<div className='absolute right-0 top-0 flex gap-3 bg-background p-1 opacity-0 shadow-xl group-hover:opacity-100'>
+					<EmojiPickerButton
+						handleClick={(e) => handleAppendOrRemoveEmoji(e, msg.message_id)}
+					/>
+					{msg.author === userId && (
+						<button
+							name='Edit message'
+							title='Edit message'
+							type='button'
+							className='min-w-5'
+							onClick={() => setIsOpen((prev) => !prev)}
+						>
+							<Image
+								src={'/icons/pencil.svg'}
+								width={20}
+								height={20}
+								alt='pencil'
+							/>
+						</button>
+					)}{' '}
+					<MessageMenu
+						permissions={permissions}
+						serverAuthor={selectedServer?.owner_id || ''}
+						type={replyType}
+						socket={socket}
+						handleSelectedMessage={handleSelectedMessage}
+						currentUser={userId}
+						channelId={channelId}
+						message={msg}
+						serverId={serverId!}
+					/>
+				</div>
+			)}
 			{msg.media_image && !msg.parent_message_id && (
 				<Image
 					src={msg.media_image}
@@ -109,41 +226,18 @@ function ChatItem({
 					loading='lazy'
 				/>
 			)}
-			<div className='mt-1'>
+
+			<div className='mt-2'>
 				{(msg?.threads || []).map((thread) => (
 					<ThreadMessages
-						username={serverStates.selectedServer?.name || ''}
+						thread={thread}
+						selectThread={selectThread}
 						key={thread.thread_id}
-						threadId={thread.thread_id}
-					>
-						<button
-							onClick={() =>
-								setServerStates((prev) => ({
-									...prev,
-									selectedThread: thread,
-								}))
-							}
-							className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
-						>
-							<Image
-								src={'/icons/threads.svg'}
-								width={15}
-								height={15}
-								alt={'threads'}
-							/>
-							<p className='text-sm'>
-								<span className='font-medium text-white'>
-									{thread.username}
-								</span>{' '}
-								started a thread:{' '}
-								<span className='text-white'>{thread.thread_name}</span>
-							</p>
-						</button>
-					</ThreadMessages>
+					/>
 				))}
 			</div>
 		</li>
 	);
-}
+};
 
 export default memo(ChatItem);

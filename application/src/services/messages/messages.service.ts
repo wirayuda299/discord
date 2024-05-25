@@ -142,7 +142,7 @@ export class MessagesService {
           serverId
         );
 
-        reply.role = role;
+        reply.role = role.data;
         const threads = await this.db.pool.query(
           `select
           sp.username as username,
@@ -285,7 +285,7 @@ export class MessagesService {
           serverId
         );
 
-        thread.role = role;
+        thread.role = role.data;
       }
 
       return threads.rows;
@@ -334,7 +334,7 @@ export class MessagesService {
           serverId
         );
 
-        message.role = role;
+        message.role = role.data;
         message.threads = threads || [];
         message.reactions = reactions;
         messagesWithReactions.push(message);

@@ -23,8 +23,9 @@ import { UpdateServerSchemaType, updateServerSchema } from "@/validations";
 import { createError } from "@/utils/error";
 import { Switch } from "@/components/ui/switch";
 import { Servers } from "@/types/server";
+import { memo } from "react";
 
-export default function ServerOverview({
+ function ServerOverview({
 server
 }: {
   server:Servers
@@ -305,4 +306,6 @@ server
 			</form>
 		</Form>
 	);
-}
+ }
+
+ export default memo(ServerOverview)

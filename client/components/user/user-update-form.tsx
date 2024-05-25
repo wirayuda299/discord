@@ -226,78 +226,7 @@ export default function UserUpdateForm({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="avatar"
-            render={({ field }) => (
-              <FormItem className="border-b border-b-foreground">
-                <FormLabel>Avatar Decoration</FormLabel>
-                <FormControl>
-                  <div>
-                    <Label htmlFor="avatar">
-                      <Button>Change decoration</Button>
-                    </Label>
-                    <Input
-                      disabled
-                      name="file"
-                      id="avatar"
-                      type="file"
-                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    />
-                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="avatar"
-            render={({ field }) => (
-              <FormItem className="border-b border-b-foreground">
-                <FormLabel>Profile effect</FormLabel>
-                <FormControl>
-                  <div>
-                    <Label htmlFor="avatar">
-                      <Button>Change effect</Button>
-                    </Label>
-                    <Input
-                      disabled
-                      name="file"
-                      id="avatar"
-                      type="file"
-                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    />
-                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="avatar"
-            render={({ field }) => (
-              <FormItem className="border-b border-b-foreground">
-                <FormLabel>Avatar Decoration</FormLabel>
-                <FormControl>
-                  <div>
-                    <Label htmlFor="avatar">
-                      <Button>Change decoration</Button>
-                    </Label>
-                    <Input
-                      disabled
-                      name="file"
-                      id="avatar"
-                      type="file"
-                      className="hidden w-full rounded border-none bg-foreground p-3 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                    />
-                    <div className="mt-7 h-px w-full rounded-full bg-gray-1"></div>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
-          />
+        
           <Button disabled={isSubmitting} type="submit">
             Update
           </Button>

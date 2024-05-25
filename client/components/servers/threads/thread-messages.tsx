@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { ReactNode, memo, useMemo, useEffect, useRef } from 'react';
+import {  memo, useMemo, useEffect, useRef } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -11,14 +11,14 @@ import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
 import usePermissions from '@/hooks/usePermissions';
+import { Thread } from '@/types/messages';
 
 type Props = {
-	threadId: string;
-	username: string;
-	children: ReactNode;
+	thread:Thread
+	selectThread: (thread:Thread) => void;
 };
 
-function ThreadMessages({ threadId, children }: Props) {
+function ThreadMessages({  selectThread, thread }: Props) {
 	const ref = useRef<HTMLUListElement>(null);
 
 	const { states, reloadThreadMessages, socket, userId, searchParams, params } =
@@ -32,17 +32,20 @@ function ThreadMessages({ threadId, children }: Props) {
 		[states.thread_messages]
 	);
 
-	const { isCurrentUserBanned, loading,isError}=usePermissions(userId, serversState?.selectedServer?.id!!)
+	const { isCurrentUserBanned, loading, isError, permissions } = usePermissions(
+		userId,
+		serversState?.selectedServer?.id!!
+	);
 
 	useScroll(ref, messages);
 
 	useEffect(() => {
-		reloadThreadMessages(threadId);
-	}, [reloadThreadMessages, threadId]);
+		reloadThreadMessages(thread.thread_id);
+	}, [reloadThreadMessages, thread]);
 
 	const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
-	if (loading || isError) return null 
+	if (loading || isError) return null;
 
 	return (
 		<Sheet
@@ -56,7 +59,23 @@ function ThreadMessages({ threadId, children }: Props) {
 				}
 			}}
 		>
-			<SheetTrigger asChild>{children}</SheetTrigger>
+			<SheetTrigger
+				onClick={() => selectThread(thread)}
+				className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
+			>
+		
+					<Image
+						src={'/icons/threads.svg'}
+						width={15}
+						height={15}
+						alt={'threads'}
+					/>
+					<p className='text-sm'>
+						<span className='font-medium text-white'>{thread.username}</span>{' '}
+						started a thread:{' '}
+						<span className='text-white'>{thread.thread_name}</span>
+					</p>
+			</SheetTrigger>
 			<SheetContent
 				side='right'
 				className='flex h-screen flex-col justify-between overflow-y-auto border-l-2 border-none border-l-foreground bg-black p-0 md:bg-background'
@@ -82,13 +101,12 @@ function ThreadMessages({ threadId, children }: Props) {
 					>
 						{messages?.map((message) => (
 							<ChatItem
+								isCurrentUserBanned={isCurrentUserBanned}
+								permissions={permissions}
 								serverId={params.serverId as string}
 								channelId={params.channelId as string}
-								setServerStates={setServerStates}
 								replyType='thread'
-								reloadMessage={() => reloadThreadMessages(threadId)}
-								socket={socket}
-								serverStates={serversState}
+								reloadMessage={() => reloadThreadMessages(thread.thread_id)}
 								messages={states.thread_messages}
 								userId={userId!!}
 								msg={message}
@@ -123,7 +141,7 @@ function ThreadMessages({ threadId, children }: Props) {
 					{!isCurrentUserBanned && (
 						<ChatForm
 							socketStates={states}
-							reloadMessage={() => reloadThreadMessages(threadId)}
+							reloadMessage={() => reloadThreadMessages(thread.thread_id)}
 							params={params}
 							searchParams={searchParams}
 							userId={userId!!}

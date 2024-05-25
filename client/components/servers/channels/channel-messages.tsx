@@ -17,7 +17,7 @@ export default function ChannelMessages({
 	const { states, socket, reloadChannelMessage, params, userId, searchParams } =
 		useSocket();
 	const ref = useRef<HTMLUListElement>(null);
-	const { isCurrentUserBanned, loading, isError } = usePermissions(
+	const { isCurrentUserBanned, loading, isError, permissions } = usePermissions(
 		userId,
 		serversState?.selectedServer?.id || ''
 	);
@@ -40,9 +40,10 @@ export default function ChannelMessages({
 			>
 				{messages.map((message) => (
 					<ChatItem
+						isCurrentUserBanned={isCurrentUserBanned}
+						permissions={permissions}
 						serverId={params.serverId as string}
 						channelId={params.channelId as string}
-						setServerStates={setServerStates}
 						replyType='channel'
 						key={message.created_at}
 						reloadMessage={() =>
@@ -53,9 +54,7 @@ export default function ChannelMessages({
 						}
 						messages={messages}
 						msg={message}
-						socket={socket}
 						userId={userId || ''}
-						serverStates={serversState}
 					/>
 				))}
 			</ul>

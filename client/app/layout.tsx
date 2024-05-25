@@ -3,7 +3,7 @@ import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 // import { Poppins } from "next/font/google";
 import type { Metadata, Viewport } from 'next';
-import type { ReactNode } from 'react';
+import {  type ReactNode } from 'react';
 
 import { ServerContextProvider } from '@/providers/server';
 
@@ -50,6 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 							</UserContextProvider>
 						</ServerContextProvider>
 					</SocketContextProvider>
+
 				</body>
 			</ClerkProvider>
 		</html>

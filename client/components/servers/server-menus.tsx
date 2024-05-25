@@ -16,13 +16,15 @@ import { Servers } from '@/types/server';
 import RolesModal from './settings/roles/rolesModal';
 import { useAuth } from '@clerk/nextjs';
 import usePermissions from '@/hooks/usePermissions';
+import { memo, useMemo } from 'react';
 
-export default function ServerMenu({ server }: { server: Servers }) {
+function ServerMenu({ server }: { server: Servers }) {
 	const { userId } = useAuth();
+	const data=useMemo(( )=> server, [server])
 	const { setServerStates, serversState } = useServerContext();
-	const {isCurrentUserBanned, permissions, loading, isError} = usePermissions(
+	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
 		userId!!,
-		server.id
+		data.id
 	);
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
@@ -39,7 +41,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button className='sticky top-0 z-10  hidden min-h-12 w-full items-center justify-between gap-2 truncate border-b-2 border-foreground bg-black px-2 text-base font-semibold text-gray-2 md:!flex md:bg-[#2b2d31]'>
-					<p className='text-wrap'>{server.name || 'server name'}</p>
+					<p className='text-wrap'>{data.name || 'server name'}</p>
 					<Ellipsis className='cursor-pointer text-gray-2' size={18} />
 				</button>
 			</DropdownMenuTrigger>
@@ -72,16 +74,16 @@ export default function ServerMenu({ server }: { server: Servers }) {
 						/>
 					</DropdownMenuItem>
 				</AddUser>
-				{serversState.selectedServer && server.owner_id === userId && (
-					<ServerSetting server={server} />
+				{serversState.selectedServer && data.owner_id === userId && (
+					<ServerSetting server={data} />
 				)}
-				{ permissions && !isCurrentUserBanned && (
+				{permissions && !isCurrentUserBanned && (
 					<>
 						{(serverOwnerId === userId ||
 							(permissions && permissions.manage_channel)) && (
 							<CreateChannelModals
-								serverId={server.id}
-								serverAuthor={server.owner_id!}
+								serverId={data.id}
+								serverAuthor={data.owner_id!}
 								type='text'
 							>
 								<div className='group flex cursor-pointer items-center justify-between rounded !bg-black px-2 py-1.5 text-xs font-semibold capitalize text-gray-2 hover:!bg-primary hover:!text-white'>
@@ -94,7 +96,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 						)}
 						{(serverOwnerId === userId ||
 							(permissions && permissions.manage_role)) && (
-							<RolesModal serverId={server.id} serverAuthor={server.owner_id} />
+							<RolesModal serverId={data.id} serverAuthor={data.owner_id} />
 						)}
 					</>
 				)}
@@ -111,3 +113,5 @@ export default function ServerMenu({ server }: { server: Servers }) {
 		</DropdownMenu>
 	);
 }
+
+export default memo(ServerMenu)

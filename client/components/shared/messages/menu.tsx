@@ -19,7 +19,6 @@ import { Permission } from '@/types/server';
 
 type Props = {
 	channelId: string;
-	styles?: string;
 	serverId: string;
 	type: 'personal' | 'thread' | 'channel' | 'reply';
 	currentUser: string;
@@ -42,7 +41,6 @@ export default function MessageMenu({
 	currentUser,
 	handleSelectedMessage,
 	socket,
-	styles,
 	type,
 	permissions,
 }: Props) {
@@ -65,11 +63,11 @@ export default function MessageMenu({
 	};
 
 	return (
-		<DropdownMenu>
+		<DropdownMenu modal={false} >
 			<DropdownMenuTrigger>
 				<Ellipsis size={25} color='#fff' className='text-white' />
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className='flex flex-col gap-2 border-none bg-[#111214] text-gray-2'>
+			<DropdownMenuContent className=' flex flex-col gap-2 border-none bg-[#111214] text-gray-2'>
 				{type !== 'personal' && (
 					<>
 						{(serverAuthor === currentUser ||
@@ -102,12 +100,10 @@ export default function MessageMenu({
 						{(serverAuthor === currentUser ||
 							(permissions && permissions.manage_thread)) && (
 							<CreateThread
-								styles={styles}
 								channelId={channelId}
 								message={message}
 								serverId={serverId}
 								socket={socket}
-								text={<span>Create Thread</span>}
 							/>
 						)}
 					</>
