@@ -4,12 +4,9 @@ import type { Socket } from 'socket.io-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-import { getCurrentUserPermissions } from '@/helper/roles';
-import useFetch from '@/hooks/useFetch';
-import { getBannedMembers } from '@/helper/members';
-import { findBannedMembers } from '@/utils/banned_members';
 import { ServerStates, useServerContext } from '@/providers/server';
 import { Message } from '@/types/messages';
+import usePermissions from '@/hooks/usePermissions';
 const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
 const EmojiPickerButton = dynamic(() => import('./emoji-picker'), {
 	ssr: false,
@@ -62,7 +59,7 @@ function ChatContent({
 	styles,
 	replyType,
 	channelId,
-	serverId
+	serverId,
 }: Props) {
 	const searchParams = useSearchParams();
 	const { setServerStates } = useServerContext();
@@ -82,31 +79,13 @@ function ChatContent({
 		},
 		[router, searchParams]
 	);
-	
 
-	const {
-		data: permissions,
-		error,
-		isLoading,
-	} = useFetch('user-permissions', () =>
-		getCurrentUserPermissions(userId!!, serverId)
+	const { isCurrentUserBanned, isError, loading, permissions } = usePermissions(
+		userId,
+		serverId
 	);
-	const {
-		data: bannedMembers,
-		error: bannedMembersError,
-		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () => getBannedMembers(serverId));
-	
-	
-	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
-	
 
-	if (isLoading || bannedMembersLoading || isCurrentUserBanned) return null;
-
-	if (error || bannedMembersError)
-		return <p>{error.message ?? bannedMembersError.message}</p>;
-
-	console.log(permissions);
+	if (loading || isError) return null;
 	return (
 		<div className='w-full'>
 			<div className='group !relative flex items-center'>

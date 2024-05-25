@@ -3,8 +3,6 @@ import Link from "next/link";
 import { navItemsMobile } from "@/constants/sidebarLinks";
 
 export default function SidebarMobile() {
-	// TODO: add role based on context menu on member, only server author or member with ban_member permission can ban member 
-	// TODO: fix context menu in member only server author can kick member
 	return (
 		<div className='fixed bottom-0 h-16 w-full border-t-2 border-t-foreground bg-black md:hidden'>
 			<ul className='flex h-full items-center justify-evenly'>

@@ -9,10 +9,8 @@ import ChatItem from '../../shared/messages/chat-item';
 
 import useSocket from '@/hooks/useSocket';
 import { useServerContext } from '@/providers/server';
-import { findBannedMembers } from '@/utils/banned_members';
-import useFetch from '@/hooks/useFetch';
-import { getBannedMembers } from '@/helper/members';
 import useScroll from '@/hooks/useScroll';
+import usePermissions from '@/hooks/usePermissions';
 
 type Props = {
 	threadId: string;
@@ -34,14 +32,7 @@ function ThreadMessages({ threadId, children }: Props) {
 		[states.thread_messages]
 	);
 
-	const {
-		data: bannedMembers,
-		error: bannedMembersError,
-		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () =>
-		getBannedMembers(params.serverId as string)
-	);
-	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
+	const { isCurrentUserBanned, loading,isError}=usePermissions(userId, serversState?.selectedServer?.id!!)
 
 	useScroll(ref, messages);
 
@@ -51,8 +42,7 @@ function ThreadMessages({ threadId, children }: Props) {
 
 	const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
-	if (bannedMembersLoading) return <p>loading....</p>;
-	if (bannedMembersError) return <p>error....</p>;
+	if (loading || isError) return null 
 
 	return (
 		<Sheet

@@ -14,29 +14,16 @@ import ServerSetting from '@/components/servers/settings/server-setting';
 import AddUser from '@/components/servers/add-user';
 import { Servers } from '@/types/server';
 import RolesModal from './settings/roles/rolesModal';
-import useFetch from '@/hooks/useFetch';
-import { getCurrentUserPermissions } from '@/helper/roles';
 import { useAuth } from '@clerk/nextjs';
-import { getBannedMembers } from '@/helper/members';
-import { findBannedMembers } from '@/utils/banned_members';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function ServerMenu({ server }: { server: Servers }) {
 	const { userId } = useAuth();
 	const { setServerStates, serversState } = useServerContext();
-	const {
-		data: permissions,
-		error,
-		isLoading,
-	} = useFetch('user-permissions', () =>
-		getCurrentUserPermissions(userId!!, server.id)
+	const {isCurrentUserBanned, permissions, loading, isError} = usePermissions(
+		userId!!,
+		server.id
 	);
-	const {
-		data: bannedMembers,
-		error: bannedMembersError,
-		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () => getBannedMembers(server.id));
-	const isCurrentUserBanned = findBannedMembers(bannedMembers||[], userId!!);
-
 	const handleClick = (setting: string) => {
 		setServerStates((prev) => ({
 			...prev,
@@ -46,11 +33,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 	};
 	const serverOwnerId = server.owner_id;
 
-	if (isLoading|| bannedMembersLoading)
-		return (
-			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
-		);
-	if (error|| bannedMembersError) return <p>{error.message ?? bannedMembersError.message}</p>;
+	if(loading || isError) return null 
 
 	return (
 		<DropdownMenu>
@@ -92,7 +75,7 @@ export default function ServerMenu({ server }: { server: Servers }) {
 				{serversState.selectedServer && server.owner_id === userId && (
 					<ServerSetting server={server} />
 				)}
-				{!isCurrentUserBanned && (
+				{ permissions && !isCurrentUserBanned && (
 					<>
 						{(serverOwnerId === userId ||
 							(permissions && permissions.manage_channel)) && (

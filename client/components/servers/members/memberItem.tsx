@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useMemo } from 'react';
+import { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
 import type { Socket } from 'socket.io-client';
 import Link from 'next/link';
@@ -16,11 +16,7 @@ import { SocketStates } from '@/types/socket-states';
 import { createError } from '@/utils/error';
 import { banMember, kickMember } from '@/actions/members';
 import { copyText } from '@/utils/copy';
-import { findBannedMembers } from '@/utils/banned_members';
-import { useSWRConfig } from 'swr';
-import useFetch from '@/hooks/useFetch';
-import { getBannedMembers } from '@/helper/members';
-import { getCurrentUserPermissions } from '@/helper/roles';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function MemberItem({
 	member,
@@ -28,7 +24,7 @@ export default function MemberItem({
 	states,
 	ownerId,
 	socket,
-	serverId
+	serverId,
 }: {
 	member: Member;
 	ownerId: string;
@@ -36,25 +32,13 @@ export default function MemberItem({
 	currentUser: string;
 	states: SocketStates;
 	socket: Socket | null;
-	}) {
-		const {
-			data: permissions,
-			error,
-			isLoading,
-		} = useFetch('user-permissions', () =>
-			getCurrentUserPermissions(currentUser!!, serverId)
-		);
-	
-	const {
-		data: bannedMembers,
-		error: bannedMembersError,
-		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () => getBannedMembers(serverId as string));
-	const { mutate } = useSWRConfig();
-	const isCurrentUserBanned = useMemo(
-		() => findBannedMembers(bannedMembers||[], currentUser!),
-		[bannedMembers, currentUser]
+}) {
+	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
+		currentUser,
+		serverId
 	);
+	const { mutate } = useSWRConfig();
+
 	const handleKickMember = async () => {
 		try {
 			await kickMember(
@@ -78,12 +62,7 @@ export default function MemberItem({
 		}
 	};
 
-	if (isLoading || bannedMembersLoading)
-		return (
-			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
-		);
-	if (error || bannedMembersError)
-		return <p>{error.message ?? bannedMembersError.message}</p>;
+	if (loading || isError) return null;
 
 	return (
 		<ContextMenu>

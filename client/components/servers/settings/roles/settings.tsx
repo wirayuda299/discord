@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@clerk/nextjs';
+import { useParams } from 'next/navigation';
 
 import { cn } from '@/lib/utils/mergeStyle';
 import {
@@ -29,7 +30,6 @@ import { deleteImage, uploadFile } from '@/helper/file';
 import { Role, updateRole } from '@/helper/roles';
 import { createError } from '@/utils/error';
 import { revalidate } from '@/utils/cache';
-import { useParams } from 'next/navigation';
 
 const MemberWithRole = dynamic(() => import('./MemberWithRole'), {
 	ssr: false,

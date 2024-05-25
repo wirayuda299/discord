@@ -13,12 +13,9 @@ import { useServerContext } from '@/providers/server';
 
 import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
 import AddUser from '@/components/servers/add-user';
-import { findBannedMembers } from '@/utils/banned_members';
-import useFetch from '@/hooks/useFetch';
-import { getBannedMembers } from '@/helper/members';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { getCurrentUserPermissions } from '@/helper/roles';
+import usePermissions from '@/hooks/usePermissions';
 
 export default function ChannelList({
 	channels,
@@ -34,20 +31,10 @@ export default function ChannelList({
 	const params = useParams();
 	const { userId } = useAuth();
 	const [selectedCategory, setSelectedCategory] = useState('');
-	const {
-		data: permissions,
-		error,
-		isLoading,
-	} = useFetch('user-permissions', () =>
-		getCurrentUserPermissions(userId!!, server.id)
+	const { isCurrentUserBanned, isError, loading, permissions } = usePermissions(
+		userId!!,
+		server.id
 	);
-	const {
-		data: bannedMembers,
-		error: bannedMembersError,
-		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () => getBannedMembers(server.id));
-
-	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
 
 	const toggleCategory = useCallback((categoryName: string) => {
 		setSelectedCategory((prev) => (prev === categoryName ? '' : categoryName));
@@ -69,12 +56,8 @@ export default function ChannelList({
 			return { ...prev, selectedChannel: channel || null };
 		});
 	}, [params.channelId, channels, setServerStates]);
-	if (isLoading || bannedMembersLoading)
-		return (
-			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
-		);
-	if (error || bannedMembersError)
-		return <p>{error.message ?? bannedMembersError.message}</p>;
+
+	if (loading || isError) return null;
 
 	return (
 		<ul className='text-gray-2'>

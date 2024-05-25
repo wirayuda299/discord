@@ -25,8 +25,7 @@ import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
 import { SocketStates } from '@/types/socket-states';
 import FileUpload from './fileUpload';
-import { getCurrentUserPermissions } from '@/helper/roles';
-import useFetch from '@/hooks/useFetch';
+import usePermissions from '@/hooks/usePermissions';
 
 type Props = {
 	styles?: string;
@@ -87,13 +86,10 @@ function ChatForm({
 
 	const isSubmitting = form.formState.isSubmitting;
 	const isValid = form.formState.isValid;
-	const {
-		data: permissions,
-		error,
-		isLoading,
-	} = useFetch('user-permissions', () =>
-		getCurrentUserPermissions(userId!!, serverStates.selectedServer?.id??'')
-	);
+const {  isError, loading, permissions } = usePermissions(
+	userId,
+	selectedServer?.id!! || ''
+);
 	const appendEmojiToMessage = (e: any) => {
 		const current = form.getValues('message');
 		form.setValue('message', (current + e.emoji) as any);
@@ -282,7 +278,7 @@ function ChatForm({
 
 	const image = form.watch('image');
 
-	if (isLoading || error) return null;
+	if (loading || isError) return null;
 
 	return (
 		<Form {...form}>
