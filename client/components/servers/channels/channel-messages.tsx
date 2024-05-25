@@ -30,6 +30,7 @@ export default function ChannelMessages({
 	useScroll(ref, messages);
 
 	if (loading || isError) return null;
+	
 
 	return (
 		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
@@ -50,7 +51,7 @@ export default function ChannelMessages({
 								params.serverId as string
 							)
 						}
-						messages={states.personal_messages}
+						messages={messages}
 						msg={message}
 						socket={socket}
 						userId={userId || ''}

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Dispatch, SetStateAction, memo, useMemo } from 'react';
+import { Dispatch, SetStateAction, memo } from 'react';
 import type { Socket } from 'socket.io-client';
 
 import { Message } from '@/types/messages';
@@ -46,10 +46,7 @@ function ChatItem({
 		reloadMessage
 	);
 
-	const repliedMessage = useMemo(
-		() => foundMessage(messages, msg),
-		[messages, msg]
-	);
+	const repliedMessage = foundMessage(messages, msg)
 
 	return (
 		<li

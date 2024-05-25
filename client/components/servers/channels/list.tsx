@@ -50,7 +50,7 @@ export default function ChannelList({
 	useEffect(() => {
 		const channel = channels
 			.map((c) => c.channels)[0]
-			.find((c) => c.channel_id === params.channelId);
+			.find((c) => c.channel_id === params.channel_id);
 
 		setServerStates((prev) => {
 			return { ...prev, selectedChannel: channel || null };
