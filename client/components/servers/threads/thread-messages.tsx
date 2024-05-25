@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { ReactNode, memo, useMemo, useEffect } from 'react';
+import { ReactNode, memo, useMemo, useEffect, useRef } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -12,6 +12,7 @@ import { useServerContext } from '@/providers/server';
 import { findBannedMembers } from '@/utils/banned_members';
 import useFetch from '@/hooks/useFetch';
 import { getBannedMembers } from '@/helper/members';
+import useScroll from '@/hooks/useScroll';
 
 type Props = {
 	threadId: string;
@@ -20,7 +21,9 @@ type Props = {
 };
 
 function ThreadMessages({ threadId, children }: Props) {
-	const { states, reloadThreadMessages, socket, userId,loading, searchParams, params } =
+	const ref = useRef<HTMLUListElement>(null);
+
+	const { states, reloadThreadMessages, socket, userId, searchParams, params } =
 		useSocket();
 	const { serversState, setServerStates } = useServerContext();
 	const { selectedServer, selectedChannel, selectedMessage, selectedThread } =
@@ -35,8 +38,12 @@ function ThreadMessages({ threadId, children }: Props) {
 		data: bannedMembers,
 		error: bannedMembersError,
 		isLoading: bannedMembersLoading,
-	} = useFetch('banned-members', () => getBannedMembers(params.serverId as string));
+	} = useFetch('banned-members', () =>
+		getBannedMembers(params.serverId as string)
+	);
 	const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
+
+	useScroll(ref, messages);
 
 	useEffect(() => {
 		reloadThreadMessages(threadId);
@@ -44,8 +51,8 @@ function ThreadMessages({ threadId, children }: Props) {
 
 	const path = `/server/${selectedServer?.id}/${selectedChannel?.channel_id}?channel_type=${selectedChannel?.channel_type}`;
 
-	if(bannedMembersLoading) return <p>loading....</p>
-	if(bannedMembersError) return <p>error....</p>
+	if (bannedMembersLoading) return <p>loading....</p>;
+	if (bannedMembersError) return <p>error....</p>;
 
 	return (
 		<Sheet
@@ -79,33 +86,25 @@ function ThreadMessages({ threadId, children }: Props) {
 							</span>
 						</h3>
 					</header>
-					<ul className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'>
-						{loading ? (
-										<div className='flex flex-col gap-5'>
-						{[1, 2, 3, 4, 5, 6].map((l) => (
-							<div
-								className='h-8 w-full animate-pulse bg-background brightness-110'
-								key={l}
-							></div>
+					<ul
+						className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'
+						ref={ref}
+					>
+						{messages?.map((message) => (
+							<ChatItem
+								serverId={params.serverId as string}
+								channelId={params.channelId as string}
+								setServerStates={setServerStates}
+								replyType='thread'
+								reloadMessage={() => reloadThreadMessages(threadId)}
+								socket={socket}
+								serverStates={serversState}
+								messages={states.thread_messages}
+								userId={userId!!}
+								msg={message}
+								key={message.message_id}
+							/>
 						))}
-					</div>
-						) : (
-							messages?.map((message) => (
-								<ChatItem
-									serverId={params.serverId as string}
-									channelId={params.channelId as string}
-									setServerStates={setServerStates}
-									replyType='thread'
-									reloadMessage={() => reloadThreadMessages(threadId)}
-									socket={socket}
-									serverStates={serversState}
-									messages={states.thread_messages}
-									userId={userId!!}
-									msg={message}
-									key={message.message_id}
-								/>
-							))
-						)}
 					</ul>
 				</div>
 				<div className=' sticky bottom-0 flex w-full flex-col justify-end backdrop-blur-md'>

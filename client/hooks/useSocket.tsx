@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useMemo, useState } from 'react';
+import { useCallback, useEffect, useReducer, useMemo } from 'react';
 import { socketReducer } from '@/reducer/socket';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useSocketContext } from '@/providers/socket-io';
@@ -17,7 +17,6 @@ export default function useSocket() {
 	const searchParams = useSearchParams();
 	const { id: serverId, channel_id: channelId } = useParams();
 	const [states, dispatch] = useReducer(socketReducer, initialValues);
-	const [loading, setLoading] = useState<boolean>(false);
 
 	const chat = useMemo(() => searchParams.get('chat'), [searchParams]);
 	const conversationId = useMemo(
@@ -61,20 +60,16 @@ export default function useSocket() {
 
 		if (chat) {
 			reloadPersonalMessage();
-			setLoading(true);
 			socket.on('set-personal-messages', (messages: Message[]) => {
 				dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
-				setLoading(false);
 			});
 		}
 
 		if (channelId && serverId) {
-			setLoading(true);
 			reloadChannelMessage(channelId as string, serverId as string);
 
 			socket.on('set-message', (data) => {
 				dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
-				setLoading(false);
 			});
 		}
 
@@ -83,9 +78,7 @@ export default function useSocket() {
 		});
 
 		socket.on('set-thread-messages', (data: Message[]) => {
-						setLoading(true);
-						dispatch({ type: 'THREAD_MESSAGES', payload: data });
-						setLoading(false);
+			dispatch({ type: 'THREAD_MESSAGES', payload: data });
 		});
 	}, [
 		socket,
@@ -101,7 +94,6 @@ export default function useSocket() {
 	return {
 		reloadChannelMessage,
 		states,
-		loading,
 		dispatch,
 		reloadPersonalMessage,
 		reloadThreadMessages,

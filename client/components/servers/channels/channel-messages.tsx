@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useMemo } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
@@ -7,6 +7,7 @@ import { findBannedMembers } from '@/utils/banned_members';
 import { ServerStates } from '@/providers/server';
 import useFetch from '@/hooks/useFetch';
 import { getBannedMembers } from '@/helper/members';
+import useScroll from '@/hooks/useScroll';
 
 export default function ChannelMessages({
 	serversState,
@@ -22,8 +23,8 @@ export default function ChannelMessages({
 		params,
 		userId,
 		searchParams,
-		loading,
 	} = useSocket();
+	const ref = useRef<HTMLUListElement>(null)
 
 	const {
 		data: bannedMembers,
@@ -44,6 +45,8 @@ export default function ChannelMessages({
 		reloadChannelMessage(params.channelId as string, params.serverId as string);
 	}, [params.channelId, params.serverId, reloadChannelMessage, socket]);
 
+	useScroll(ref, messages)
+
 	if (bannedMembersLoading)
 		return (
 			<div className='h-6 w-full animate-pulse rounded bg-background brightness-110'></div>
@@ -52,17 +55,8 @@ export default function ChannelMessages({
 
 	return (
 		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
-			<ul className='ease relative flex h-dvh min-h-full flex-col gap-10 overflow-y-auto p-2 transition-all duration-500 md:h-screen md:p-5'>
-				{loading ? (
-					<div className='flex flex-col gap-5'>
-						{[1, 2, 3, 4, 5, 6].map((l) => (
-							<div
-								className='h-8 w-full animate-pulse bg-background brightness-110'
-								key={l}
-							></div>
-						))}
-					</div>
-				) : (
+			<ul className='ease relative flex h-dvh min-h-full flex-col gap-10 overflow-y-auto p-2 transition-all duration-500 md:h-screen md:p-5' ref={ref}>
+				{
 					messages.map((message) => (
 						<ChatItem
 							serverId={params.serverId as string}
@@ -83,7 +77,7 @@ export default function ChannelMessages({
 							serverStates={serversState}
 						/>
 					))
-				)}
+				}
 			</ul>
 
 			{!isCurrentUserBanned ? (
