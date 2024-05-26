@@ -2,10 +2,10 @@ import { Dispatch, SetStateAction, useMemo, useRef } from 'react';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
-import useSocket from '@/hooks/useSocket';
 import { ServerStates } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
 import usePermissions from '@/hooks/usePermissions';
+import { useSocketContext } from '@/providers/socket-io';
 
 export default function ChannelMessages({
 	serversState,
@@ -14,9 +14,9 @@ export default function ChannelMessages({
 	serversState: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
-	const { states, socket, reloadChannelMessage, params, userId, searchParams } =
-		useSocket();
+	const { states, userId } = useSocketContext();
 	const ref = useRef<HTMLUListElement>(null);
+
 	const { isCurrentUserBanned, loading, isError, permissions } = usePermissions(
 		userId,
 		serversState?.selectedServer?.id || ''
@@ -38,45 +38,23 @@ export default function ChannelMessages({
 				className='ease relative flex h-dvh min-h-full flex-col gap-10 overflow-y-auto p-2 transition-all duration-500 md:h-screen md:p-5'
 				ref={ref}
 			>
-				{messages.map((message) => (
+				{messages?.map((message) => (
 					<ChatItem
 						serversState={serversState}
 						setServerStates={setServerStates}
 						isCurrentUserBanned={isCurrentUserBanned}
 						permissions={permissions}
-						params={params}
-						searchParams={searchParams}
-						socket={socket}
-						states={states}
 						replyType='channel'
 						key={message.created_at}
-						reloadMessage={() =>
-							reloadChannelMessage(
-								params.channelId as string,
-								params.serverId as string
-							)
-						}
 						messages={messages}
 						msg={message}
-						userId={userId || ''}
 					/>
 				))}
 			</ul>
 
 			{!isCurrentUserBanned ? (
 				<ChatForm
-					socketStates={states}
-					socket={socket}
 					type='channel'
-					params={params}
-					searchParams={searchParams}
-					userId={userId!!}
-					reloadMessage={() =>
-						reloadChannelMessage(
-							params.channelId as string,
-							params.serverId as string
-						)
-					}
 					setServerStates={setServerStates}
 					serverStates={serversState}
 					placeholder={`Message #${serversState.selectedChannel?.channel_name}`}

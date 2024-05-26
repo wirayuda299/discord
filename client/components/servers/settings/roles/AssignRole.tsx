@@ -13,10 +13,10 @@ import {
 import { createError } from '@/utils/error';
 import { assignRole } from '@/actions/roles';
 import { Role } from '@/helper/roles';
-import useSocket from '@/hooks/useSocket';
 import useFetch from '@/hooks/useFetch';
 import { getMemberWithoutRole } from '@/helper/server';
 import { revalidate } from '@/utils/cache';
+import { useSocketContext } from '@/providers/socket-io';
 
 export default function AssignRole({
 	children,
@@ -29,7 +29,7 @@ export default function AssignRole({
 	const { data, isLoading, error } = useFetch('members', () =>
 		getMemberWithoutRole(params.serverId as string)
 	);
-	const {  reloadChannelMessage,params  } = useSocket();
+	const {  reloadChannelMessage,params  } = useSocketContext();
 
 
 	const handleAssignRole = async (userId: string) => {

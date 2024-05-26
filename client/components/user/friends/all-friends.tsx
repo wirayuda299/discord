@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useSocket from "@/hooks/useSocket";
+import { useSocketContext } from "@/providers/socket-io";
 
 type User = {
   user_id: string;
@@ -29,7 +29,7 @@ export default function AllFriends({
   userId: string;
   handleSelectUser: (user: User) => void;
 }) {
-  const { states } = useSocket();
+  const { states } = useSocketContext();
 
   const setSelectedUser = (user: User) => handleSelectUser(user);
 

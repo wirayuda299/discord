@@ -3,17 +3,17 @@ import { memo } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Servers } from '@/types/server';
-import useSocket from '@/hooks/useSocket';
 import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from './memberItem';
+import { useSocketContext } from '@/providers/socket-io';
 
 function MemberSheet({
 	selectedServer,
 }: {
 	selectedServer: Servers | null;
 }) {
-	const { states, socket, params, userId } = useSocket();
+	const { states, socket, params, userId } = useSocketContext();
 
 	const { data, error, isLoading, mutate } = useFetch('members', () =>
 		getServerMembers(params.serverId as string),

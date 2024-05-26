@@ -9,7 +9,13 @@ import { getBannedMembers, revokeMember } from '@/helper/members';
 import useFetch from '@/hooks/useFetch';
 import { createError } from '@/utils/error';
 import { kickMember } from '@/actions/members';
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTrigger } from '@/components/ui/dialog';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogHeader,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 
 export default function ServerBanList({
 	serverId,
@@ -17,8 +23,8 @@ export default function ServerBanList({
 }: {
 	serverId: string;
 	serverAuthor: string;
-	}) {
-	const {userId}=useAuth()
+}) {
+	const { userId } = useAuth();
 	const { data, isLoading, error, mutate } = useFetch('banned_members', () =>
 		getBannedMembers(serverId)
 	);
@@ -38,23 +44,20 @@ export default function ServerBanList({
 	};
 
 	const handleKickMember = async (memberId: string) => {
-    if (!userId) return 
-    
-    try {
-     
+		if (!userId) return;
+
+		try {
 			await kickMember(serverId, memberId, serverAuthor, userId!!).then(() =>
 				toast.success('Member kicked from server')
 			);
 		} catch (error) {
 			console.log(error);
-			
+
 			createError(error);
 		}
-  };
-  
+	};
+
 	console.log(data);
-	
-  
 
 	return (
 		<section className='size-full'>
@@ -118,12 +121,17 @@ export default function ServerBanList({
 										</p>
 									</DialogHeader>
 									<div className='flex items-center justify-end gap-2'>
-                    <DialogClose asChild>
-                      <Button className='!bg-green-500 text-white'>
-                        Cancel
-                      </Button>
-                    </DialogClose>
-										<Button onClick={() => handleKickMember(member.id)} variant='destructive'>Kick</Button>
+										<DialogClose asChild>
+											<Button className='!bg-green-500 text-white'>
+												Cancel
+											</Button>
+										</DialogClose>
+										<Button
+											onClick={() => handleKickMember(member.id)}
+											variant='destructive'
+										>
+											Kick
+										</Button>
 									</div>
 								</DialogContent>
 							</Dialog>

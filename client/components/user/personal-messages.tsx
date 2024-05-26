@@ -10,13 +10,13 @@ import Inbox from "@/components/shared/inbox";
 import ChatForm from "../shared/messages/chat-form";
 import { useServerContext } from "@/providers/server";
 import ChatItem from "../shared/messages/chat-item";
-import useSocket from "@/hooks/useSocket";
 import useScroll from "@/hooks/useScroll";
+import { useSocketContext } from "@/providers/socket-io";
 
 export default function ChatList() {
   const { selectedUser, handleSelectUser } = useUserContext();
   const { setServerStates, serversState } = useServerContext();
-	const { states, reloadPersonalMessage, socket, params, searchParams, userId } = useSocket();
+	const { states, searchParams  } = useSocketContext();
 	const ref = useRef<HTMLUListElement>(null);
 
 	
@@ -59,30 +59,18 @@ export default function ChatList() {
 								<ChatItem
 									serversState={serversState}
 									setServerStates={setServerStates}
-									params={params}
-									searchParams={searchParams}
-									socket={socket}
-									states={states}
 									isCurrentUserBanned={false}
 									permissions={undefined}
 									replyType='personal'
 									key={message.created_at}
-									reloadMessage={reloadPersonalMessage}
 									messages={states.personal_messages}
 									msg={message}
-									userId={userId || ''}
 								/>
 
 							))
 					}
 				</ul>
 				<ChatForm
-					socketStates={states}
-					reloadMessage={reloadPersonalMessage}
-					params={params}
-					searchParams={searchParams}
-					userId={userId!!}
-					socket={socket}
 					type='personal'
 					handleSelectUser={handleSelectUser}
 					setServerStates={setServerStates}

@@ -1,9 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { X } from 'lucide-react';
-import { Dispatch, ReactNode, SetStateAction, memo, useEffect, useMemo, useRef } from 'react';
-import type { ReadonlyURLSearchParams } from 'next/navigation';
-import type { Socket } from 'socket.io-client';
+import {
+	Dispatch,
+	ReactNode,
+	SetStateAction,
+	memo,
+	useEffect,
+	useMemo,
+	useRef,
+} from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -13,58 +19,39 @@ import { ServerStates } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
 import { Thread } from '@/types/messages';
 import { Permission } from '@/types/server';
-import { BannedMembers, SocketStates } from '@/types/socket-states';
+import { BannedMembers } from '@/types/socket-states';
+import { useSocketContext } from '@/providers/socket-io';
 
 type Props = {
-	userId: string;
 	thread: Thread;
-	children:ReactNode
-	serversState:ServerStates;
-	setServerStates:Dispatch<SetStateAction<ServerStates>>;
+	children: ReactNode;
+	serversState: ServerStates;
+	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 	isCurrentUserBanned: false | BannedMembers | undefined;
 	permissions: Permission | undefined;
-	states: SocketStates;
-	params: {
-		serverId: string | string[];
-		channelId: string | string[];
-	};
-	searchParams: ReadonlyURLSearchParams;
-	socket: Socket | null;
-	reloadMessage: () => void;
 };
 
 function ThreadMessages({
 	thread,
 	permissions,
 	isCurrentUserBanned,
-	params,
-	searchParams,
-	socket,
-	states,
-	reloadMessage,
-	userId,
 	serversState,
 	setServerStates,
-	children
+	children,
 }: Props) {
 	const ref = useRef<HTMLUListElement>(null);
 	const { selectedChannel, selectedMessage, selectedThread } = serversState;
+	const { states, params, searchParams, reloadThreadMessages } = useSocketContext();
+
+	useEffect(() => {
+		reloadThreadMessages(thread.thread_id)
+	}, [reloadThreadMessages, thread.thread_id])
+
 
 	const messages = useMemo(
 		() => states.thread_messages,
 		[states.thread_messages]
 	);
-
-
-
-	useEffect(() => {
-		if (!socket) return 
-		socket.emit('thread-messages', {
-			 threadId: thread.thread_id,
-      serverId: params.serverId,
-      channelId: params.channelId
-		})
-	}, [params.channelId, params.serverId, socket, thread.thread_id])
 
 	useScroll(ref, states.thread_messages);
 
@@ -80,12 +67,12 @@ function ThreadMessages({
 						selectedThread: null,
 						selectedMessage: null,
 					}));
+				} else {
+					reloadThreadMessages(thread.thread_id);
 				}
 			}}
 		>
-			<SheetTrigger asChild>
-			{children}
-			</SheetTrigger>
+			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent
 				side='right'
 				className='flex h-screen flex-col justify-between overflow-y-auto border-l-2 border-none border-l-foreground bg-black p-0 shadow-2xl md:bg-background'
@@ -113,16 +100,10 @@ function ThreadMessages({
 							<ChatItem
 								serversState={serversState}
 								setServerStates={setServerStates}
-								params={params}
-								searchParams={searchParams}
-								socket={socket}
-								states={states}
 								isCurrentUserBanned={isCurrentUserBanned}
 								permissions={permissions}
 								replyType='thread'
-								reloadMessage={reloadMessage}
 								messages={messages}
-								userId={userId!!}
 								msg={message}
 								key={message.message_id}
 							/>
@@ -154,21 +135,9 @@ function ThreadMessages({
 					)}
 					{!isCurrentUserBanned && (
 						<ChatForm
-							socketStates={states}
-							reloadMessage={() =>
-								socket?.emit('thread-messages', {
-									threadId: thread.thread_id,
-									serverId: params.serverId,
-									channelId: params.channelId,
-								})
-							}
-							params={params}
-							searchParams={searchParams}
-							userId={userId!!}
 							placeholder='Send message'
 							serverStates={serversState}
 							setServerStates={setServerStates}
-							socket={socket}
 							type='thread'
 						/>
 					)}

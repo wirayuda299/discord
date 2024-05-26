@@ -1,4 +1,3 @@
-import type { Socket } from 'socket.io-client';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
@@ -28,7 +27,6 @@ type Props = {
 		action: string,
 		type: 'personal' | 'thread' | 'channel' | 'reply'
 	) => void;
-	socket: Socket | null;
 	serverAuthor: string;
 	permissions: Permission | undefined;
 };
@@ -40,7 +38,6 @@ export default function MessageMenu({
 	message,
 	currentUser,
 	handleSelectedMessage,
-	socket,
 	type,
 	permissions,
 }: Props) {
@@ -89,7 +86,7 @@ export default function MessageMenu({
 				)}
 
 				<DropdownMenuItem
-					onClick={() => handleSelectedMessage(message, 'reply', 'channel')}
+					onClick={() => handleSelectedMessage(message, 'reply', type)}
 					className='w-full justify-between bg-transparent hover:!bg-primary hover:!text-white '
 				>
 					<span>Reply</span>
@@ -99,16 +96,13 @@ export default function MessageMenu({
 					<>
 						{(serverAuthor === currentUser ||
 							(permissions && permissions.manage_thread)) && (
-							<CreateThread
-								channelId={channelId}
-								message={message}
-								serverId={serverId}
-								socket={socket}
-							>
+							<CreateThread message={message}>
 								<button
 									type='button'
 									className='flex w-full justify-between bg-transparent p-2 text-sm hover:bg-primary hover:text-white'
-									onClick={() => handleSelectedMessage(message, 'create_thread', 'thread')}
+									onClick={() =>
+										handleSelectedMessage(message, 'create_thread', 'thread')
+									}
 								>
 									<span>Create Thread</span>
 									<Image

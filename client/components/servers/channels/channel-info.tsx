@@ -18,11 +18,11 @@ import { useServerContext } from '@/providers/server';
 import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from '../members/memberItem';
-import useSocket from '@/hooks/useSocket';
 import { PinnedMessage, getPinnedMessages } from '@/helper/message';
 import { Member } from '@/types/server';
 import { SocketStates } from '@/types/socket-states';
 import { Socket } from 'socket.io-client';
+import { useSocketContext } from '@/providers/socket-io';
 
 const options = ['members', 'media', 'pins'] as const;
 
@@ -185,7 +185,7 @@ export default function ChannelInfo() {
 	const {
 		serversState: { selectedChannel, selectedServer },
 	} = useServerContext();
-	const { states, params, userId, socket } = useSocket();
+	const { states, params, userId, socket } = useSocketContext();
 
 	const {
 		data: membersData,

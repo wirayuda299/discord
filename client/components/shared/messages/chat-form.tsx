@@ -1,12 +1,16 @@
 'use client';
 
-import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { z } from 'zod';
-import { Dispatch, SetStateAction, memo, useCallback, useEffect, useMemo } from 'react';
+import {
+	Dispatch,
+	SetStateAction,
+	memo,
+	useCallback,
+	useEffect,
+	useMemo,
+} from 'react';
 import { X, SendHorizontal } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
-import type { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
 
@@ -23,23 +27,17 @@ import { createError } from '@/utils/error';
 import { uploadFile } from '@/helper/file';
 import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
-import { SocketStates } from '@/types/socket-states';
 import FileUpload from './fileUpload';
 import usePermissions from '@/hooks/usePermissions';
+import { useSocketContext } from '@/providers/socket-io';
 
 type Props = {
 	styles?: string;
-	socket: Socket | null;
-	userId: string;
 	type: string;
 	placeholder: string;
-	params: Params;
-	socketStates: SocketStates;
-	searchParams: ReadonlyURLSearchParams;
 	serverStates: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 	handleSelectUser?: (user: User | null) => void;
-	reloadMessage: () => void;
 	threadName?: string;
 };
 
@@ -60,14 +58,7 @@ function ChatForm({
 	placeholder,
 	setServerStates,
 	handleSelectUser,
-	socket,
 	type,
-	params,
-	searchParams,
-	userId,
-	reloadMessage,
-	socketStates,
-
 }: Props) {
 	const form = useForm({
 		resolver: zodResolver(personalChatSchema),
@@ -77,6 +68,16 @@ function ChatForm({
 		},
 	});
 	const { mutate } = useSWRConfig();
+	const {
+		socket,
+		userId,
+		params,
+		searchParams,
+		reloadChannelMessage,
+		reloadPersonalMessage,
+		reloadThreadMessages,
+	} = useSocketContext();
+
 	const { selectedMessage, selectedThread, selectedServer } = useMemo(
 		() => serverStates,
 		[serverStates]
@@ -84,17 +85,45 @@ function ChatForm({
 
 	const { preview, files, handleChange } = useUploadFile(form);
 
+	const reloadMessages = () => {
+		switch (type) {
+			case 'channel':
+				reloadChannelMessage(
+					params.channelId as string,
+					params.serverId as string
+				);
+				break;
+
+			case 'personal':
+				reloadPersonalMessage();
+				break;
+			case 'thread':
+				reloadChannelMessage(
+					params.channelId as string,
+					params.serverId as string
+				);
+				reloadThreadMessages(selectedThread?.thread_id!);
+				break;
+
+			default:
+				break;
+		}
+	};
+
 	const isSubmitting = form.formState.isSubmitting;
 	const isValid = form.formState.isValid;
-const {  isError, loading, permissions } = usePermissions(
-	userId,
-	selectedServer?.id!! || ''
-);
-	const appendEmojiToMessage = useCallback((e:any) => {
-		const current = form.getValues('message');
+	const { isError, loading, permissions } = usePermissions(
+		userId,
+		selectedServer?.id!! || ''
+	);
+
+	const appendEmojiToMessage = useCallback(
+		(e: any) => {
+			const current = form.getValues('message');
 			form.setValue('message', (current + e.emoji) as any);
-	}, [form])
-	
+		},
+		[form]
+	);
 
 	const onSubmit = async (data: z.infer<typeof personalChatSchema>) => {
 		let image: ImageRes = null;
@@ -178,8 +207,8 @@ const {  isError, loading, permissions } = usePermissions(
 				imageUrl: image?.url || '',
 				userId,
 				type: 'reply',
-				channelId: params?.channel_id as string,
-				serverId: params.serverId as string,
+				channelId: params?.channelId as string,
+				serverId: params?.serverId as string,
 				username: serverStates.selectedServer?.serverProfile.username,
 				parentMessageId: selectedMessage?.message.message_id,
 				messageId: selectedMessage?.message.message_id,
@@ -217,7 +246,7 @@ const {  isError, loading, permissions } = usePermissions(
 				imageUrl: image?.url || '',
 				userId,
 				type: 'thread',
-				channelId: params?.channel_id as string,
+				channelId: params?.channelId as string,
 				serverId: params.serverId as string,
 				username: serverStates.selectedServer?.serverProfile.username,
 				threadId: selectedThread.thread_id,
@@ -239,7 +268,7 @@ const {  isError, loading, permissions } = usePermissions(
 				imageUrl: image?.url || '',
 				userId,
 				type: 'reply',
-				channelId: params?.channel_id as string,
+				channelId: params?.channelId as string,
 				serverId: params.serverId as string,
 				username: serverStates.selectedServer?.serverProfile.username,
 				parentMessageId: selectedMessage?.message.message_id,
@@ -252,11 +281,10 @@ const {  isError, loading, permissions } = usePermissions(
 		}
 
 		form.reset();
-		reloadMessage();
+		reloadMessages();
 		if (selectedMessage) {
 			resetSelectedMessage();
 		}
-
 	};
 
 	const resetSelectedMessage = () => {
@@ -280,6 +308,8 @@ const {  isError, loading, permissions } = usePermissions(
 	const image = form.watch('image');
 
 	if (loading || isError) return null;
+
+	console.log({ type, selectedMessage });
 
 	return (
 		<Form {...form}>
@@ -318,8 +348,7 @@ const {  isError, loading, permissions } = usePermissions(
 						/>
 					) : (
 						(selectedServer?.owner_id === userId ||
-							(permissions &&
-								permissions.attach_file)) && (
+							(permissions && permissions.attach_file)) && (
 							<FileUpload
 								deleteImage={deleteImage}
 								handleChange={handleChange}

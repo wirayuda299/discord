@@ -2,7 +2,7 @@ import { Message } from "@/types/messages";
 import { Permission } from "@/types/server";
 import { BannedMembers, SocketStates } from "@/types/socket-states";
 
-type Action =
+export type Action =
 	| { type: 'PERSONAL_MESSAGES'; payload: Message[] } 
 	| { type: 'CHANNEL_MESSAGES'; payload: Message[] } 
 	| { type: 'BANNED_MEMBERS'; payload: BannedMembers[] }

@@ -1,32 +1,23 @@
 import Image from 'next/image';
 import { ReactNode, Suspense, useState } from 'react';
-import type { Socket } from 'socket.io-client';
 
 import { Message } from '@/types/messages';
 import { useServerContext } from '@/providers/server';
 import ChatForm from '../../shared/messages/chat-form';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
-import useSocket from '@/hooks/useSocket';
 
 type Props = {
 	message: Message;
 	children: ReactNode;
-	serverId: string;
-	channelId: string;
-	socket: Socket | null;
 };
 
 export default function CreateThread({
 	message,
-	socket,
-	channelId,
-	serverId,
 	children,
 }: Props) {
 	const [threadName, setThreadName] = useState<string>('');
 	const { serversState, setServerStates } = useServerContext();
-	const { reloadChannelMessage, searchParams, params, userId, states } =
-		useSocket();
+
 
 	return (
 		<Sheet
@@ -124,17 +115,11 @@ export default function CreateThread({
 						</div>
 
 						<ChatForm
-							socketStates={states}
-							params={params}
-							userId={userId!!}
-							searchParams={searchParams}
 							threadName={threadName}
 							key={'thread-form'}
 							placeholder={`Message #thread-name`}
 							serverStates={serversState}
-							reloadMessage={() => reloadChannelMessage(channelId, serverId)}
 							setServerStates={setServerStates}
-							socket={socket}
 							type='thread'
 						/>
 					</div>

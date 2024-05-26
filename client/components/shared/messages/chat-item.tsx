@@ -8,8 +8,6 @@ import {
 	useMemo,
 	useState,
 } from 'react';
-import type { Socket } from 'socket.io-client';
-import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 import { Message, Thread } from '@/types/messages';
 import ThreadMessages from '../../servers/threads/thread-messages';
@@ -20,27 +18,19 @@ import MessageMenu from './menu';
 import EditMessageForm from './edit-message';
 import { formatDate, formatMessageTimestamp } from '@/utils/createdDate';
 import { Permission } from '@/types/server';
-import { BannedMembers, SocketStates } from '@/types/socket-states';
+import { BannedMembers } from '@/types/socket-states';
 import { ServerStates } from '@/providers/server';
 import CreateThread from '@/components/servers/threads/create-thread';
+import { useSocketContext } from '@/providers/socket-io';
 
 type Props = {
 	msg: Message;
 	permissions: Permission | undefined;
 	isCurrentUserBanned: false | BannedMembers | undefined;
-	userId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	messages: Message[];
-	reloadMessage: () => void;
 	serversState: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-	states: SocketStates;
-	params: {
-		serverId: string | string[];
-		channelId: string | string[];
-	};
-	searchParams: ReadonlyURLSearchParams;
-	socket: Socket | null;
 };
 
 const highlightLinks = (text: string) => {
@@ -68,28 +58,50 @@ const ChatItem = (props: Props) => {
 	const {
 		msg,
 		messages,
-		userId,
-		reloadMessage,
 		replyType,
 		permissions,
 		isCurrentUserBanned,
-		params,
-		searchParams,
-		socket,
-		states,
 		serversState,
 		setServerStates,
 	} = props;
 
 	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const { selectedServer } = serversState;
+	const {
+		userId,
+		params,
+		reloadChannelMessage,
+		reloadPersonalMessage,
+		reloadThreadMessages,
+	} = useSocketContext();
+	const { selectedServer, selectedThread } = serversState;
 
-		const selectThread = (thread: Thread) => {
-			setServerStates((prev) => ({
-				...prev,
-				selectedThread: thread,
-			}));
-		};
+	const reloadMessages = () => {
+		switch (replyType) {
+			case 'channel':
+				reloadChannelMessage(
+					params.channelId as string,
+					params.serverId as string
+				);
+				break;
+
+			case 'personal':
+				reloadPersonalMessage();
+				break;
+			case 'thread':
+				reloadThreadMessages(selectedThread?.thread_id!);
+				break;
+
+			default:
+				break;
+		}
+	};
+
+	const selectThread = (thread: Thread) => {
+		setServerStates((prev) => ({
+			...prev,
+			selectedThread: thread,
+		}));
+	};
 
 	const isEdited = useCallback(
 		() =>
@@ -98,13 +110,17 @@ const ChatItem = (props: Props) => {
 	);
 
 	const handleAppendOrRemoveEmoji = useEmoji(
-		selectedServer?.id || '',
+		params.serverId as string,
 		userId,
-		reloadMessage
+		reloadMessages
 	);
 
 	const handleSelectedMessage = useCallback(
-		(msg: Message, action: string, type:"personal" | "thread" | "channel" | "reply") => {
+		(
+			msg: Message,
+			action: string,
+			type: 'personal' | 'thread' | 'channel' | 'reply'
+		) => {
 			setServerStates((prev) => ({
 				...prev,
 				selectedMessage: {
@@ -117,7 +133,10 @@ const ChatItem = (props: Props) => {
 		[setServerStates]
 	);
 
-	const repliedMessage = useMemo(() => foundMessage(messages, msg),[messages, msg]);
+	const repliedMessage = useMemo(
+		() => foundMessage(messages, msg),
+		[messages, msg]
+	);
 
 	return (
 		<li className='group !relative w-full rounded p-2 text-gray-2 hover:bg-background hover:brightness-110'>
@@ -161,10 +180,9 @@ const ChatItem = (props: Props) => {
 				</Link>
 			)}
 
-	
 			{isOpen ? (
 				<EditMessageForm
-					reloadMessage={reloadMessage}
+					reloadMessage={reloadMessages}
 					currentUser={userId!}
 					messageAuthor={msg.author}
 					messageId={msg.message_id}
@@ -180,9 +198,7 @@ const ChatItem = (props: Props) => {
 							</span>
 							<h5
 								className='text-sm font-semibold group-hover:text-white'
-								style={{
-									...(msg.role && { color: msg.role.role_color }),
-								}}
+								style={{ ...(msg.role && { color: msg.role.role_color }) }}
 							>
 								{msg.username}
 							</h5>
@@ -233,12 +249,7 @@ const ChatItem = (props: Props) => {
 							<>
 								{(serversState.selectedServer?.owner_id === userId ||
 									(permissions && permissions.manage_thread)) && (
-									<CreateThread
-										channelId={params.channelId as string}
-										message={msg}
-										serverId={params.serverId as string}
-										socket={socket}
-									>
+									<CreateThread message={msg}>
 										<Image
 											onClick={() =>
 												handleSelectedMessage(msg, 'create_thread', 'thread')
@@ -258,7 +269,6 @@ const ChatItem = (props: Props) => {
 						permissions={permissions}
 						serverAuthor={selectedServer?.owner_id || ''}
 						type={replyType}
-						socket={socket}
 						handleSelectedMessage={handleSelectedMessage}
 						currentUser={userId}
 						channelId={params.channelId as string}
@@ -297,12 +307,6 @@ const ChatItem = (props: Props) => {
 					<ThreadMessages
 						serversState={serversState}
 						setServerStates={setServerStates}
-						params={params}
-						reloadMessage={reloadMessage}
-						searchParams={searchParams}
-						socket={socket}
-						states={states}
-						userId={userId}
 						isCurrentUserBanned={isCurrentUserBanned}
 						permissions={permissions}
 						thread={thread}

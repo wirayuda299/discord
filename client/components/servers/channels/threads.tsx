@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import { Dispatch, SetStateAction, memo } from 'react';
+import { useParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 import {
 	DropdownMenu,
@@ -9,7 +11,6 @@ import {
 import { getAllThreads } from '@/helper/threads';
 import useFetch from '@/hooks/useFetch';
 import ThreadMessages from '../threads/thread-messages';
-import useSocket from '@/hooks/useSocket';
 import usePermissions from '@/hooks/usePermissions';
 import { ServerStates } from '@/providers/server';
 
@@ -20,15 +21,15 @@ function Thread({
 	serversState: ServerStates;
 	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
-	const { params, reloadThreadMessages, searchParams, socket, states, userId } =
-		useSocket();
+	const { userId } = useAuth();
+	const params = useParams();
 
 	const { data, isLoading, error, mutate } = useFetch('all-threads', () =>
-		getAllThreads(params.channelId as string, params.serverId as string)
+		getAllThreads(params.channel_id as string, params.id as string)
 	);
 	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
-		userId,
-		params.serverId as string
+		userId!!,
+		params.id as string
 	);
 
 	if (error || isError) return null;
@@ -36,7 +37,7 @@ function Thread({
 	return (
 		<DropdownMenu
 			onOpenChange={(isOpen) => {
-				mutate();
+				isOpen && mutate();
 			}}
 		>
 			<DropdownMenuTrigger>
@@ -61,8 +62,6 @@ function Thread({
 						/>
 						<h3 className='text-base font-semibold'>Threads</h3>
 					</div>
-
-			
 				</header>
 				<div className='flex max-h-48 w-full min-w-56 flex-col gap-2 overflow-y-auto p-2'>
 					{isLoading || loading ? (
@@ -79,14 +78,8 @@ function Thread({
 							<ThreadMessages
 								key={thread.thread_id}
 								isCurrentUserBanned={isCurrentUserBanned}
-								params={params}
 								permissions={permissions}
-								reloadMessage={() => reloadThreadMessages(thread.thread_id)}
-								searchParams={searchParams}
 								serversState={serversState}
-								socket={socket}
-								userId={userId}
-								states={states}
 								thread={thread}
 								setServerStates={setServerStates}
 							>
