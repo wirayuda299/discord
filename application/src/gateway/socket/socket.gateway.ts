@@ -128,6 +128,14 @@ export class SocketGateway implements OnModuleInit {
             payload.threadId
           );
         });
+
+        const threadMessages = await this.threadsService.getThreadMessage(
+          payload.threadId,
+          payload.serverId
+        );
+        process.nextTick(() => {
+          this.server.emit('set-thread-messages', threadMessages);
+        });
         break;
       case 'personal':
         await this.messagesService.sendPersonalMessage(
