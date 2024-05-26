@@ -13,7 +13,7 @@ import { createError } from "@/utils/error";
 
 export default function PendingInvitation({ userId }: { userId: string }) {
   const { mutate } = useSWRConfig();
-  const { data, isLoading } = useFetch("pending-invitation", () =>
+  const { data, isLoading} = useFetch("pending-invitation", () =>
     getPendingInvitation(userId!!),
   );
   const handleCancleInvitation = async () => {
