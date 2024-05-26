@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import { ApiRequest } from "../utils/api";
 
@@ -36,7 +36,6 @@ export async function inviteUser(
 			userId,
 			serverId,
     });
-    revalidateTag('members');
 	} catch (error) {
 		console.log(error);
 

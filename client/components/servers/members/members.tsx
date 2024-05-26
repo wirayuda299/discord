@@ -20,7 +20,8 @@ function MemberSheet({
 	const { states, socket } = useSocket();
 
 	const { data, error, isLoading } = useFetch('members', () =>
-		getServerMembers(serverId)
+		getServerMembers(serverId),
+		true
 	);
 	if (!selectedServer) return null;
 
