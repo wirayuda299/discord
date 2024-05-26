@@ -76,6 +76,7 @@ export async function getServerMembers(serverId: string): Promise<Member[]> {
 			headers: await prepareHeaders(),
 			method: 'GET',
 			credentials: 'include',
+			cache:'no-store',
 			next: { tags: ['members'] },
 		});
 
