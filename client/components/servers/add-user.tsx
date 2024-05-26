@@ -19,7 +19,7 @@ export default function AddUser({
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { serversState } = useServerContext();
-  const path = `${process.env.NEXT_PUBLIC_CLIENT_URL}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}`;
+  const path = `${process.env.NEXT_PUBLIC_CLIENT_URL}/server/${serversState.selectedServer?.id}/invite?inviteCode=${serversState.selectedServer?.invite_code}&channelId=${serversState.selectedChannel?.channel_id}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

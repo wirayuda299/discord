@@ -26,21 +26,21 @@ export async function createServer(
 }
 
 export async function inviteUser(
-  serverId: string,
-  userId: string,
-  inviteCode: string,
-  path: string,
+	serverId: string,
+	userId: string,
+	inviteCode: string,
+	channelId: string
 ) {
-  try {
-    await api.post("/servers/invite-user", {
-      inviteCode,
-      userId,
-      serverId,
-    });
-    revalidatePath(path);
-  } catch (error) {
-    console.log(error);
-    
-    throw error;
-  }
+	try {
+		await api.post('/servers/invite-user', {
+			inviteCode,
+			userId,
+			serverId,
+		});
+		revalidatePath(`/server/${serverId}/${channelId}`);
+	} catch (error) {
+		console.log(error);
+
+		throw error;
+	}
 }

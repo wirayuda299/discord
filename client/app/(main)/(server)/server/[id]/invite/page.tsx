@@ -5,7 +5,7 @@ import { inviteUser } from "@/actions/server";
 
 type Props = {
   params: { id: string };
-  searchParams: { inviteCode: string };
+  searchParams: { inviteCode: string, channelId:string };
 };
 
 export default async function Invite({ params, searchParams }: Props) {
@@ -15,7 +15,7 @@ export default async function Invite({ params, searchParams }: Props) {
       params.id,
       user.id,
       searchParams.inviteCode,
-      `/server/${params.id}`,
+      searchParams.channelId
     )
       .then(() => {
         redirect(`/server/${params.id}`);
