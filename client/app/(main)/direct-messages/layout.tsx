@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { auth } from '@clerk/nextjs';
+import {  currentUser } from '@clerk/nextjs';
 
 import ServerSidebarLinksItem from '@/components/shared/sidebar/server-sidebar-links';
 import { serverSidebarLinks } from '@/constants/sidebarLinks';
@@ -14,9 +14,9 @@ export default async function DirectMessagesLayout({
 	children: ReactNode;
 	messages: ReactNode;
 }) {
-	const { userId } = auth();
+	const user = await currentUser();
 
-	const conversations = await getConversationList(userId ?? '');
+	const conversations = await getConversationList(user?.id ?? '');
 
 	console.log(conversations);
 	
