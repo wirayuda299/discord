@@ -108,7 +108,6 @@ function renderMedia(media: string[]) {
 					src={m}
 					width={200}
 					height={100}
-					placeholder='blur'
 					alt='media'
 					className='ml-0 mt-3 aspect-auto rounded-md object-cover'
 					loading='lazy'

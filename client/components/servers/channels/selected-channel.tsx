@@ -4,13 +4,12 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { MoveLeft } from 'lucide-react';
 import Image from 'next/image';
-import {  memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 
 import { cn } from '@/lib/utils/mergeStyle';
 
 import SearchForm from '../../shared/search-form';
 import { useServerContext } from '@/providers/server';
-import { Thread as ThreadType } from '@/types/messages';
 
 const ChannelMessages = dynamic(() => import('./channel-messages'), {
 	ssr: false,
@@ -33,7 +32,7 @@ const ChanelInfo = dynamic(
 function SelectedChannel({
 	serverId,
 	channelId,
-	userId
+	userId,
 }: {
 	serverId: string;
 	channelId: string;
@@ -46,79 +45,71 @@ function SelectedChannel({
 		[setServerStates]
 	);
 
-		const selectThread = useCallback((thread: ThreadType) => {
-			setServerStates((prev) => ({
-				...prev,
-				selectedThread: thread,
-			}));
-		}, []);
-
 	return (
-			<div
-				className={cn(
-					'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background w-full',
-					serversState.selectedChannel ? 'right-0' : '-right-full'
-				)}
-			>
-				<header className='flex min-h-14 w-full items-center justify-between border-b-2 border-b-foreground p-2 '>
-					<div className='flex items-center gap-3'>
-						<Link
-							aria-label='Go back'
-							href={'/server/' + serverId}
-							className='block md:hidden'
-							onClick={handleBackClick}
-						>
-							<MoveLeft className='text-gray-2' />
-						</Link>
-						<div className='flex items-center gap-1 '>
-							<h3 className='text-md flex items-center gap-2 font-medium lowercase text-white'>
-								<Image
-									src={'/icons/hashtag.svg'}
-									width={24}
-									height={24}
-									alt={'hashtag'}
-									key={'hashtag'}
-								/>
-								{serversState.selectedChannel?.channel_name}
-							</h3>
-							<div className='md:hidden'>
-								<ChanelInfo />
-							</div>
+		<div
+			className={cn(
+				'fixed md:static transition-all ease-out duration-300 top-0 md:z-0 z-40 md:h-screen h-dvh overflow-y-auto overflow-x-hidden bg-black md:bg-background w-full',
+				serversState.selectedChannel ? 'right-0' : '-right-full'
+			)}
+		>
+			<header className='flex min-h-14 w-full items-center justify-between border-b-2 border-b-foreground p-2 '>
+				<div className='flex items-center gap-3'>
+					<Link
+						aria-label='Go back'
+						href={'/server/' + serverId}
+						className='block md:hidden'
+						onClick={handleBackClick}
+					>
+						<MoveLeft className='text-gray-2' />
+					</Link>
+					<div className='flex items-center gap-1 '>
+						<h3 className='text-md flex items-center gap-2 font-medium lowercase text-white'>
+							<Image
+								src={'/icons/hashtag.svg'}
+								width={24}
+								height={24}
+								alt={'hashtag'}
+								key={'hashtag'}
+							/>
+							{serversState.selectedChannel?.channel_name}
+						</h3>
+						<div className='md:hidden'>
+							<ChanelInfo />
 						</div>
 					</div>
-					<div className='hidden items-center gap-4 md:flex'>
-						<Thread
-							selectThread={selectThread}
-							channelId={channelId as string}
-							serverId={serverId as string}
-						/>
-						<NotificationSettings />
+				</div>
+				<div className='hidden items-center gap-4 md:flex'>
+					<Thread
+						serversState={serversState}
+						setServerStates={setServerStates}
+					/>
+					<NotificationSettings />
 
-						<PinnedMessage channelId={channelId as string} />
+					<PinnedMessage channelId={channelId as string} />
 
-						<MemberSheet
-							userId={userId!!}
-							serverId={serverId}
-							selectedServer={serversState.selectedServer}
-						/>
-						<SearchForm />
-						<Inbox>
-							<p>channel notifications</p>
-						</Inbox>
-						<Image
-							src={'/icons/ask.svg'}
-							width={24}
-							height={24}
-							alt={'ask'}
-							key={'ask'}
-						/>
-					</div>
-				</header>
-				<ChannelMessages
-					serversState={serversState}
-					setServerStates={setServerStates}
-				/>
-			</div>
+					<MemberSheet
+						userId={userId!!}
+						serverId={serverId}
+						selectedServer={serversState.selectedServer}
+					/>
+					<SearchForm />
+					<Inbox>
+						<p>channel notifications</p>
+					</Inbox>
+					<Image
+						src={'/icons/ask.svg'}
+						width={24}
+						height={24}
+						alt={'ask'}
+						key={'ask'}
+					/>
+				</div>
+			</header>
+			<ChannelMessages
+				serversState={serversState}
+				setServerStates={setServerStates}
+			/>
+		</div>
 	);
 }
 

@@ -57,10 +57,14 @@ export default function ChatList() {
 					{
 							messages.map(message => (
 								<ChatItem
+									serversState={serversState}
+									setServerStates={setServerStates}
+									params={params}
+									searchParams={searchParams}
+									socket={socket}
+									states={states}
 									isCurrentUserBanned={false}
 									permissions={undefined}
-									serverId={params.serverId as string}
-									channelId={params.channelId as string}
 									replyType='personal'
 									key={message.created_at}
 									reloadMessage={reloadPersonalMessage}

@@ -24,13 +24,13 @@ type Props = {
 	currentUser: string;
 	message: Message;
 	handleSelectedMessage: (
-		message: Message,
-		type: 'personal' | 'thread' | 'channel' | 'reply',
-		action: string
+		msg: Message,
+		action: string,
+		type: 'personal' | 'thread' | 'channel' | 'reply'
 	) => void;
 	socket: Socket | null;
 	serverAuthor: string;
-	permissions:Permission|undefined
+	permissions: Permission | undefined;
 };
 
 export default function MessageMenu({
@@ -63,7 +63,7 @@ export default function MessageMenu({
 	};
 
 	return (
-		<DropdownMenu modal={false} >
+		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger>
 				<Ellipsis size={25} color='#fff' className='text-white' />
 			</DropdownMenuTrigger>
@@ -89,7 +89,7 @@ export default function MessageMenu({
 				)}
 
 				<DropdownMenuItem
-					onClick={() => handleSelectedMessage(message, type, 'reply')}
+					onClick={() => handleSelectedMessage(message, 'reply', 'channel')}
 					className='w-full justify-between bg-transparent hover:!bg-primary hover:!text-white '
 				>
 					<span>Reply</span>
@@ -104,7 +104,21 @@ export default function MessageMenu({
 								message={message}
 								serverId={serverId}
 								socket={socket}
-							/>
+							>
+								<button
+									type='button'
+									className='flex w-full justify-between bg-transparent p-2 text-sm hover:bg-primary hover:text-white'
+									onClick={() => handleSelectedMessage(message, 'create_thread', 'thread')}
+								>
+									<span>Create Thread</span>
+									<Image
+										src={'/icons/threads.svg'}
+										width={20}
+										height={20}
+										alt='threads'
+									/>
+								</button>
+							</CreateThread>
 						)}
 					</>
 				)}

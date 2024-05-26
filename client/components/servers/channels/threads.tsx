@@ -1,38 +1,44 @@
-import Image from "next/image";
-import { memo, useState } from "react";
+import Image from 'next/image';
+import { Dispatch, SetStateAction, memo } from 'react';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getAllThreads } from "@/helper/threads";
-import ThreadMessages from "@/components/servers/threads/thread-messages";
-import { useDebounce } from "@/hooks/useDebounce";
-import useFetch from "@/hooks/useFetch";
-import { Thread as ThreadType } from "@/types/messages";
-
-
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getAllThreads } from '@/helper/threads';
+import useFetch from '@/hooks/useFetch';
+import ThreadMessages from '../threads/thread-messages';
+import useSocket from '@/hooks/useSocket';
+import usePermissions from '@/hooks/usePermissions';
+import { ServerStates } from '@/providers/server';
 
 function Thread({
-	channelId,
-	serverId,
-	selectThread,
+	serversState,
+	setServerStates,
 }: {
-	channelId: string;
-	serverId: string;
-	selectThread: (thread: ThreadType) => void;
+	serversState: ServerStates;
+	setServerStates: Dispatch<SetStateAction<ServerStates>>;
 }) {
-	const [value, setValue] = useState<string>('');
+	const { params, reloadThreadMessages, searchParams, socket, states, userId } =
+		useSocket();
 
-	const { debouncedValue } = useDebounce(value);
-
-	const { data, isLoading } = useFetch<ThreadType[]>('all-threads', () =>
-		getAllThreads(channelId, serverId)
+	const { data, isLoading, error, mutate } = useFetch('all-threads', () =>
+		getAllThreads(params.channelId as string, params.serverId as string)
+	);
+	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
+		userId,
+		params.serverId as string
 	);
 
+	if (error || isError) return null;
+
 	return (
-		<DropdownMenu onOpenChange={(isOpen) => isOpen && setValue('')}>
+		<DropdownMenu
+			onOpenChange={(isOpen) => {
+				mutate();
+			}}
+		>
 			<DropdownMenuTrigger>
 				<Image
 					className='min-w-6'
@@ -55,59 +61,57 @@ function Thread({
 						/>
 						<h3 className='text-base font-semibold'>Threads</h3>
 					</div>
-					<div className='flex max-w-40 items-center rounded bg-background px-2 py-0.5'>
-						<input
-							type='search'
-							id='search'
-							defaultValue={value}
-							onChange={(e) => setValue(e.target.value)}
-							autoComplete='off'
-							className='w-full bg-transparent placeholder:text-sm focus-visible:outline-none'
-							placeholder='Search'
-						/>
-					</div>
+
+			
 				</header>
-				<div className='flex max-h-48 flex-col gap-2 overflow-y-auto p-2'>
-					{isLoading
-						? [1, 2, 3, 4].map((c) => (
+				<div className='flex max-h-48 w-full min-w-56 flex-col gap-2 overflow-y-auto p-2'>
+					{isLoading || loading ? (
+						<div className='flex flex-col gap-3'>
+							{[1, 2, 3, 4].map((l) => (
 								<div
-									key={c}
-									className='h-5 w-full animate-pulse rounded-md bg-background brightness-110'
+									key={l}
+									className='h-7 w-full animate-pulse bg-background brightness-110'
 								></div>
-							))
-						: debouncedValue === ''
-							? data?.map((thread) => (
-									<div
-										key={thread.thread_id}
-										className='ease rounded bg-background p-2 brightness-110 transition-colors duration-300 hover:brightness-125'
-									>
-										<ThreadMessages
-											thread={thread}
-											selectThread={selectThread}
+							))}
+						</div>
+					) : (
+						data?.map((thread) => (
+							<ThreadMessages
+								key={thread.thread_id}
+								isCurrentUserBanned={isCurrentUserBanned}
+								params={params}
+								permissions={permissions}
+								reloadMessage={() => reloadThreadMessages(thread.thread_id)}
+								searchParams={searchParams}
+								serversState={serversState}
+								socket={socket}
+								userId={userId}
+								states={states}
+								thread={thread}
+								setServerStates={setServerStates}
+							>
+								<div
+									key={thread.thread_id}
+									className='cursor-pointer p-1 text-gray-2 hover:bg-background hover:brightness-110'
+								>
+									<h4 className='text-sm font-semibold text-white '>
+										{thread.thread_name}
+									</h4>
+									<div className='flex items-center gap-2'>
+										<Image
+											// @ts-ignore
+											src={thread.avatar}
+											width={10}
+											height={10}
+											alt='author'
+											className='size-3 rounded-full object-cover'
 										/>
+										<p className='text-sm'>Started by {thread.username}</p>
 									</div>
-								))
-							: data
-									?.filter(
-										(thread) =>
-											thread.thread_name
-												.toLowerCase()
-												.startsWith(debouncedValue.toLowerCase()) ||
-											thread.thread_name.includes(
-												debouncedValue.toLocaleLowerCase()
-											)
-									)
-									.map((thread) => (
-										<div
-											key={thread.thread_id}
-											className='ease rounded bg-background p-2 brightness-110 transition-colors duration-300 hover:brightness-125'
-										>
-											<ThreadMessages
-												thread={thread}
-												selectThread={selectThread}
-											/>
-										</div>
-									))}
+								</div>
+							</ThreadMessages>
+						))
+					)}
 				</div>
 			</DropdownMenuContent>
 		</DropdownMenu>

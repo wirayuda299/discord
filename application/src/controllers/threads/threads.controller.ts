@@ -5,6 +5,14 @@ import { ThreadsService } from 'src/services/threads/threads.service';
 export class ThreadsController {
   constructor(private threadService: ThreadsService) {}
 
+  @Get()
+  getAllThreads(
+    @Query('channelId') channelId: string,
+    @Query('serverId') serverId: string
+  ) {
+    return this.threadService.getAllThreads(channelId, serverId);
+  }
+
   @Post('/create')
   createThread(
     @Body('messageId') msgId: string,
@@ -24,13 +32,5 @@ export class ThreadsController {
       channelId,
       threadName
     );
-  }
-
-  @Get('all-threads')
-  getAllThreads(
-    @Query('channelId') channelId: string,
-    @Query('serverId') serverId: string
-  ) {
-    return this.threadService.getAllThreads(channelId, serverId);
   }
 }

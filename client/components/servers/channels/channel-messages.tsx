@@ -29,8 +29,8 @@ export default function ChannelMessages({
 
 	useScroll(ref, messages);
 
-	if (loading || isError) return null;
-	
+	if (loading) return 'loading...';
+	if (isError) return <p>error</p>;
 
 	return (
 		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
@@ -40,10 +40,14 @@ export default function ChannelMessages({
 			>
 				{messages.map((message) => (
 					<ChatItem
+						serversState={serversState}
+						setServerStates={setServerStates}
 						isCurrentUserBanned={isCurrentUserBanned}
 						permissions={permissions}
-						serverId={params.serverId as string}
-						channelId={params.channelId as string}
+						params={params}
+						searchParams={searchParams}
+						socket={socket}
+						states={states}
 						replyType='channel'
 						key={message.created_at}
 						reloadMessage={() =>

@@ -1,7 +1,7 @@
 import './globals.css';
 
 import { ClerkProvider } from '@clerk/nextjs';
-// import { Poppins } from "next/font/google";
+import { Poppins } from "next/font/google";
 import type { Metadata, Viewport } from 'next';
 import {  type ReactNode } from 'react';
 
@@ -11,13 +11,13 @@ import { Toaster } from '@/components/ui/sonner';
 import { SocketContextProvider } from '@/providers/socket-io';
 import { UserContextProvider } from '@/providers/users';
 
-// const poppins = Poppins({
-//   subsets: ["latin"],
-//   weight: ["300", "400", "600", "500", "700", "800", "900"],
-//   fallback: ["sans-serif"],
-//   display: "swap",
-//   adjustFontFallback: true,
-// });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "600", "500", "700", "800", "900"],
+  fallback: ["sans-serif"],
+  display: "swap",
+  adjustFontFallback: true,
+});
 
 export const metadata: Metadata = {
 	title: 'Discord',
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 				afterSignInUrl='/direct-messages'
 				afterSignUpUrl='/direct-messages'
 			>
-				<body className={`size-full bg-black md:bg-background`}>
+				<body className={`${poppins.className} size-full bg-black md:bg-background`}>
 					<SocketContextProvider>
 						<ServerContextProvider>
 							<UserContextProvider>

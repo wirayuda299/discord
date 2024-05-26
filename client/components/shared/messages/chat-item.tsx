@@ -1,9 +1,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo, useCallback, useMemo, useState } from 'react';
+import {
+	Dispatch,
+	SetStateAction,
+	memo,
+	useCallback,
+	useMemo,
+	useState,
+} from 'react';
+import type { Socket } from 'socket.io-client';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 
 import { Message, Thread } from '@/types/messages';
-import { useServerContext } from '@/providers/server';
 import ThreadMessages from '../../servers/threads/thread-messages';
 import EmojiPickerButton from './emoji-picker';
 import { foundMessage } from '@/utils/messages';
@@ -11,20 +19,28 @@ import useEmoji from '@/hooks/useEmoji';
 import MessageMenu from './menu';
 import EditMessageForm from './edit-message';
 import { formatDate, formatMessageTimestamp } from '@/utils/createdDate';
-import { useSocketContext } from '@/providers/socket-io';
 import { Permission } from '@/types/server';
-import { BannedMembers } from '@/types/socket-states';
+import { BannedMembers, SocketStates } from '@/types/socket-states';
+import { ServerStates } from '@/providers/server';
+import CreateThread from '@/components/servers/threads/create-thread';
 
 type Props = {
 	msg: Message;
 	permissions: Permission | undefined;
 	isCurrentUserBanned: false | BannedMembers | undefined;
 	userId: string;
-	serverId: string;
-	channelId: string;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	messages: Message[];
 	reloadMessage: () => void;
+	serversState: ServerStates;
+	setServerStates: Dispatch<SetStateAction<ServerStates>>;
+	states: SocketStates;
+	params: {
+		serverId: string | string[];
+		channelId: string | string[];
+	};
+	searchParams: ReadonlyURLSearchParams;
+	socket: Socket | null;
 };
 
 const highlightLinks = (text: string) => {
@@ -54,20 +70,32 @@ const ChatItem = (props: Props) => {
 		messages,
 		userId,
 		reloadMessage,
-		serverId,
 		replyType,
-		channelId,
 		permissions,
 		isCurrentUserBanned,
+		params,
+		searchParams,
+		socket,
+		states,
+		serversState,
+		setServerStates,
 	} = props;
-	const [isOpen, setIsOpen] = useState<boolean>(false);
-	
-	const { serversState, setServerStates } = useServerContext();
-	const { selectedServer } = serversState;
-	const { socket } = useSocketContext();
 
-	const isEdited = () =>
-		new Date(msg.update_at).getTime() > new Date(msg.created_at).getTime();
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const { selectedServer } = serversState;
+
+		const selectThread = (thread: Thread) => {
+			setServerStates((prev) => ({
+				...prev,
+				selectedThread: thread,
+			}));
+		};
+
+	const isEdited = useCallback(
+		() =>
+			new Date(msg.update_at).getTime() > new Date(msg.created_at).getTime(),
+		[msg]
+	);
 
 	const handleAppendOrRemoveEmoji = useEmoji(
 		selectedServer?.id || '',
@@ -75,25 +103,21 @@ const ChatItem = (props: Props) => {
 		reloadMessage
 	);
 
-	const handleSelectedMessage = useCallback((msg: Message) => {
-		setServerStates((prev) => ({
-			...prev,
-			selectedMessage: {
-				message: msg,
-				type: replyType,
-				action: 'reply',
-			},
-		}));
-	}, []);
+	const handleSelectedMessage = useCallback(
+		(msg: Message, action: string, type:"personal" | "thread" | "channel" | "reply") => {
+			setServerStates((prev) => ({
+				...prev,
+				selectedMessage: {
+					message: msg,
+					type,
+					action,
+				},
+			}));
+		},
+		[setServerStates]
+	);
 
-	const repliedMessage = useMemo(() => foundMessage(messages, msg), []);
-
-	const selectThread = useCallback((thread: Thread) => {
-		setServerStates((prev) => ({
-			...prev,
-			selectedThread: thread,
-		}));
-	}, []);
+	const repliedMessage = useMemo(() => foundMessage(messages, msg),[messages, msg]);
 
 	return (
 		<li className='group !relative w-full rounded p-2 text-gray-2 hover:bg-background hover:brightness-110'>
@@ -137,10 +161,20 @@ const ChatItem = (props: Props) => {
 				</Link>
 			)}
 
-			{!isOpen && (
+	
+			{isOpen ? (
+				<EditMessageForm
+					reloadMessage={reloadMessage}
+					currentUser={userId!}
+					messageAuthor={msg.author}
+					messageId={msg.message_id}
+					message={msg.message}
+					handleClose={() => setIsOpen(false)}
+				/>
+			) : (
 				<div className='flex flex-wrap items-center gap-2'>
 					<div className='flex items-center gap-2'>
-						<div className='flex gap-3'>
+						<div className='flex items-center gap-3'>
 							<span className='text-nowrap text-xs'>
 								{formatDate(msg.created_at)}
 							</span>
@@ -165,21 +199,11 @@ const ChatItem = (props: Props) => {
 							)}
 						</div>
 					</div>
-					<p className='text-wrap break-all  text-sm group-hover:text-white'>
+					<p className='text-wrap break-all text-sm group-hover:text-white'>
 						{highlightLinks(msg.message)}{' '}
 						{isEdited() && <span className='text-xs '>(edited)</span>}
 					</p>
 				</div>
-			)}
-			{isOpen && (
-				<EditMessageForm
-					reloadMessage={reloadMessage}
-					currentUser={userId!}
-					messageAuthor={msg.author}
-					messageId={msg.message_id}
-					message={msg.message}
-					handleClose={() => setIsOpen(false)}
-				/>
 			)}
 
 			{!isCurrentUserBanned && (
@@ -202,7 +226,34 @@ const ChatItem = (props: Props) => {
 								alt='pencil'
 							/>
 						</button>
-					)}{' '}
+					)}
+
+					<>
+						{replyType !== 'personal' && (
+							<>
+								{(serversState.selectedServer?.owner_id === userId ||
+									(permissions && permissions.manage_thread)) && (
+									<CreateThread
+										channelId={params.channelId as string}
+										message={msg}
+										serverId={params.serverId as string}
+										socket={socket}
+									>
+										<Image
+											onClick={() =>
+												handleSelectedMessage(msg, 'create_thread', 'thread')
+											}
+											src={'/icons/threads.svg'}
+											width={20}
+											height={20}
+											alt='threads'
+										/>
+									</CreateThread>
+								)}
+							</>
+						)}
+					</>
+
 					<MessageMenu
 						permissions={permissions}
 						serverAuthor={selectedServer?.owner_id || ''}
@@ -210,9 +261,9 @@ const ChatItem = (props: Props) => {
 						socket={socket}
 						handleSelectedMessage={handleSelectedMessage}
 						currentUser={userId}
-						channelId={channelId}
+						channelId={params.channelId as string}
 						message={msg}
-						serverId={serverId!}
+						serverId={params.serverId as string}
 					/>
 				</div>
 			)}
@@ -222,18 +273,60 @@ const ChatItem = (props: Props) => {
 					width={200}
 					height={100}
 					alt='media'
+					priority
 					className='ml-9 mt-3 aspect-auto rounded-md object-cover'
-					loading='lazy'
 				/>
 			)}
 
-			<div className='mt-2'>
+			<div className='flex flex-wrap items-center gap-3 pt-2'>
+				{msg.reactions.map((reaction) => (
+					<div
+						key={reaction.unified_emoji}
+						className='max-w-16 rounded border border-blue-500/55 bg-blue-400/10 px-2 '
+					>
+						{reaction.emoji}{' '}
+						<span className='text-sm font-semibold text-white'>
+							{reaction.count}
+						</span>
+					</div>
+				))}
+			</div>
+
+			<div className=' pt-2'>
 				{(msg?.threads || []).map((thread) => (
 					<ThreadMessages
+						serversState={serversState}
+						setServerStates={setServerStates}
+						params={params}
+						reloadMessage={reloadMessage}
+						searchParams={searchParams}
+						socket={socket}
+						states={states}
+						userId={userId}
+						isCurrentUserBanned={isCurrentUserBanned}
+						permissions={permissions}
 						thread={thread}
-						selectThread={selectThread}
 						key={thread.thread_id}
-					/>
+					>
+						<div
+							onClick={() => selectThread(thread)}
+							className='flex cursor-pointer items-center gap-3 text-gray-2 brightness-125'
+						>
+							<Image
+								src={'/icons/threads.svg'}
+								width={15}
+								height={15}
+								alt={'threads'}
+							/>
+							<p className='text-sm'>
+								<span className='font-medium text-white'>
+									{thread.username}
+								</span>{' '}
+								started a thread:{' '}
+								<span className='text-white'>{thread.thread_name}</span>
+							</p>
+						</div>
+					</ThreadMessages>
 				))}
 			</div>
 		</li>

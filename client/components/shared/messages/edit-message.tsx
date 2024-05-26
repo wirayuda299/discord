@@ -1,77 +1,72 @@
-"use client";
+'use client';
 
-import { FormEvent, useState } from "react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { FormEvent, useRef } from 'react';
+import { toast } from 'sonner';
 
-import { editMessage } from "@/helper/message";
-import { Textarea } from "../../ui/textarea";
-import { createError } from "@/utils/error";
+import { editMessage } from '@/helper/message';
+import { Textarea } from '../../ui/textarea';
+import { createError } from '@/utils/error';
 
 export default function EditMessageForm({
-  message,
-  handleClose,
-  currentUser,
-  messageAuthor,
-  messageId,
-  reloadMessage,
+	message,
+	handleClose,
+	currentUser,
+	messageAuthor,
+	messageId,
+	reloadMessage,
 }: {
-  message: string;
-  handleClose: () => void;
-  messageAuthor: string;
-  currentUser: string;
-  messageId: string;
-  reloadMessage: () => void;
+	message: string;
+	handleClose: () => void;
+	messageAuthor: string;
+	currentUser: string;
+	messageId: string;
+	reloadMessage: () => void;
 }) {
-  const [value, setValue] = useState<string>(message);
-  const router = useRouter();
+	const ref = useRef<HTMLTextAreaElement>(null);
 
-  async function handleEditMessage(e: FormEvent) {
+	async function handleEditMessage(e: FormEvent) {
     e.preventDefault();
-    if (value === "") return;
+    const value = ref.current?.value
+    
+		if (!value) return;
 
-    try {
-      if (value === message) {
-        return toast.error("Previous message still same");
-      }
-      await editMessage(
-        messageAuthor,
-        currentUser,
-        messageId,
-        value,
-      ).then(() => {
-        router.refresh();
-        handleClose();
-        reloadMessage();
-      });
-    } catch (error) {
-      createError(error);
-    }
-  }
-  return (
-    <form onSubmit={handleEditMessage}>
+		try {
+			if (value === message) {
+				return toast.error('Previous message still same');
+			}
+			await editMessage(messageAuthor, currentUser, messageId, value).then(
+				() => {
+					handleClose();
+					reloadMessage();
+				}
+			);
+		} catch (error) {
+			createError(error);
+		}
+	}
+	return (
+		<form onSubmit={handleEditMessage}>
       <Textarea
-        minLength={1}
-        name="message"
-        value={value}
-        defaultValue={value}
-        onChange={(e) => setValue(e.target.value)}
-        rows={1}
-        autoComplete="off"
-        className="flex min-h-[30px] w-full max-w-full break-before-auto  items-center  whitespace-pre-wrap break-all !border-none  bg-background px-3 pt-2 text-sm font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse "
-      />
-      <div className="flex items-center gap-2 pt-1">
-        <button
-          className="text-xs text-red-600"
-          type="button"
-          onClick={handleClose}
-        >
-          Cancel
-        </button>
-        <button className="text-xs text-blue-600" type="submit">
-          Submit
-        </button>
-      </div>
-    </form>
-  );
+        ref={ref}
+				minLength={1}
+				name='message'
+				defaultValue={message}
+				rows={1}
+				autoComplete='off'
+				className='flex min-h-[30px] w-full max-w-full break-before-auto  items-center  whitespace-pre-wrap break-all !border-none  bg-background px-3 pt-2 text-sm font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse '
+			/>
+			<div className='flex items-center gap-2 pt-1'>
+				<button
+					className='text-xs text-red-600'
+					type='button'
+					onClick={handleClose}
+				>
+					Cancel
+				</button>
+				<button className='text-xs text-blue-600' type='submit'>
+					Submit
+				</button>
+			</div>
+		</form>
+	);
 }

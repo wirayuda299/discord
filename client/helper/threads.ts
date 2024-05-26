@@ -3,14 +3,14 @@ import { prepareHeaders } from "./cookies";
 
 const serverUrl = process.env.SERVER_URL;
 
-
 export async function getAllThreads(
   channelId: string,
   serverId: string,
 ): Promise<Thread[]> {
+  
   try {
     const res = await fetch(
-      `${serverUrl}/threads/all-threads?channelId=${channelId}&serverId=${serverId}`,
+      `${serverUrl}/threads?channelId=${channelId}&serverId=${serverId}`,
       {
         headers: await prepareHeaders(),
         method: "GET",
@@ -18,6 +18,9 @@ export async function getAllThreads(
       },
     );
     const threads = await res.json();
+
+    console.log(threads);
+    
     return threads.data;
   } catch (error) {
     throw error;

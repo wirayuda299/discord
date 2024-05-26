@@ -51,6 +51,8 @@ export class ThreadsService {
     name: string = ''
   ) {
     try {
+      console.log('Create thread');
+
       await this.db.pool.query('begin');
       const {
         rows: [thread],

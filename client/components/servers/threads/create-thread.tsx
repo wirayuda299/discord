@@ -1,65 +1,47 @@
 import Image from 'next/image';
-import { MouseEvent, Suspense, useCallback, useState } from 'react';
+import { ReactNode, Suspense, useState } from 'react';
 import type { Socket } from 'socket.io-client';
 
 import { Message } from '@/types/messages';
 import { useServerContext } from '@/providers/server';
-
 import ChatForm from '../../shared/messages/chat-form';
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import useSocket from '@/hooks/useSocket';
 
 type Props = {
 	message: Message;
+	children: ReactNode;
 	serverId: string;
 	channelId: string;
 	socket: Socket | null;
 };
-// TODO: fix page refresh on create thread 
 
 export default function CreateThread({
 	message,
 	socket,
 	channelId,
 	serverId,
+	children,
 }: Props) {
 	const [threadName, setThreadName] = useState<string>('');
 	const { serversState, setServerStates } = useServerContext();
 	const { reloadChannelMessage, searchParams, params, userId, states } =
 		useSocket();
 
-	const setSelectedMessage = useCallback((e:MouseEvent, message: Message) => {
-		e.stopPropagation()
-
-		setServerStates((prev) => ({
-			...prev,
-			selectedMessage: {
-				message,
-				type: 'thread',
-				action: 'create_thread',
-			},
-		}));
-	}, [])
-
 	return (
-		<Sheet modal={false}>
-			<SheetTrigger asChild>
-				<button
-					type='button'
-					className='flex w-full justify-between bg-transparent p-2 text-sm hover:bg-primary hover:text-white'
-					onClick={(e) => {
-						setSelectedMessage(e,message);
-					}}
-				>
-					<span>Create Thread</span>
-					<Image
-						src={'/icons/threads.svg'}
-						width={20}
-						height={20}
-						alt='threads'
-					/>
-				</button>
-			</SheetTrigger>
+		<Sheet
+			modal={false}
+			onOpenChange={(isOpen) => {
+				if (!isOpen) {
+					setServerStates((prev) => ({
+						...prev,
+						selectedMessage: null,
+						selectedThread: null,
+					}));
+				}
+			}}
+		>
+			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent side='right' className='border-none p-0'>
 				<header className='flex w-full items-center gap-4 border-b border-b-foreground p-4'>
 					<Image
@@ -133,7 +115,6 @@ export default function CreateThread({
 										src={message.media_image}
 										width={200}
 										height={100}
-										placeholder='blur'
 										alt='media'
 										className='ml-9 mt-3 aspect-auto rounded-md object-cover'
 										loading='lazy'
