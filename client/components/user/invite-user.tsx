@@ -63,7 +63,6 @@ export default function InviteUser() {
       <DialogContent className="border-none bg-black  md:bg-background">
         <DialogTitle className="uppercase text-white">add friend</DialogTitle>
         <input
-          defaultValue={value}
           onChange={(e) => setValue(e.target.value)}
           value={value}
           className="w-full rounded bg-foreground p-3 text-gray-2 placeholder:text-sm focus-visible:outline-none"
