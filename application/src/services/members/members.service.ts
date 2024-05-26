@@ -86,6 +86,7 @@ export class MembersService {
         member.role = role.rows[0];
         member.serverProfile = serverProfile.data;
       }
+      console.log(members.rows);
 
       return {
         data: members.rows,

@@ -10,24 +10,19 @@ import MemberItem from './memberItem';
 
 function MemberSheet({
 	selectedServer,
-	serverId,
-	userId,
 }: {
 	selectedServer: Servers | null;
-	serverId: string;
-	userId: string;
 }) {
-	const { states, socket } = useSocket();
+	const { states, socket, params, userId } = useSocket();
 
-	const { data, error, isLoading } = useFetch('members', () =>
-		getServerMembers(serverId),
+	const { data, error, isLoading, mutate } = useFetch('members', () =>
+		getServerMembers(params.serverId as string),
 		true
 	);
 	if (!selectedServer) return null;
 
-
 	return (
-		<Sheet>
+		<Sheet onOpenChange={(isOpen) => isOpen && mutate() }>
 			<SheetTrigger>
 				<Image
 					className='min-w-6'

@@ -84,14 +84,8 @@ function SelectedChannel({
 						setServerStates={setServerStates}
 					/>
 					<NotificationSettings />
-
 					<PinnedMessage channelId={channelId as string} />
-
-					<MemberSheet
-						userId={userId!!}
-						serverId={serverId}
-						selectedServer={serversState.selectedServer}
-					/>
+					<MemberSheet selectedServer={serversState.selectedServer} />
 					<SearchForm />
 					<Inbox>
 						<p>channel notifications</p>
