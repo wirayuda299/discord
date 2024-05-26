@@ -67,6 +67,8 @@ export default function Friends() {
         });
       });
     } catch (error) {
+      console.log(error);
+      
       createError(error);
     }
   };
