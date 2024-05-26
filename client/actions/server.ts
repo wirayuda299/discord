@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { ApiRequest } from "../utils/api";
 
@@ -29,7 +29,6 @@ export async function inviteUser(
 	serverId: string,
 	userId: string,
 	inviteCode: string,
-	channelId: string
 ) {
 	try {
 		await api.post('/servers/invite-user', {
@@ -37,7 +36,7 @@ export async function inviteUser(
 			userId,
 			serverId,
     });
-    revalidatePath(`/server/${serverId}/[channel_id]`);
+    revalidateTag('members');
 	} catch (error) {
 		console.log(error);
 
