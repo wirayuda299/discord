@@ -36,8 +36,8 @@ export async function inviteUser(
 			inviteCode,
 			userId,
 			serverId,
-		});
-		revalidatePath(`/server/${serverId}/${channelId}`);
+    });
+    revalidatePath(`/server/${serverId}/[channel_id]`);
 	} catch (error) {
 		console.log(error);
 
