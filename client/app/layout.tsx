@@ -30,6 +30,7 @@ export const viewport: Viewport = {
 	initialScale: 1,
 };
 
+
 export default function RootLayout({ children }: { children: ReactNode }) {
 	return (
 		<html lang='en'>
@@ -40,17 +41,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 				afterSignUpUrl='/direct-messages'
 			>
 				<body className={` size-full bg-black md:bg-background`}>
-					<SocketContextProvider>
-						<ServerContextProvider>
-							<UserContextProvider>
+						<SocketContextProvider>
+							<ServerContextProvider>
+								<UserContextProvider>
 									<div className='mx-auto w-full max-w-[1440px]'>
 										{children}
 									</div>
 									<Toaster className='text-white' />
-							</UserContextProvider>
-						</ServerContextProvider>
-					</SocketContextProvider>
-
+								</UserContextProvider>
+							</ServerContextProvider>
+						</SocketContextProvider>
 				</body>
 			</ClerkProvider>
 		</html>

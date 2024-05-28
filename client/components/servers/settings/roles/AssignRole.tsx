@@ -16,7 +16,8 @@ import { Role } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import { getMemberWithoutRole } from '@/helper/server';
 import { revalidate } from '@/utils/cache';
-import { useSocketContext } from '@/providers/socket-io';
+import { useSocket } from '@/providers/socket-io';
+import { useParams } from 'next/navigation';
 
 export default function AssignRole({
 	children,
@@ -26,11 +27,11 @@ export default function AssignRole({
 	role: Role | null;
 }) {
 	const { mutate } = useSWRConfig();
+	const params = useParams();
 	const { data, isLoading, error } = useFetch('members', () =>
-		getMemberWithoutRole(params.serverId as string)
+		getMemberWithoutRole(params.id as string)
 	);
-	const {  reloadChannelMessage,params  } = useSocketContext();
-
+	const {states} = useSocket();
 
 	const handleAssignRole = async (userId: string) => {
 		try {
@@ -38,23 +39,26 @@ export default function AssignRole({
 
 			await assignRole(userId, role?.id, role?.permissions.id).then(() => {
 				toast.success('Role has been added to user');
-				mutate('members')
-			})
-
+				mutate('members');
+			});
 		} catch (error) {
 			createError(error);
 		} finally {
-			reloadChannelMessage(params.channelId as string, params.serverId as string);
-			revalidate(`/server/${params.serverId}`)
-			revalidate(`/server/${params.serverId}/${params.channelId}`)
+			states.socket?.emit('get-channel-message', {
+				channelId: params.channel_id as string,
+				serverId: params.id as string,
+			});
+
+			revalidate(`/server/${params.serverId}`);
+			revalidate(`/server/${params.serverId}/${params.channelId}`);
 			mutate('members');
 			mutate('members-by-role');
 			mutate('user-permissions');
 		}
 	};
 
-	if (isLoading ) return <p>Loading...</p>;
-	if (error ) return <p>{error.message}</p>;
+	if (isLoading) return <p>Loading...</p>;
+	if (error) return <p>{error.message}</p>;
 
 	return (
 		<Dialog>

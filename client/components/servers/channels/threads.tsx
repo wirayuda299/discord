@@ -1,7 +1,6 @@
 import Image from 'next/image';
-import { Dispatch, SetStateAction, memo } from 'react';
+import { memo } from 'react';
 import { useParams } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 
 import {
 	DropdownMenu,
@@ -11,29 +10,35 @@ import {
 import { getAllThreads } from '@/helper/threads';
 import useFetch from '@/hooks/useFetch';
 import ThreadMessages from '../threads/thread-messages';
-import usePermissions from '@/hooks/usePermissions';
 import { ServerStates } from '@/providers/server';
+import { Message, Thread as ThreadType } from '@/types/messages';
+import { Servers } from '@/types/server';
+import { Channel } from '@/types/channels';
+
+type Props = {
+	setStates: (value: Partial<ServerStates>) => void;
+	selectedThread: ThreadType | null;
+	selectedServer: Servers | null;
+	selectedMessage: {
+		type: 'personal' | 'thread' | 'channel' | 'reply';
+		message: Message;
+		action: string;
+	} | null;
+	selectedChannel: Channel | null;
+};
 
 function Thread({
-	serversState,
-	setServerStates,
-}: {
-	serversState: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-}) {
-	const { userId } = useAuth();
+	selectedChannel,
+	selectedMessage,
+	selectedServer,
+	selectedThread,
+	setStates,
+}: Props) {
 	const params = useParams();
 
-	const { data, isLoading, error, mutate } = useFetch('all-threads', () =>
+	const { data, isLoading, mutate } = useFetch('all-threads', () =>
 		getAllThreads(params.channel_id as string, params.id as string)
 	);
-	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
-		userId!!,
-		params.id as string
-	);
-
-	if (error || isError) return null;
-
 	return (
 		<DropdownMenu
 			onOpenChange={(isOpen) => {
@@ -64,7 +69,7 @@ function Thread({
 					</div>
 				</header>
 				<div className='flex max-h-48 w-full min-w-56 flex-col gap-2 overflow-y-auto p-2'>
-					{isLoading || loading ? (
+					{isLoading ? (
 						<div className='flex flex-col gap-3'>
 							{[1, 2, 3, 4].map((l) => (
 								<div
@@ -77,11 +82,12 @@ function Thread({
 						data?.map((thread) => (
 							<ThreadMessages
 								key={thread.thread_id}
-								isCurrentUserBanned={isCurrentUserBanned}
-								permissions={permissions}
-								serversState={serversState}
+								selectedChannel={selectedChannel}
+								selectedMessage={selectedMessage}
+								selectedServer={selectedServer}
+								selectedThread={selectedThread}
 								thread={thread}
-								setServerStates={setServerStates}
+								setStates={setStates}
 							>
 								<div
 									key={thread.thread_id}

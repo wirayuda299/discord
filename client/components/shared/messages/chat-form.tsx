@@ -1,16 +1,11 @@
 'use client';
 
 import { z } from 'zod';
-import {
-	Dispatch,
-	SetStateAction,
-	memo,
-	useCallback,
-	useEffect,
-	useMemo,
-} from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { X, SendHorizontal } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
 
@@ -18,7 +13,7 @@ import EmojiPickerButton from './emoji-picker';
 import { cn } from '@/lib/utils/mergeStyle';
 import { Form, FormControl, FormField, FormItem } from '../../ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ServerStates } from '@/providers/server';
+import { useServerContext } from '@/providers/server';
 import { User } from '@/types/user';
 import useUploadFile from '@/hooks/useFileUpload';
 import { messageData } from '@/helper/message';
@@ -29,14 +24,13 @@ import { createThread } from '@/actions/threads';
 import { Textarea } from '@/components/ui/textarea';
 import FileUpload from './fileUpload';
 import usePermissions from '@/hooks/usePermissions';
-import { useSocketContext } from '@/providers/socket-io';
+import { useSocket } from '@/providers/socket-io';
 
 type Props = {
 	styles?: string;
 	type: string;
 	placeholder: string;
-	serverStates: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
+	reloadMessage: () => void;
 	handleSelectUser?: (user: User | null) => void;
 	threadName?: string;
 };
@@ -54,12 +48,16 @@ const personalChatSchema = z.object({
 function ChatForm({
 	styles,
 	threadName,
-	serverStates,
 	placeholder,
-	setServerStates,
 	handleSelectUser,
 	type,
+	reloadMessage,
 }: Props) {
+	const { mutate } = useSWRConfig();
+	const params = useParams();
+	const searchParams = useSearchParams();
+	const { userId } = useAuth();
+	
 	const form = useForm({
 		resolver: zodResolver(personalChatSchema),
 		defaultValues: {
@@ -67,54 +65,21 @@ function ChatForm({
 			image: null,
 		},
 	});
-	const { mutate } = useSWRConfig();
-	const {
-		socket,
-		userId,
-		params,
-		searchParams,
-		reloadChannelMessage,
-		reloadPersonalMessage,
-		reloadThreadMessages,
-	} = useSocketContext();
 
-	const { selectedMessage, selectedThread, selectedServer } = useMemo(
-		() => serverStates,
-		[serverStates]
-	);
+
+	const { states } = useSocket();
+	const { states: serverStates, updateState } = useServerContext();
+
+	const conversationId = searchParams.get('conversationId') as string;
+	const chat = searchParams.get('chat') as string;
 
 	const { preview, files, handleChange } = useUploadFile(form);
 
-	const reloadMessages = () => {
-		switch (type) {
-			case 'channel':
-				reloadChannelMessage(
-					params.channelId as string,
-					params.serverId as string
-				);
-				break;
-
-			case 'personal':
-				reloadPersonalMessage();
-				break;
-			case 'thread':
-				reloadChannelMessage(
-					params.channelId as string,
-					params.serverId as string
-				);
-				reloadThreadMessages(selectedThread?.thread_id!);
-				break;
-
-			default:
-				break;
-		}
-	};
-
 	const isSubmitting = form.formState.isSubmitting;
 	const isValid = form.formState.isValid;
-	const { isError, loading, permissions } = usePermissions(
-		userId,
-		selectedServer?.id!! || ''
+	const { isError, loading, permissions, isCurrentUserBanned } = usePermissions(
+		userId!!,
+		params?.id as string
 	);
 
 	const appendEmojiToMessage = useCallback(
@@ -137,89 +102,93 @@ function ChatForm({
 			return;
 		}
 		// personal message
-		if (type === 'personal' && !selectedMessage) {
+		if (type === 'personal' && !serverStates.selectedMessage) {
 			const values = messageData({
 				content: data.message,
 				conversationId: searchParams.get('conversationId') as string,
 				imageAssetId: image?.publicId || '',
 				imageUrl: image?.url || '',
 				recipientId: searchParams.get('chat') as string,
-				userId,
+				userId: userId!!,
 				type: 'personal',
 			});
 
-			if (socket) {
-				socket.emit('message', values);
+			if (states.socket) {
+				states.socket.emit('message', values);
 			}
 			revalidate('/direct-messages');
 		}
 		// reply of personal message
 		if (
 			type === 'personal' &&
-			selectedMessage &&
-			selectedMessage.message &&
-			selectedMessage.type === 'personal'
+			serverStates.selectedMessage &&
+			serverStates.selectedMessage.message &&
+			serverStates.selectedMessage.type === 'personal'
 		) {
 			const values = messageData({
 				content: data.message,
-				conversationId: searchParams.get('conversationId') as string,
+				conversationId,
 				imageAssetId: image?.publicId || '',
 				imageUrl: image?.url || '',
-				recipientId: searchParams.get('chat') as string,
-				userId,
+				recipientId: chat,
+				userId: userId!!,
 				type: 'reply',
-				parentMessageId: selectedMessage?.message.message_id!,
-				messageId: selectedMessage?.message.message_id!,
+				parentMessageId: serverStates.selectedMessage?.message.message_id!,
+				messageId: serverStates.selectedMessage?.message.message_id!,
 			});
-			if (socket) {
-				socket.emit('message', values);
+			if (states.socket) {
+				states.socket.emit('message', values);
 			}
 		}
 
 		// common message in channel
-		if (type === 'channel' && !selectedMessage) {
+		if (type === 'channel' && !serverStates.selectedMessage) {
 			const values = messageData({
 				content: data.message,
 				conversationId: '',
 				recipientId: '',
 				imageAssetId: image?.publicId || '',
 				imageUrl: image?.url || '',
-				userId,
+				userId: userId!!,
 				type: 'channel',
-				channelId: params?.channelId as string,
-				serverId: params.serverId as string,
+				channelId: params?.channel_id as string,
+				serverId: params.id as string,
 				username: serverStates.selectedServer?.serverProfile.username,
 			});
-			if (socket) {
-				socket.emit('message', values);
+			if (states.socket) {
+				states.socket.emit('message', values);
 			}
 		}
 		// reply message in channel
 		if (
 			type === 'channel' &&
-			selectedMessage &&
-			selectedMessage.message &&
-			selectedMessage.type === 'channel'
+			serverStates.selectedMessage &&
+			serverStates.selectedMessage.message &&
+			serverStates.selectedMessage.type === 'channel'
 		) {
 			const values = messageData({
 				content: data.message,
 				imageAssetId: image?.publicId || '',
 				imageUrl: image?.url || '',
-				userId,
+				userId: userId!!,
+
 				type: 'reply',
 				channelId: params?.channelId as string,
 				serverId: params?.serverId as string,
 				username: serverStates.selectedServer?.serverProfile.username,
-				parentMessageId: selectedMessage?.message.message_id,
-				messageId: selectedMessage?.message.message_id,
+				parentMessageId: serverStates.selectedMessage?.message.message_id,
+				messageId: serverStates.selectedMessage?.message.message_id,
 			});
-			if (socket) {
-				socket.emit('message', values);
+			if (states.socket) {
+				states.socket.emit('message', values);
 			}
 		}
 
 		// create thread
-		if (selectedMessage && selectedMessage.action === 'create_thread') {
+		if (
+			serverStates.selectedMessage &&
+			serverStates.selectedMessage.action === 'create_thread'
+		) {
 			if (!threadName) {
 				toast.error('Thread name is required');
 				return;
@@ -228,9 +197,9 @@ function ChatForm({
 			await createThread({
 				channelId: params.channelId as string,
 				message: data.message,
-				msgId: selectedMessage?.message?.message_id || '',
+				msgId: serverStates.selectedMessage?.message?.message_id || '',
 				threadName,
-				userId,
+				userId: userId!!,
 				imageAssetId: '',
 				imageUrl: '',
 			}).then(() => {
@@ -239,56 +208,62 @@ function ChatForm({
 			});
 		}
 
-		if (selectedThread && type === 'thread' && !selectedMessage) {
-			const values = messageData({
-				content: data.message,
-				imageAssetId: image?.publicId || '',
-				imageUrl: image?.url || '',
-				userId,
-				type: 'thread',
-				channelId: params?.channelId as string,
-				serverId: params.serverId as string,
-				username: serverStates.selectedServer?.serverProfile.username,
-				threadId: selectedThread.thread_id,
-			});
-			if (socket) {
-				socket.emit('message', values);
-			}
-		}
-
 		if (
-			selectedThread &&
-			selectedMessage &&
-			selectedMessage?.type === 'thread' &&
-			selectedMessage.action === 'reply'
+			serverStates.selectedThread &&
+			type === 'thread' &&
+			!serverStates.selectedMessage
 		) {
 			const values = messageData({
 				content: data.message,
 				imageAssetId: image?.publicId || '',
 				imageUrl: image?.url || '',
-				userId,
+				userId: userId!!,
+				type: 'thread',
+				channelId: params?.channelId as string,
+				serverId: params.serverId as string,
+				username: serverStates.selectedServer?.serverProfile.username,
+				threadId: serverStates.selectedThread.thread_id,
+			});
+			if (states.socket) {
+				states.socket.emit('message', values);
+			}
+		}
+
+		if (
+			serverStates.selectedThread &&
+			serverStates.selectedMessage &&
+			serverStates.selectedMessage?.type === 'thread' &&
+			serverStates.selectedMessage.action === 'reply'
+		) {
+			const values = messageData({
+				content: data.message,
+				imageAssetId: image?.publicId || '',
+				imageUrl: image?.url || '',
+				userId: userId!!,
 				type: 'reply',
 				channelId: params?.channelId as string,
 				serverId: params.serverId as string,
 				username: serverStates.selectedServer?.serverProfile.username,
-				parentMessageId: selectedMessage?.message.message_id,
-				messageId: selectedMessage?.message.message_id,
-				threadId: selectedThread?.thread_id,
+				parentMessageId: serverStates.selectedMessage?.message.message_id,
+				messageId: serverStates.selectedMessage?.message.message_id,
+				threadId: serverStates.selectedThread.thread_id,
 			});
-			if (socket) {
-				socket.emit('message', values);
+			if (states.socket) {
+				states.socket.emit('message', values);
 			}
 		}
 
 		form.reset();
-		reloadMessages();
-		if (selectedMessage) {
+		reloadMessage();
+		if (serverStates.selectedMessage) {
 			resetSelectedMessage();
 		}
 	};
 
 	const resetSelectedMessage = () => {
-		setServerStates((prev) => ({ ...prev, selectedMessage: null }));
+		updateState({
+			selectedMessage: null,
+		});
 	};
 
 	useEffect(() => {
@@ -308,20 +283,20 @@ function ChatForm({
 	const image = form.watch('image');
 
 	if (loading || isError) return null;
-
-	console.log({ type, selectedMessage });
-
+	if (isCurrentUserBanned) return <p className='text-center text-red-600'>You are banned </p>;
+	
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className='relative w-full'>
-				{selectedMessage &&
-					selectedMessage.type === type &&
-					selectedMessage.action === 'reply' && (
+				{serverStates.selectedMessage &&
+					serverStates.selectedMessage.type === type &&
+					serverStates.selectedMessage.action === 'reply' && (
 						<div className='absolute -top-9 left-0 flex w-full items-center justify-between rounded-t-xl bg-[#2b2d31] p-2'>
 							<p className='bottom-16 text-sm text-gray-2'>
 								Replying to{' '}
 								<span className='font-semibold text-gray-2 brightness-150'>
-									{selectedMessage.message && selectedMessage.message.username}
+									{serverStates.selectedMessage.message &&
+										serverStates.selectedMessage.message.username}
 								</span>
 							</p>
 							<button
@@ -347,7 +322,7 @@ function ChatForm({
 							preview={preview}
 						/>
 					) : (
-						(selectedServer?.owner_id === userId ||
+						(serverStates.selectedServer?.owner_id === userId ||
 							(permissions && permissions.attach_file)) && (
 							<FileUpload
 								deleteImage={deleteImage}

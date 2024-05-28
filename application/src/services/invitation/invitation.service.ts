@@ -1,19 +1,34 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
+import { FriendsService } from '../friends/friends.service';
 
 @Injectable()
 export class InvitationService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private friendService: FriendsService
+  ) {}
 
   async inviteUser(userToInvite: string, userId: string) {
     try {
       if (!userId || !userToInvite) {
-        throw new HttpException('User id is missing', HttpStatus.BAD_REQUEST);
+        throw new BadRequestException('User id is missing');
       }
+
+      const friend = await this.friendService.getFriends(userId);
+      if (friend.data.length >= 1) {
+        throw new HttpException('You already a friend', HttpStatus.BAD_REQUEST);
+      }
+
       await this.db.pool.query(
         `insert into invitations (user_to_invite, invitator, status)
-values($1, $2, 'pending')`,
+         values($1, $2, 'pending')`,
         [userToInvite, userId]
       );
 
@@ -83,7 +98,7 @@ values($1, $2, 'pending')`,
       await this.db.pool.query(
         `
           delete from invitations 
-          where invitator = $1 and user_to_invite=$2`,
+          where invitator = $1 and user_to_invite = $2`,
         [friend_id, userId]
       );
 

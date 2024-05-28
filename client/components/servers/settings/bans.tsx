@@ -57,8 +57,6 @@ export default function ServerBanList({
 		}
 	};
 
-	console.log(data);
-
 	return (
 		<section className='size-full'>
 			<header className='space-y-3 '>

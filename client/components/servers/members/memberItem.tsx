@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/context-menu';
 import { cn } from '@/lib/utils/mergeStyle';
 import { Member } from '@/types/server';
-import { SocketStates } from '@/types/socket-states';
 import { createError } from '@/utils/error';
 import { banMember, kickMember } from '@/actions/members';
 import { copyText } from '@/utils/copy';
@@ -21,16 +20,16 @@ import usePermissions from '@/hooks/usePermissions';
 export default function MemberItem({
 	member,
 	currentUser,
-	states,
 	ownerId,
 	socket,
 	serverId,
+	activeUsers
 }: {
 	member: Member;
 	ownerId: string;
 	serverId: string;
 	currentUser: string;
-	states: SocketStates;
+	activeUsers: string[];
 	socket: Socket | null;
 }) {
 	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
@@ -83,13 +82,10 @@ export default function MemberItem({
 							<p
 								className={cn(
 									'text-xs text-gray-2',
-									states.active_users.includes(member.user_id) &&
-										'text-green-600'
+									activeUsers.includes(member.user_id) && 'text-green-600'
 								)}
 							>
-								{states.active_users.includes(member.user_id)
-									? 'online'
-									: 'offline'}
+								{activeUsers.includes(member.user_id) ? 'online' : 'offline'}
 							</p>
 						</div>
 					</div>

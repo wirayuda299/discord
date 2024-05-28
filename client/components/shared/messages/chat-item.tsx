@@ -1,36 +1,33 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-	Dispatch,
-	SetStateAction,
-	memo,
-	useCallback,
-	useMemo,
-	useState,
-} from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 import { Message, Thread } from '@/types/messages';
 import ThreadMessages from '../../servers/threads/thread-messages';
-import EmojiPickerButton from './emoji-picker';
 import { foundMessage } from '@/utils/messages';
-import useEmoji from '@/hooks/useEmoji';
-import MessageMenu from './menu';
 import EditMessageForm from './edit-message';
 import { formatDate, formatMessageTimestamp } from '@/utils/createdDate';
-import { Permission } from '@/types/server';
-import { BannedMembers } from '@/types/socket-states';
+import { Servers } from '@/types/server';
 import { ServerStates } from '@/providers/server';
-import CreateThread from '@/components/servers/threads/create-thread';
-import { useSocketContext } from '@/providers/socket-io';
+import { Channel } from '@/types/channels';
+import MessagesAction from './message-action';
 
 type Props = {
 	msg: Message;
-	permissions: Permission | undefined;
-	isCurrentUserBanned: false | BannedMembers | undefined;
 	replyType: 'personal' | 'thread' | 'channel' | 'reply';
 	messages: Message[];
-	serversState: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
+	selectedThread: Thread | null;
+	selectedServer: Servers | null;
+	selectedMessage: {
+		type: 'personal' | 'thread' | 'channel' | 'reply';
+		message: Message;
+		action: string;
+	} | null;
+	selectedChannel: Channel | null;
+	setStates: (value: Partial<ServerStates>) => void;
+	reloadMessages: () => void;
 };
 
 const highlightLinks = (text: string) => {
@@ -59,78 +56,28 @@ const ChatItem = (props: Props) => {
 		msg,
 		messages,
 		replyType,
-		permissions,
-		isCurrentUserBanned,
-		serversState,
-		setServerStates,
+		selectedThread,
+		reloadMessages,
+		selectedServer,
+		selectedMessage,
+		selectedChannel,
+		setStates,
 	} = props;
 
 	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const {
-		userId,
-		params,
-		reloadChannelMessage,
-		reloadPersonalMessage,
-		reloadThreadMessages,
-	} = useSocketContext();
-	const { selectedServer, selectedThread } = serversState;
-
-	const reloadMessages = () => {
-		switch (replyType) {
-			case 'channel':
-				reloadChannelMessage(
-					params.channelId as string,
-					params.serverId as string
-				);
-				break;
-
-			case 'personal':
-				reloadPersonalMessage();
-				break;
-			case 'thread':
-				reloadThreadMessages(selectedThread?.thread_id!);
-				break;
-
-			default:
-				break;
-		}
-	};
+	const params = useParams();
+	const { userId } = useAuth();
 
 	const selectThread = (thread: Thread) => {
-		setServerStates((prev) => ({
-			...prev,
+		setStates({
 			selectedThread: thread,
-		}));
+		});
 	};
 
 	const isEdited = useCallback(
 		() =>
 			new Date(msg.update_at).getTime() > new Date(msg.created_at).getTime(),
 		[msg]
-	);
-
-	const handleAppendOrRemoveEmoji = useEmoji(
-		params.serverId as string,
-		userId,
-		reloadMessages
-	);
-
-	const handleSelectedMessage = useCallback(
-		(
-			msg: Message,
-			action: string,
-			type: 'personal' | 'thread' | 'channel' | 'reply'
-		) => {
-			setServerStates((prev) => ({
-				...prev,
-				selectedMessage: {
-					message: msg,
-					type,
-					action,
-				},
-			}));
-		},
-		[setServerStates]
 	);
 
 	const repliedMessage = useMemo(
@@ -221,62 +168,18 @@ const ChatItem = (props: Props) => {
 					</p>
 				</div>
 			)}
+			<MessagesAction
+				channelId={params.channel_id as string}
+				handleOpen={() => setIsOpen((prev) => !prev)}
+				msg={msg}
+				ownerId={selectedServer?.owner_id!}
+				reloadMessages={reloadMessages}
+				serverId={params.id as string}
+				setStates={setStates}
+				type={replyType}
+				userId={userId!!}
+			/>
 
-			{!isCurrentUserBanned && (
-				<div className='absolute right-0 top-0 flex gap-3 bg-background p-1 opacity-0 shadow-xl group-hover:opacity-100'>
-					<EmojiPickerButton
-						handleClick={(e) => handleAppendOrRemoveEmoji(e, msg.message_id)}
-					/>
-					{msg.author === userId && (
-						<button
-							name='Edit message'
-							title='Edit message'
-							type='button'
-							className='min-w-5'
-							onClick={() => setIsOpen((prev) => !prev)}
-						>
-							<Image
-								src={'/icons/pencil.svg'}
-								width={20}
-								height={20}
-								alt='pencil'
-							/>
-						</button>
-					)}
-
-					<>
-						{replyType !== 'personal' && (
-							<>
-								{(serversState.selectedServer?.owner_id === userId ||
-									(permissions && permissions.manage_thread)) && (
-									<CreateThread message={msg}>
-										<Image
-											onClick={() =>
-												handleSelectedMessage(msg, 'create_thread', 'thread')
-											}
-											src={'/icons/threads.svg'}
-											width={20}
-											height={20}
-											alt='threads'
-										/>
-									</CreateThread>
-								)}
-							</>
-						)}
-					</>
-
-					<MessageMenu
-						permissions={permissions}
-						serverAuthor={selectedServer?.owner_id || ''}
-						type={replyType}
-						handleSelectedMessage={handleSelectedMessage}
-						currentUser={userId}
-						channelId={params.channelId as string}
-						message={msg}
-						serverId={params.serverId as string}
-					/>
-				</div>
-			)}
 			{msg.media_image && !msg.parent_message_id && (
 				<Image
 					src={msg.media_image}
@@ -305,10 +208,11 @@ const ChatItem = (props: Props) => {
 			<div className=' pt-2'>
 				{(msg?.threads || []).map((thread) => (
 					<ThreadMessages
-						serversState={serversState}
-						setServerStates={setServerStates}
-						isCurrentUserBanned={isCurrentUserBanned}
-						permissions={permissions}
+						selectedChannel={selectedChannel}
+						selectedMessage={selectedMessage}
+						selectedServer={selectedServer}
+						selectedThread={selectedThread}
+						setStates={setStates}
 						thread={thread}
 						key={thread.thread_id}
 					>

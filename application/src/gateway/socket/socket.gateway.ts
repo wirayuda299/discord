@@ -7,9 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { MembersService } from 'src/services/members/members.service';
 import { MessagesService } from 'src/services/messages/messages.service';
-import { RolesService } from 'src/services/roles/roles.service';
 import { ThreadsService } from 'src/services/threads/threads.service';
 
 type PayloadTypes = {
@@ -44,9 +42,7 @@ export class SocketGateway implements OnModuleInit {
 
   constructor(
     private messagesService: MessagesService,
-    private threadsService: ThreadsService,
-    private rolesService: RolesService,
-    private membersService: MembersService
+    private threadsService: ThreadsService
   ) {}
 
   onModuleInit() {
@@ -104,6 +100,8 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
+    console.log(payload);
+
     switch (payload.type) {
       case 'channel':
         await this.messagesService.sendMessage(payload);

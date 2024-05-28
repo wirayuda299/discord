@@ -2,6 +2,7 @@ import { getCurrentUserPermissions } from '@/helper/roles';
 import useFetch from './useFetch';
 import { getBannedMembers } from '@/helper/members';
 import { findBannedMembers } from '@/utils/banned_members';
+import { useMemo } from 'react';
 
 export default function usePermissions(userId: string, serverId: string) {
 	const {
@@ -20,7 +21,7 @@ export default function usePermissions(userId: string, serverId: string) {
   const loading = permissionsLoading || bannedMembersLoading;
   const isError = permissionsError || bannedMembersError;
 
-  const isCurrentUserBanned = findBannedMembers(bannedMembers || [], userId!!);
+  const isCurrentUserBanned = useMemo(() => findBannedMembers(bannedMembers || [], userId!!), [bannedMembers, userId])
     
     return { permissions, isCurrentUserBanned, loading, isError };
 

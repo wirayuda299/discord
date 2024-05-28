@@ -1,130 +1,129 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
-import { useAuth } from "@clerk/nextjs";
-import { toast } from "sonner";
-import { SquarePen } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
+import { useAuth } from '@clerk/nextjs';
+import { toast } from 'sonner';
+import { SquarePen } from 'lucide-react';
 
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "../../ui/form";
-import useUploadFile from "@/hooks/useFileUpload";
-import { Button } from "../../ui/button";
-import { deleteImage, uploadFile } from "@/helper/file";
-import { updateServer } from "@/helper/server";
-import { UpdateServerSchemaType, updateServerSchema } from "@/validations";
-import { createError } from "@/utils/error";
-import { Switch } from "@/components/ui/switch";
-import { Servers } from "@/types/server";
-import { memo } from "react";
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+} from '../../ui/form';
+import useUploadFile from '@/hooks/useFileUpload';
+import { Button } from '../../ui/button';
+import { deleteImage, uploadFile } from '@/helper/file';
+import { updateServer } from '@/helper/server';
+import { UpdateServerSchemaType, updateServerSchema } from '@/validations';
+import { createError } from '@/utils/error';
+import { Switch } from '@/components/ui/switch';
+import { Servers } from '@/types/server';
+import { memo } from 'react';
 
- function ServerOverview({
-server
-}: {
-  server:Servers
-}) {
-  const { userId } = useAuth();
-  const form = useForm<UpdateServerSchemaType>({
-    resolver: zodResolver(updateServerSchema),
-    defaultValues: {
-      logo: server.logo ||'',
-      name: server.name,
-      showBanner:server.settings.show_banner_background,
-      showProgressBar: server.settings.show_progress_bar,
-      banner:server.banner,
-    },
-  });
-  const { handleChange, preview, files } = useUploadFile(form);
+function ServerOverview({ server }: { server: Servers }) {
+	const { userId } = useAuth();
+	const form = useForm<UpdateServerSchemaType>({
+		resolver: zodResolver(updateServerSchema),
+		defaultValues: {
+			logo: server.logo || '',
+			name: server.name,
+			showBanner: server.settings.show_banner_background,
+			showProgressBar: server.settings.show_progress_bar,
+			banner: server.banner,
+		},
+	});
+	const { handleChange, preview, files } = useUploadFile(form);
 
-  const localLogo = form.watch("logo");
-  const localBanner = form.watch("banner");
-  const isValid = form.formState.isValid;
-  const isSubmitting = form.formState.isSubmitting;
-  const isEdited = form.formState.isDirty;
-  const editedFields = form.formState.dirtyFields;
+	const localLogo = form.watch('logo');
+	const localBanner = form.watch('banner');
+	const isValid = form.formState.isValid;
+	const isSubmitting = form.formState.isSubmitting;
+	const isEdited = form.formState.isDirty;
+	const editedFields = form.formState.dirtyFields;
 
-  async function onSubmit(data: UpdateServerSchemaType) {
-    try {
-      if (!userId) return;
+	async function onSubmit(data: UpdateServerSchemaType) {
+		try {
+			if (!userId) return;
 
-      const updateServerData = async (
-        logo: { url: string; id: string },
-        banner: { url: string; id: string },
-      ) => {
-        await updateServer(
-          server.id,
-          data.name,
-          logo.url!,
-          logo.id!,
-          banner.url,
-          banner.id,
-          userId,
-          data.showBanner,
-          data.showProgressBar,
-        );
-        toast.success("Server has been updated");
-      };
+			const updateServerData = async (
+				logo: { url: string; id: string },
+				banner: { url: string; id: string }
+			) => {
+				await updateServer(
+					server.id,
+					data.name,
+					logo.url!,
+					logo.id!,
+					banner.url,
+					banner.id,
+					userId,
+					data.showBanner,
+					data.showProgressBar
+				);
+				toast.success('Server has been updated');
+			};
 
-      const handleFileUpload = async (fileKey: string, assetId?: string) => {
-        if (files && files[fileKey]) {
-          const [, uploadedFile] = await Promise.all([
-            assetId ? deleteImage(assetId) : Promise.resolve(),
-            uploadFile(files[fileKey]),
-          ]);
-          return uploadedFile;
-        }
-      };
+			const handleFileUpload = async (fileKey: string, assetId?: string) => {
+				if (files && files[fileKey]) {
+					const [, uploadedFile] = await Promise.all([
+						assetId ? deleteImage(assetId) : Promise.resolve(),
+						uploadFile(files[fileKey]),
+					]);
+					return uploadedFile;
+				}
+			};
 
-      if (editedFields.logo) {
-        const logo = await handleFileUpload("logo", server.logo_asset_id);
-        await updateServerData(
-          {
-            url: logo?.url,
-            id: logo?.publicId,
-          },
-          { id: server.banner_asset_id!, url: data?.banner!! },
-        );
-      } else if (editedFields.banner) {
-        const banner = await handleFileUpload("banner", server.banner_asset_id!!);
-        await updateServerData(
-          { id: server.logo_asset_id, url: data.logo },
-          {
-            url: banner?.url,
-            id: banner?.publicId,
-          },
-        );
-      } else if (editedFields.logo && editedFields.banner) {
-        const [logo, banner] = await Promise.all([
-          editedFields.logo
-            ? handleFileUpload("logo", server.logo_asset_id)
-            : Promise.resolve(null),
-          editedFields.banner
-            ? handleFileUpload("banner", server.banner_asset_id ||'')
-            : Promise.resolve(null),
-        ]);
-        await updateServerData(
-          { id: logo?.publicId, url: logo?.url },
-          { id: banner?.publicId, url: banner?.url },
-        );
-      } else {
-        await updateServerData(
+			if (editedFields.logo) {
+				const logo = await handleFileUpload('logo', server.logo_asset_id);
+				await updateServerData(
+					{
+						url: logo?.url,
+						id: logo?.publicId,
+					},
+					{ id: server.banner_asset_id!, url: data?.banner!! }
+				);
+			} else if (editedFields.banner) {
+				const banner = await handleFileUpload(
+					'banner',
+					server.banner_asset_id!!
+				);
+				await updateServerData(
+					{ id: server.logo_asset_id, url: data.logo },
+					{
+						url: banner?.url,
+						id: banner?.publicId,
+					}
+				);
+			} else if (editedFields.logo && editedFields.banner) {
+				const [logo, banner] = await Promise.all([
+					editedFields.logo
+						? handleFileUpload('logo', server.logo_asset_id)
+						: Promise.resolve(null),
+					editedFields.banner
+						? handleFileUpload('banner', server.banner_asset_id || '')
+						: Promise.resolve(null),
+				]);
+				await updateServerData(
+					{ id: logo?.publicId, url: logo?.url },
+					{ id: banner?.publicId, url: banner?.url }
+				);
+			} else {
+				await updateServerData(
 					{ id: server.logo_asset_id, url: data.logo },
 					{ id: server.banner_asset_id!, url: data?.banner!! }
 				);
-      }
-    } catch (error) {
-      createError(error);
-    }
-  }
+			}
+		} catch (error) {
+			createError(error);
+		}
+	}
 
-  return (
+	return (
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
@@ -306,6 +305,6 @@ server
 			</form>
 		</Form>
 	);
- }
+}
 
- export default memo(ServerOverview)
+export default memo(ServerOverview);

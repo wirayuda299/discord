@@ -18,9 +18,6 @@ export async function getAllThreads(
       },
     );
     const threads = await res.json();
-
-    console.log(threads);
-    
     return threads.data;
   } catch (error) {
     throw error;

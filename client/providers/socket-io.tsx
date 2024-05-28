@@ -1,106 +1,65 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { Socket, io } from 'socket.io-client';
 import {
-	ReactNode,
+	Dispatch,
+	SetStateAction,
 	createContext,
 	useCallback,
 	useContext,
 	useEffect,
 	useMemo,
-	useReducer,
 	useState,
+	type ReactNode,
 } from 'react';
-import { ReadonlyURLSearchParams, useParams, useSearchParams } from 'next/navigation';
-import { socketReducer } from '@/reducer/socket';
+
 import { SocketStates } from '@/types/socket-states';
+import { useAuth } from '@clerk/nextjs';
+import { io } from 'socket.io-client';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { Message } from '@/types/messages';
 
-const initialValues: SocketStates = {
-	active_users: [] as string[],
-	channel_messages: [],
-	personal_messages: [],
-	thread_messages: [],
-};
-
-export type SocketContextType = {
-	socket: Socket | null;
-	isConnected: boolean;
-	userId: string;
+type SocketContextIntialValue = {
 	states: SocketStates;
-	reloadChannelMessage: (channelId: string, serverId: string) => void;
-	reloadPersonalMessage: () => void;
-	reloadThreadMessages: (threadId: string) => void;
-	params: {
-		serverId: string | string[];
-		channelId: string | string[];
-	};
-	searchParams: ReadonlyURLSearchParams;
+	setValues: Dispatch<SetStateAction<SocketStates>>;
 };
 
-export const SocketContext = createContext<SocketContextType>(
-	{} as SocketContextType
-);
+const initialValues: SocketContextIntialValue = {
+	states: {
+		active_users: [],
+		channel_messages: [],
+		personal_messages: [],
+		thread_messages: [],
+		socket: null,
+		isConnected: false,
+	},
+	setValues: () => {},
+};
+
+export const SocketContext = createContext<SocketContextIntialValue>(initialValues);
 
 export const SocketContextProvider = ({
 	children,
 }: {
 	children: ReactNode;
 }) => {
-	const [socket, setSocket] = useState<Socket | null>(null);
 	const { userId } = useAuth();
-
-	const [isConnected, setIsConnected] = useState<boolean>(false);
+	const params = useParams();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const { id: serverId, channel_id: channelId } = useParams();
-	const [states, dispatch] = useReducer(socketReducer, initialValues);
+	const chat = searchParams.get('chat');
 
-	const chat = useMemo(() => searchParams.get('chat'), [searchParams]);
-	const conversationId = useMemo(
-		() => searchParams.get('conversationId'),
-		[searchParams]
-	);
+	const [values, setValues] = useState<SocketStates>(initialValues.states);
 
-	const reloadChannelMessage = useCallback(
-		(channelId: string, serverId: string) => {
-			if (socket && channelId && serverId) {
-				socket.emit('get-channel-message', { channelId, serverId });
-			}
-		},
-		[socket, serverId, channelId]
-	);
-
-	const reloadPersonalMessage = useCallback(() => {
-		if (socket && chat && conversationId) {
-			socket.emit('personal-message', {
-				userId: chat,
-				conversationId,
-			});
-		}
-	}, [socket, chat, conversationId]);
-
-	const reloadThreadMessages = useCallback(
-		(threadId: string) => {
-			if (socket && serverId && channelId) {
-				socket.emit('thread-messages', {
-					threadId,
-					serverId,
-					channelId,
-				});
-			}
-		},
-		[socket, serverId, channelId]
-	);
+	const socketValues = useMemo(() => values, [values]);
 
 	useEffect(() => {
-		const serverUrl = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhpst:3001';
-		const clientSocket = io(serverUrl!, {
-			query: {
-				userId,
-			},
-		});
-		setSocket(clientSocket);
+		const serverUrl = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:3001';
+
+		const clientSocket = io(serverUrl, { query: { userId } });
+		setValues((prev) => ({
+			...prev,
+			socket: clientSocket,
+		}));
 
 		return () => {
 			clientSocket.disconnect();
@@ -108,89 +67,88 @@ export const SocketContextProvider = ({
 	}, [userId]);
 
 	useEffect(() => {
-		if (!socket) return;
+		const socket = values.socket;
+		if (socket === null) return;
 
 		socket.on('connect', () => {
-			setIsConnected(true);
+			setValues((prev) => ({
+				...prev,
+				isConnected: true,
+			}));
 		});
 
 		socket.on('disconnect', () => {
-			setIsConnected(false);
+			setValues((prev) => ({
+				...prev,
+				isConnected: false,
+			}));
 		});
 
 		return () => {
 			socket.disconnect();
 		};
-	}, [socket]);
+	}, [socketValues.socket, values.socket]);
+
+	const reloadChannelMessage = useCallback(() => {
+		values.socket?.emit('get-channel-message', {
+			channelId: params?.channel_id as string,
+			serverId: params?.id as string,
+		});
+	}, [params?.channel_id, params?.id, values.socket]);
+
+	const reloadPersonalMessage = useCallback(() => {
+		values.socket?.emit('personal-message', {
+			conversationId: searchParams.get('conversationId') as string,
+			userId: searchParams.get('chat') as string,
+		});
+	}, [values.socket, searchParams]);
 
 	useEffect(() => {
-		if (!socket || !userId || !isConnected) return;
+		if (!values.socket) return;
 
-		if (chat) {
+		if (params?.channel_id && params?.id) {
+			reloadChannelMessage();
+		}
+
+		if (pathname === '/direct-message' && chat) {
 			reloadPersonalMessage();
-			socket.on('set-personal-messages', (messages: Message[]) => {
-				dispatch({ type: 'PERSONAL_MESSAGES', payload: messages });
-			});
 		}
 
-		if (channelId && serverId) {
-			reloadChannelMessage(channelId as string, serverId as string);
-
-			socket.on('set-message', (data) => {
-				dispatch({ type: 'CHANNEL_MESSAGES', payload: data });
-			});
-		}
-
-		socket.on('set-active-users', (data) => {
-			dispatch({ type: 'ACTIVE_USERS', payload: data });
+		values.socket.on('set-message', (messages: Message[]) => {
+			setValues((prev) => ({
+				...prev,
+				channel_messages: messages,
+			}));
+		});
+		values.socket.on('set-thread-messages', (messages: Message[]) => {
+			setValues((prev) => ({
+				...prev,
+				thread_messages: messages,
+			}));
 		});
 
-		socket.on('set-thread-messages', (data: Message[]) => {
-			dispatch({ type: 'THREAD_MESSAGES', payload: data });
+		values.socket.on('set-personal-messages', (messages: Message[]) => {
+			setValues((prev) => ({
+				...prev,
+				personal_messages: messages,
+			}));
 		});
 	}, [
-		socket,
 		chat,
-		conversationId,
-		channelId,
-		serverId,
-		reloadPersonalMessage,
+		params?.channel_id,
+		params?.id,
+		pathname,
 		reloadChannelMessage,
-		userId,
-		isConnected,
+		reloadPersonalMessage,
+		setValues,
+		values.socket,
 	]);
 
-	const value = useMemo(
-		() => ({
-			states,
-			reloadChannelMessage,
-			reloadPersonalMessage,
-			reloadThreadMessages,
-			searchParams,
-			isConnected,
-			socket,
-			userId: userId as string,
-			params: { serverId, channelId },
-		}),
-		[
-			states,
-			reloadChannelMessage,
-			reloadPersonalMessage,
-			reloadThreadMessages,
-			searchParams,
-			isConnected,
-			socket,
-			userId,
-			serverId,
-			channelId,
-		]
-	);
-
 	return (
-		<SocketContext.Provider value={value}>{children}</SocketContext.Provider>
+		<SocketContext.Provider value={{ setValues, states: socketValues }}>
+			{children}
+		</SocketContext.Provider>
 	);
 };
 
-export function useSocketContext() {
-	return useContext(SocketContext);
-}
+export const useSocket = () => useContext(SocketContext);

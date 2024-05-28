@@ -1,34 +1,35 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { X } from "lucide-react";
-import Link from "next/link";
+import Image from 'next/image';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 
-import { Conversation } from "@/types/messages";
-import { useUserContext } from "@/providers/users";
-import { cn } from "@/lib/utils/mergeStyle";
+import { Conversation } from '@/types/messages';
+import { useUser } from '@/providers/users';
+import { cn } from '@/lib/utils/mergeStyle';
 
 export default function ConversationItem({
-  conversation,
-  styles,
-  innerStyles,
+	conversation,
+	styles,
+	innerStyles,
 }: {
-  conversation: Conversation;
-  styles?: string;
-  innerStyles?: string;
+	conversation: Conversation;
+	styles?: string;
+	innerStyles?: string;
 }) {
-  const { handleSelectUser } = useUserContext();
+	const {setUser} = useUser();
 
-  return (
+	return (
 		<div className='w-full py-3'>
 			<div
-				onClick={() =>
-					handleSelectUser({
+				onClick={() => {
+					setUser({
 						created_at: conversation.created_at,
 						image: conversation.image,
 						user_id: conversation.recipient_id,
 						username: conversation.username,
 					})
+				}
 				}
 				className={cn(
 					'group rounded-md hover:bg-background hover:brightness-105',

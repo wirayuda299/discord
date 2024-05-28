@@ -7,7 +7,8 @@ import { useServerContext } from "@/providers/server";
 import useFetch from "@/hooks/useFetch";
 
 export default function UserAccount() {
-  const { setServerStates } = useServerContext();
+  const {  updateState } = useServerContext();
+  
   const { userId } = useAuth();
   const {
     data: user,
@@ -16,11 +17,11 @@ export default function UserAccount() {
   } = useFetch("user", async () => getUserById(userId!!));
 
   const handleClick = () => {
-    setServerStates((prev) => ({
-      ...prev,
-      selectedSetting: "profiles",
-      selectedOption: "user",
-    }));
+    updateState({
+      selectedOption: 'user',
+      selectedSetting:'profile'
+    })
+   
   };
 
   if (userLoading || userError || !user) return null;

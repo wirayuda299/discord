@@ -1,28 +1,28 @@
 import Image from 'next/image';
 import { memo } from 'react';
+import { useParams } from 'next/navigation';
+import {  useAuth } from '@clerk/nextjs';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Servers } from '@/types/server';
 import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
 import MemberItem from './memberItem';
-import { useSocketContext } from '@/providers/socket-io';
+import {useSocket} from '@/providers/socket-io';
 
-function MemberSheet({
-	selectedServer,
-}: {
-	selectedServer: Servers | null;
-}) {
-	const { states, socket, params, userId } = useSocketContext();
+function MemberSheet({ selectedServer }: { selectedServer: Servers | null }) {
+	const params = useParams();
+	const { userId } = useAuth();
+	const {states} = useSocket()
 
-	const { data, error, isLoading, mutate } = useFetch('members', () =>
-		getServerMembers(params.serverId as string),
-		true
+	const { data, error, isLoading, mutate } = useFetch(
+		'members',
+		() => getServerMembers(params.id as string),
 	);
 	if (!selectedServer) return null;
 
 	return (
-		<Sheet onOpenChange={(isOpen) => isOpen && mutate() }>
+		<Sheet onOpenChange={(isOpen) => isOpen && mutate()}>
 			<SheetTrigger>
 				<Image
 					className='min-w-6'
@@ -75,10 +75,10 @@ function MemberSheet({
 					) : (
 						data?.map((member) => (
 							<MemberItem
+								activeUsers={states.active_users}
 								serverId={selectedServer.id}
-								socket={socket}
-								currentUser={userId}
-								states={states}
+								socket={states.socket}
+								currentUser={userId!!}
 								ownerId={selectedServer.owner_id}
 								member={member}
 								key={member.id}

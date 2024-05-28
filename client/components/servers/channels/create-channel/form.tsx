@@ -29,6 +29,7 @@ export default function CreateChannelForm({
 	serverAuthor: string;
 }) {
 	const { userId } = useAuth();
+	
 	const form = useForm<CreateChannelSchemaType>({
 		resolver: zodResolver(createChannelSchema),
 		defaultValues: {

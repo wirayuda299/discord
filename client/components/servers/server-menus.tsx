@@ -1,4 +1,6 @@
 import { Ellipsis, Pencil, Plus, UserRoundPlus } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
+import { memo, useMemo } from 'react';
 
 import { useServerContext } from '@/providers/server';
 
@@ -14,28 +16,26 @@ import ServerSetting from '@/components/servers/settings/server-setting';
 import AddUser from '@/components/servers/add-user';
 import { Servers } from '@/types/server';
 import RolesModal from './settings/roles/rolesModal';
-import { useAuth } from '@clerk/nextjs';
 import usePermissions from '@/hooks/usePermissions';
-import { memo, useMemo } from 'react';
 
 function ServerMenu({ server }: { server: Servers }) {
 	const { userId } = useAuth();
-	const data=useMemo(( )=> server, [server])
-	const { setServerStates, serversState } = useServerContext();
+	const data = useMemo(() => server, [server]);
+
+	const {states, updateState} = useServerContext();
 	const { isCurrentUserBanned, permissions, loading, isError } = usePermissions(
 		userId!!,
 		data.id
 	);
 	const handleClick = (setting: string) => {
-		setServerStates((prev) => ({
-			...prev,
+		updateState({
 			selectedSetting: setting,
-			selectedOption: 'server',
-		}));
+			selectedOption:'server'
+		})
 	};
 	const serverOwnerId = server.owner_id;
 
-	if(loading || isError) return null 
+	if (loading || isError) return null;
 
 	return (
 		<DropdownMenu>
@@ -74,7 +74,7 @@ function ServerMenu({ server }: { server: Servers }) {
 						/>
 					</DropdownMenuItem>
 				</AddUser>
-				{serversState.selectedServer && data.owner_id === userId && (
+				{states.selectedServer && data.owner_id === userId && (
 					<ServerSetting server={data} />
 				)}
 				{permissions && !isCurrentUserBanned && (
@@ -114,4 +114,4 @@ function ServerMenu({ server }: { server: Servers }) {
 	);
 }
 
-export default memo(ServerMenu)
+export default memo(ServerMenu);

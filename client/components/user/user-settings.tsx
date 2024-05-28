@@ -20,10 +20,8 @@ export default function UserSettingsModals({
 }: {
   children: ReactNode;
 }) {
-  const {
-    serversState: { selectedSetting },
-    setServerStates,
-  } = useServerContext();
+  const {updateState, states} = useServerContext();
+
   const { signOut } = useClerk();
   const router = useRouter();
 
@@ -46,16 +44,13 @@ export default function UserSettingsModals({
                       {setting.items.map((item) => (
                         <li
                           onClick={() => {
-                            setServerStates((prev) => {
-                              return {
-                                ...prev,
-                                selectedSetting: item,
-                              };
-                            });
+                            updateState({
+                              selectedSetting:item
+                            })
                           }}
                           className={cn(
                             "hover:bg-background min-w-[200px] cursor-pointer text-nowrap rounded p-2 text-sm font-medium capitalize text-[#b5b8bc] transition ease hover:text-[#ced0d3]",
-                            selectedSetting === item &&
+                            states.selectedSetting === item &&
                               "bg-background text-white hover:bg-background/55",
                           )}
                           key={item}
@@ -76,8 +71,8 @@ export default function UserSettingsModals({
             </aside>
           </div>
           <div className="no-scrollbar h-screen w-full overflow-y-auto px-6 py-10">
-            {selectedSetting === "my account" && <UserAccount />}
-            {selectedSetting === "profiles" && <EditProfile />}
+            {states.selectedSetting === "my account" && <UserAccount />}
+            {states.selectedSetting === "profiles" && <EditProfile />}
           </div>
           <div className=" min-w-24 pt-10">
             <DialogClose className="flex size-10 flex-col items-center justify-center rounded-full border border-gray-2">

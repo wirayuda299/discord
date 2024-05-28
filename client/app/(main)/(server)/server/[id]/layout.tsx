@@ -17,13 +17,15 @@ export default async function ServerDetailLayout({
 
   if (!data) return notFound();
 
+  console.log("Server  layout");
+  
+
   return (
     <div className="flex w-full">
       <ServerSidebar
-        data={{
-          channels: data.channels,
-          server: data.server[0],
-        }}
+        server={data.server[0]}
+        channels={data.channels}
+       
       />
       {children}
     </div>

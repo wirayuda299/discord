@@ -11,24 +11,19 @@ type Props = {
 	children: ReactNode;
 };
 
-export default function CreateThread({
-	message,
-	children,
-}: Props) {
+export default function CreateThread({ message, children }: Props) {
 	const [threadName, setThreadName] = useState<string>('');
-	const { serversState, setServerStates } = useServerContext();
-
+	const { updateState } = useServerContext();
 
 	return (
 		<Sheet
 			modal={false}
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
-					setServerStates((prev) => ({
-						...prev,
-						selectedMessage: null,
+					updateState({
 						selectedThread: null,
-					}));
+						selectedMessage: null,
+					})
 				}
 			}}
 		>
@@ -115,11 +110,10 @@ export default function CreateThread({
 						</div>
 
 						<ChatForm
+							reloadMessage={() => {}}
 							threadName={threadName}
 							key={'thread-form'}
 							placeholder={`Message #thread-name`}
-							serverStates={serversState}
-							setServerStates={setServerStates}
 							type='thread'
 						/>
 					</div>

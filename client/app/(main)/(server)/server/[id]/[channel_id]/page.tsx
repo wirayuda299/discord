@@ -34,7 +34,6 @@ export default async function ChannelId({ searchParams, params }: Props) {
 		return (
 			<SelectedChannel
 				channelId={params.channel_id}
-				userId={user?.id}
 				serverId={params.id}
 			/>
 		);

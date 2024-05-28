@@ -4,6 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useCallback, useEffect } from 'react';
 import { ChevronRight, Plus, UserPlus } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 import { Channel } from '@/types/channels';
 import { Servers } from '@/types/server';
@@ -13,8 +15,6 @@ import { useServerContext } from '@/providers/server';
 
 import CreateChannelModals from '@/components/servers/channels/create-channel-modal';
 import AddUser from '@/components/servers/add-user';
-import { useParams } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
 import usePermissions from '@/hooks/usePermissions';
 
 export default function ChannelList({
@@ -24,10 +24,7 @@ export default function ChannelList({
 	channels: Channel[];
 	server: Servers;
 }) {
-	const {
-		serversState: { selectedChannel },
-		setServerStates,
-	} = useServerContext();
+	const { states, updateState } = useServerContext();
 	const params = useParams();
 	const { userId } = useAuth();
 	const [selectedCategory, setSelectedCategory] = useState('');
@@ -40,22 +37,17 @@ export default function ChannelList({
 		setSelectedCategory((prev) => (prev === categoryName ? '' : categoryName));
 	}, []);
 
-	const selectChannel = useCallback(
-		(channel: Channel | null) => {
-			setServerStates((prev) => ({ ...prev, selectedChannel: channel }));
-		},
-		[setServerStates]
-	);
+	const selectChannel = useCallback((channel: Channel | null) => {
+		updateState({ selectedChannel: channel });
+	}, []);
 
 	useEffect(() => {
 		const channel = channels
 			.map((c) => c.channels)[0]
 			.find((c) => c.channel_id === params.channel_id);
 
-		setServerStates((prev) => {
-			return { ...prev, selectedChannel: channel || null };
-		});
-	}, [params.channelId, channels, setServerStates]);
+		selectChannel(channel || null);
+	}, [params.channel_id, channels, selectChannel]);
 
 	if (loading || isError) return null;
 
@@ -100,7 +92,7 @@ export default function ChannelList({
 						className={cn(
 							'h-0 flex flex-col gap-1',
 							selectedCategory === channel.category_name ||
-								selectedChannel?.channel_id === channel.channel_id
+								states.selectedChannel?.channel_id === channel.channel_id
 								? 'h-auto overflow-auto [&>*:nth-child(1)]:mt-2 transition-all ease duration-300'
 								: 'overflow-hidden'
 						)}
@@ -113,7 +105,7 @@ export default function ChannelList({
 								onClick={() => selectChannel(c)}
 								className={cn(
 									'hover:bg-background/80 group ml-2 h-max cursor-pointer rounded-lg px-3 py-1 text-sm',
-									c.channel_id === selectedChannel?.channel_id &&
+									c.channel_id === states.selectedChannel?.channel_id &&
 										'bg-background/80'
 								)}
 							>

@@ -1,22 +1,22 @@
-import { ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
-import RolesSettings from "./settings";
+import { ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+import RolesSettings from './settings';
 
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import useFetch from "@/hooks/useFetch";
-import { Role, getAllRoles } from "@/helper/roles";
-import SearchForm from "../../../shared/search-form";
-import { Button } from "@/components/ui/button";
-import GeneralLoader from "@/components/shared/loader/general";
+	Table,
+	TableBody,
+	TableCaption,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
+import useFetch from '@/hooks/useFetch';
+import { Role, getAllRoles } from '@/helper/roles';
+import SearchForm from '../../../shared/search-form';
+import { Button } from '@/components/ui/button';
+import GeneralLoader from '@/components/shared/loader/general';
 
 export default function Roles({
 	serverId,
@@ -24,9 +24,9 @@ export default function Roles({
 	styles,
 }: {
 	serverId: string;
-    serverAuthor:string
-    styles?: string;
-	}) {
+	serverAuthor: string;
+	styles?: string;
+}) {
 	const { data, isLoading, error } = useFetch('roles', () =>
 		getAllRoles(serverId)
 	);

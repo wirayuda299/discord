@@ -4,6 +4,9 @@ import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Socket } from 'socket.io-client';
+import { useParams } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 import {
 	Drawer,
@@ -20,9 +23,7 @@ import { getServerMembers } from '@/helper/server';
 import MemberItem from '../members/memberItem';
 import { PinnedMessage, getPinnedMessages } from '@/helper/message';
 import { Member } from '@/types/server';
-import { SocketStates } from '@/types/socket-states';
-import { Socket } from 'socket.io-client';
-import { useSocketContext } from '@/providers/socket-io';
+import { useSocket } from '@/providers/socket-io';
 
 const options = ['members', 'media', 'pins'] as const;
 
@@ -36,7 +37,7 @@ function renderSelectedOption(
 	pinnedMessagesLoading: boolean,
 	currentUser: string,
 	ownerId: string,
-	states: SocketStates,
+	activeUsers: string[],
 	socket: Socket | null
 ) {
 	switch (selectedOption) {
@@ -47,7 +48,7 @@ function renderSelectedOption(
 				membersLoading,
 				currentUser,
 				ownerId,
-				states,
+				activeUsers,
 				socket
 			);
 		case 'media':
@@ -65,7 +66,7 @@ function renderMembers(
 	membersLoading: boolean,
 	currentUser: string,
 	ownerId: string,
-	states: SocketStates,
+	activeUsers: string[],
 	socket: Socket | null
 ) {
 	return (
@@ -88,7 +89,7 @@ function renderMembers(
 						currentUser={currentUser}
 						ownerId={ownerId}
 						socket={socket}
-						states={states}
+						activeUsers={activeUsers}
 						member={member}
 						key={member.id}
 					/>
@@ -181,30 +182,29 @@ function renderPins(
 }
 
 export default function ChannelInfo() {
+	const params = useParams();
+	const { userId } = useAuth();
+
 	const [selectedOption, setSelectedOption] = useState('members');
-	const {
-		serversState: { selectedChannel, selectedServer },
-	} = useServerContext();
-	const { states, params, userId, socket } = useSocketContext();
+	const {states:serverState} = useServerContext()
+	const {states} = useSocket()
 
 	const {
 		data: membersData,
 		error: membersError,
 		isLoading: membersLoading,
-	} = useFetch('members', () =>
-		getServerMembers((params?.serverId as string) || '')
-	);
+	} = useFetch('members', () => getServerMembers((params?.id as string) || ''));
 
 	const { data: pinnedMessagesData, isLoading: pinnedMessagesLoading } =
 		useFetch('pinned-messages', () =>
-			getPinnedMessages(params?.channelId as string)
+			getPinnedMessages(params?.channel_id as string)
 		);
 
-	const media = (states?.channel_messages ||[])
+	const media = (states.channel_messages || [])
 		.filter((message) => message.media_image)
 		.map((message) => message.media_image);
 
-	if (!selectedChannel) return null;
+	if (!serverState.selectedChannel) return null;
 
 	return (
 		<Drawer>
@@ -215,7 +215,7 @@ export default function ChannelInfo() {
 			</DrawerTrigger>
 			<DrawerContent className='border-t-2 border-background bg-black p-3 text-white'>
 				<DrawerTitle className='py-5 text-center '>
-					#{selectedChannel.channel_name}
+					#{serverState.selectedChannel.channel_name}
 				</DrawerTitle>
 				<ul className='flex items-center justify-evenly py-4'>
 					{options.map((option) => (
@@ -241,9 +241,9 @@ export default function ChannelInfo() {
 					pinnedMessagesData || [],
 					pinnedMessagesLoading,
 					userId!!,
-					selectedServer?.owner_id!!,
-					states,
-					socket
+					serverState?.selectedServer?.owner_id!!,
+					states.active_users,
+					states.socket
 				)}
 			</DrawerContent>
 		</Drawer>

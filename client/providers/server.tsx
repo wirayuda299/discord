@@ -1,12 +1,11 @@
 'use client';
 import {
+	createContext,
+	useCallback,
+	useContext,
 	useMemo,
 	useState,
-	ReactNode,
-	useContext,
-	createContext,
-	Dispatch,
-	SetStateAction,
+	type ReactNode,
 } from 'react';
 
 import { Channel } from '@/types/channels';
@@ -26,54 +25,45 @@ export type ServerStates = {
 	selectedThread: Thread | null;
 };
 
-export type ServerContextType = {
-	serversState: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
+const initialValues: ServerStates = {
+	selectedChannel: null,
+	selectedServer: null,
+	selectedSetting: 'my account',
+	selectedOption: 'user',
+	selectedMessage: null,
+	selectedThread: null,
 };
 
-const ServerContext = createContext<ServerContextType>({
-	serversState: {
-		selectedChannel: null,
-		selectedServer: null,
-		selectedSetting: 'my account',
-		selectedOption: 'user',
-		selectedMessage: null,
-		selectedThread: null,
-	},
-	setServerStates: () => {},
-});
+type ServerContextType = {
+	states: ServerStates;
+	updateState: (value: Partial<typeof initialValues>) => void;
+};
+
+const socketStates = {
+	states: initialValues,
+	updateState: () => {},
+};
+
+const ServerStatesContext = createContext<ServerContextType>(socketStates);
 
 export const ServerContextProvider = ({
 	children,
 }: {
 	children: ReactNode;
 }) => {
-	const [states, setStates] = useState<ServerStates>({
-		selectedChannel: null,
-		selectedServer: null,
-		selectedSetting: 'my account',
-		selectedOption: 'user',
-		selectedMessage: null,
-		selectedThread: null,
-	});
+	const [states, setStates] = useState(initialValues);
+	const memoized = useMemo(() => states, [states]);
 
-	const { serverStates, setServerStates } = useMemo(() => {
-		return {
-			serverStates: states,
-			setServerStates: setStates,
-		};
-	}, [states]);
-
+	const updateState = useCallback((value: Partial<typeof initialValues>) => {
+		setStates((prev) => ({ ...prev, ...value }));
+	}, []);
 	return (
-		<ServerContext.Provider
-			value={{
-				serversState: serverStates,
-				setServerStates,
-			}}
+		<ServerStatesContext.Provider
+			value={{ states: memoized,  updateState }}
 		>
 			{children}
-		</ServerContext.Provider>
+		</ServerStatesContext.Provider>
 	);
 };
 
-export const useServerContext = () => useContext(ServerContext);
+export const useServerContext = () => useContext(ServerStatesContext);

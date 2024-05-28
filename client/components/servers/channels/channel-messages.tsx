@@ -1,36 +1,31 @@
-import { Dispatch, SetStateAction, useMemo, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 import ChatForm from '@/components/shared/messages/chat-form';
 import ChatItem from '@/components/shared/messages/chat-item';
-import { ServerStates } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
-import usePermissions from '@/hooks/usePermissions';
-import { useSocketContext } from '@/providers/socket-io';
+import { useSocket } from '@/providers/socket-io';
+import { useParams } from 'next/navigation';
+import { useServerContext } from '@/providers/server';
 
-export default function ChannelMessages({
-	serversState,
-	setServerStates,
-}: {
-	serversState: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-}) {
-	const { states, userId } = useSocketContext();
+export default function ChannelMessages() {
+	const params = useParams();
 	const ref = useRef<HTMLUListElement>(null);
 
-	const { isCurrentUserBanned, loading, isError, permissions } = usePermissions(
-		userId,
-		serversState?.selectedServer?.id || ''
-	);
+	const { states } = useSocket();
+	const { states: serverStates, updateState } = useServerContext();
+	const messages = states.channel_messages;
 
-	const messages = useMemo(
-		() => states.channel_messages,
-		[states.channel_messages]
-	);
+	const reloadChannelMessage = useCallback(() => {
+		states.socket?.emit('get-channel-message', {
+			channelId: params?.channel_id as string,
+			serverId: params?.id as string,
+		});
+	}, [params?.channel_id, params?.id, states.socket]);
+
+
 
 	useScroll(ref, messages);
 
-	if (loading) return 'loading...';
-	if (isError) return <p>error</p>;
 
 	return (
 		<div className='flex h-[calc(100vh-120px)] max-w-full flex-col'>
@@ -40,10 +35,12 @@ export default function ChannelMessages({
 			>
 				{messages?.map((message) => (
 					<ChatItem
-						serversState={serversState}
-						setServerStates={setServerStates}
-						isCurrentUserBanned={isCurrentUserBanned}
-						permissions={permissions}
+						setStates={updateState}
+						reloadMessages={reloadChannelMessage}
+						selectedChannel={serverStates.selectedChannel}
+						selectedMessage={serverStates.selectedMessage}
+						selectedServer={serverStates.selectedServer}
+						selectedThread={serverStates.selectedThread}
 						replyType='channel'
 						key={message.created_at}
 						messages={messages}
@@ -52,16 +49,12 @@ export default function ChannelMessages({
 				))}
 			</ul>
 
-			{!isCurrentUserBanned ? (
 				<ChatForm
+					reloadMessage={reloadChannelMessage}
 					type='channel'
-					setServerStates={setServerStates}
-					serverStates={serversState}
-					placeholder={`Message #${serversState.selectedChannel?.channel_name}`}
+					placeholder={`Message #${serverStates.selectedChannel?.channel_name}`}
 				/>
-			) : (
-				<p className='text-center text-red-600'>You are banned </p>
-			)}
+			
 		</div>
 	);
 }

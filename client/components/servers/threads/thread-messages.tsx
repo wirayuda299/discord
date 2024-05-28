@@ -1,15 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { X } from 'lucide-react';
-import {
-	Dispatch,
-	ReactNode,
-	SetStateAction,
-	memo,
-	useEffect,
-	useMemo,
-	useRef,
-} from 'react';
+import {  useSearchParams } from 'next/navigation';
+import { ReactNode, memo, useCallback, useEffect, useRef } from 'react';
 
 import { Sheet, SheetContent, SheetTrigger } from '../../ui/sheet';
 import ChatForm from '../../shared/messages/chat-form';
@@ -17,58 +9,67 @@ import ChatItem from '../../shared/messages/chat-item';
 
 import { ServerStates } from '@/providers/server';
 import useScroll from '@/hooks/useScroll';
-import { Thread } from '@/types/messages';
-import { Permission } from '@/types/server';
-import { BannedMembers } from '@/types/socket-states';
-import { useSocketContext } from '@/providers/socket-io';
+import { Message, Thread } from '@/types/messages';
+import {  Servers } from '@/types/server';
+import { useSocket } from '@/providers/socket-io';
+import { Channel } from '@/types/channels';
 
 type Props = {
-	thread: Thread;
+	thread: Thread | null;
 	children: ReactNode;
-	serversState: ServerStates;
-	setServerStates: Dispatch<SetStateAction<ServerStates>>;
-	isCurrentUserBanned: false | BannedMembers | undefined;
-	permissions: Permission | undefined;
+	selectedChannel: Channel | null;
+	selectedMessage: {
+		type: 'personal' | 'thread' | 'channel' | 'reply';
+		message: Message;
+		action: string;
+	} | null;
+	selectedThread: Thread | null;
+	selectedServer: Servers | null;
+	setStates: (value: Partial<ServerStates>) => void;
 };
 
 function ThreadMessages({
 	thread,
-	permissions,
-	isCurrentUserBanned,
-	serversState,
-	setServerStates,
+	selectedChannel,
+	selectedMessage,
+	selectedServer,
+	selectedThread,
+	setStates,
 	children,
 }: Props) {
+	const searchParams = useSearchParams();
 	const ref = useRef<HTMLUListElement>(null);
-	const { selectedChannel, selectedMessage, selectedThread } = serversState;
-	const { states, params, searchParams, reloadThreadMessages } = useSocketContext();
+
+	const { states } = useSocket();
+
+	const reloadThreadMessages = useCallback(() => {
+		if (!states.socket || !selectedServer || !thread) return;
+
+		states.socket?.emit('thread-messages', {
+			threadId: thread?.thread_id,
+			serverId: selectedServer.id,
+			channelId: selectedChannel?.channel_id,
+		});
+	}, [states.socket, selectedServer, thread, selectedChannel?.channel_id]);
 
 	useEffect(() => {
-		reloadThreadMessages(thread.thread_id)
-	}, [reloadThreadMessages, thread.thread_id])
-
-
-	const messages = useMemo(
-		() => states.thread_messages,
-		[states.thread_messages]
-	);
+		reloadThreadMessages();
+	}, [reloadThreadMessages, thread?.thread_id]);
 
 	useScroll(ref, states.thread_messages);
 
-	const path = `/server/${params?.serverId}/${params.channelId}?channel_type=${selectedChannel?.channel_type}`;
 
 	return (
 		<Sheet
 			modal={false}
 			onOpenChange={(isOpen) => {
 				if (!isOpen) {
-					setServerStates((prev) => ({
-						...prev,
-						selectedThread: null,
+					setStates({
 						selectedMessage: null,
-					}));
+						selectedThread: null,
+					});
 				} else {
-					reloadThreadMessages(thread.thread_id);
+					reloadThreadMessages();
 				}
 			}}
 		>
@@ -96,14 +97,16 @@ function ThreadMessages({
 						className='flex h-auto w-full flex-col gap-5 overflow-y-auto p-3'
 						ref={ref}
 					>
-						{messages?.map((message) => (
+						{states?.thread_messages?.map((message) => (
 							<ChatItem
-								serversState={serversState}
-								setServerStates={setServerStates}
-								isCurrentUserBanned={isCurrentUserBanned}
-								permissions={permissions}
+								selectedChannel={selectedChannel}
+								selectedMessage={selectedMessage}
+								selectedServer={selectedServer}
+								selectedThread={selectedThread}
+								reloadMessages={reloadThreadMessages}
+								setStates={setStates}
 								replyType='thread'
-								messages={messages}
+								messages={states.thread_messages}
 								msg={message}
 								key={message.message_id}
 							/>
@@ -119,28 +122,19 @@ function ThreadMessages({
 									{selectedMessage.message && selectedMessage.message.username}
 								</span>
 							</p>
-							<Link
-								href={path}
+							<button
 								className='flex size-5 items-center justify-center rounded-full bg-gray-2'
-								onClick={() => {
-									setServerStates((prev) => ({
-										...prev,
-										selectedMessage: null,
-									}));
-								}}
+								onClick={() => setStates({ selectedMessage: null })}
 							>
 								<X size={15} className='mx-auto text-gray-1' />
-							</Link>
+							</button>
 						</div>
 					)}
-					{!isCurrentUserBanned && (
 						<ChatForm
+							reloadMessage={reloadThreadMessages}
 							placeholder='Send message'
-							serverStates={serversState}
-							setServerStates={setServerStates}
 							type='thread'
 						/>
-					)}
 				</div>
 			</SheetContent>
 		</Sheet>

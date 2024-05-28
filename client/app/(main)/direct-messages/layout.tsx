@@ -18,9 +18,6 @@ export default async function DirectMessagesLayout({
 
 	const conversations = await getConversationList(user?.id ?? '');
 
-	console.log(conversations);
-	
-
 	return (
 		<div className='flex w-full md:w-auto md:items-start'>
 			<aside className='no-scrollbar hidden size-full min-h-screen min-w-[255px] max-w-[255px] gap-3  overflow-y-auto border-r-2 border-r-foreground md:block md:h-full md:min-w-[200px] md:bg-[#2b2d31]'>

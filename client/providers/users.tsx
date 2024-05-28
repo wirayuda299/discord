@@ -1,5 +1,13 @@
 'use client';
-import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import {
+	Dispatch,
+	SetStateAction,
+	createContext,
+	useContext,
+	useMemo,
+	useState,
+	type ReactNode,
+} from 'react';
 
 type User = {
 	user_id: string;
@@ -8,31 +16,28 @@ type User = {
 	created_at: string;
 };
 
-export type UserContextType = {
-	selectedUser: User | null;
-	handleSelectUser: (user: User | null) => void;
+type UserContextType = {
+	user: User | null;
+	setUser: Dispatch<SetStateAction<User | null>>;
 };
 
-const UserContext = createContext<UserContextType>({
-	selectedUser: null,
-	handleSelectUser: () => {},
-});
+const initialValues: UserContextType = {
+	user: null,
+	setUser: () => {},
+};
+
+const UserContext = createContext<UserContextType>(initialValues);
 
 export function UserContextProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 
-	const handleSelectUser = useCallback((user: User | null)=> {
-		if (user) {
-			localStorage.setItem(user.user_id, JSON.stringify(user));
-		}
-		setUser(user);
-	}, [])
+	const memoizedvalue = useMemo(() => user, [user]);
 
 	return (
-		<UserContext.Provider value={{ selectedUser: user, handleSelectUser }}>
+		<UserContext.Provider value={{ user: memoizedvalue, setUser }}>
 			{children}
 		</UserContext.Provider>
 	);
 }
 
-export const useUserContext = (): UserContextType => useContext(UserContext);
+export const useUser = () => useContext(UserContext);
