@@ -1,25 +1,19 @@
 import { Conversation } from '@/types/messages';
-import { prepareHeaders } from './cookies';
+import { ApiRequest } from '@/utils/api';
 
-const SERVER_URL = process.env.SERVER_URL;
+const api = new ApiRequest();
 
 export async function getConversationList(
-	userId: string
+  userId: string,
 ): Promise<Conversation[]> {
-	try {
-		const res = await fetch(
-			`${SERVER_URL}/conversations/list?userId=${userId}`,
-			{
-				method: 'GET',
-				credentials: 'include',
-				headers: await prepareHeaders(),
-				cache: 'no-store',
-			}
-		);
+  try {
+    if (!userId) return [];
 
-		const conversations = await res.json();
-		return conversations.data;
-	} catch (error) {
-		throw error;
-	}
+    const result = await api.getData<Conversation[]>(
+      `/conversations/list?userId=${userId}`,
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
 }

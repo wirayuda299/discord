@@ -1,25 +1,44 @@
-import { prepareHeaders } from "./cookies";
+import { ApiRequest } from '@/utils/api';
 
-type Friend = {
+const api = new ApiRequest();
+
+export type Friend = {
+  conversation: {
+    conversationCreatedAt: string;
+    conversationId: string;
+    friendCreatedAt: string;
+    friendId: string;
+    friendImage: string;
+    friendUsername: string;
+    id: string;
+  };
+  id: string;
+  created_at: string;
   user_id: string;
   username: string;
   image: string;
-  created_at: string;
 };
-
 
 export async function getFriendList(userId: string): Promise<Friend[]> {
   try {
-    const res = await fetch(
-      `${process.env.SERVER_URL}/friends/list?userId=${userId}`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: await prepareHeaders(),
-      },
+    const res = await api.getData<Friend[]>(`/friends/list?userId=${userId}`);
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getFriend(
+  friendId: string,
+  userId: string,
+): Promise<Friend | undefined> {
+  try {
+    if (!userId) return;
+
+    const res = await api.getData<Friend>(
+      `/friends?friendId=${friendId}&userId=${userId}`,
     );
-    const list = await res.json();
-    return list.data;
+    return res;
   } catch (error) {
     throw error;
   }

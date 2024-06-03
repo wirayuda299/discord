@@ -1,15 +1,15 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createChannelSchema = z.object({
-  channelType: z.enum(["text", "audio"]),
+  channelType: z.enum(['text', 'audio']),
   name: z.string().min(4),
 });
 
 export const createServerSchema = z.object({
   name: z
     .string()
-    .min(4, "Min character is 4")
-    .max(30, "Max character for server name is 30"),
+    .min(4, 'Min character is 4')
+    .max(30, 'Max character for server name is 30'),
   logo: z.string().min(10),
 });
 
@@ -20,8 +20,6 @@ export const updateServerSchema = z.object({
   showBanner: z.boolean(),
   banner: z.string().optional().nullable(),
 });
-
-
 
 export type CreateChannelSchemaType = z.infer<typeof createChannelSchema>;
 export type CreateServerSchemaType = z.infer<typeof createServerSchema>;

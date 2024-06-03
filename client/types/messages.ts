@@ -1,4 +1,4 @@
-import { Role } from "@/helper/roles";
+import { Role } from '@/helper/roles';
 
 export type Thread = {
   username: string;
@@ -37,7 +37,7 @@ export interface Message {
   }[];
   reply_id?: string;
   thread_name?: string;
-  role:Role|undefined
+  role: Role | undefined;
 }
 
 export interface MessageData {
@@ -55,12 +55,12 @@ export interface MessageData {
   messageId?: string;
 }
 
-export interface Conversation {
-  created_at: string;
-  conversation_id: string;
-  message_id: string;
-  recipient_id: string;
-  sender_id: string;
-  username: string;
-  image: string;
-}
+export type Conversation = {
+  conversationCreatedAt: string;
+  conversationId: string;
+  friendId: string;
+  id: string;
+  friendUsername: string;
+  friendImage: string;
+  friendCreatedAt: string;
+};

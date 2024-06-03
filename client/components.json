@@ -12,6 +12,6 @@
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils/mergeStyle"
+    "utils": "@/lib/utils"
   }
 }

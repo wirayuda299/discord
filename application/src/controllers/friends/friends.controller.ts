@@ -5,6 +5,10 @@ import { FriendsService } from '../../services/friends/friends.service';
 export class FriendsController {
   constructor(private friendService: FriendsService) {}
 
+  @Get()
+  getFriendById(@Query('userId') userId: string) {
+    return this.friendService.getFriend(userId);
+  }
   @Get('/list')
   getFriendList(@Query('userId') id: string) {
     return this.friendService.getFriends(id);

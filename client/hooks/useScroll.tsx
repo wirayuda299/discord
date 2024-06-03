@@ -1,4 +1,4 @@
-import { MutableRefObject, useCallback, useEffect } from "react";
+import { MutableRefObject, useCallback, useEffect } from 'react';
 
 export default function useScroll<T extends Element | null, K>(
   ref: MutableRefObject<T>,
@@ -7,12 +7,12 @@ export default function useScroll<T extends Element | null, K>(
   const scrollToTop = useCallback(() => {
     if (ref.current) {
       ref.current.scroll({
-        behavior: "smooth",
+        behavior: 'smooth',
         left: 0,
         top: ref.current.scrollHeight,
       });
     }
-  }, [ref])
+  }, [ref]);
   useEffect(() => {
     scrollToTop();
   }, [messages.length, scrollToTop]);

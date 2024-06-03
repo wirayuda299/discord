@@ -180,27 +180,6 @@ export class ServersService {
     }
   }
 
-  private groupChannel(channels: any[]) {
-    const grouped = channels.reduce((acc, channel) => {
-      const existingCategory = acc.find(
-        (cat) => cat.channel_type === channel.channel_type
-      );
-      if (existingCategory) {
-        existingCategory.channels.push(channel);
-      } else {
-        acc.push({
-          ...channel,
-          channels: [channel],
-        });
-      }
-      return acc;
-    }, []);
-
-    return grouped.sort((a, b) =>
-      a.channel_type === 'text' ? -1 : b.channel_type === 'text' ? 1 : 0
-    );
-  }
-
   async getServerById(id: string) {
     try {
       const server = await this.databaseService.pool.query(
@@ -213,39 +192,18 @@ export class ServersService {
           description: `Server with ID : ${id} not found`,
         });
       }
-      const channelsQuery = await this.databaseService.pool.query(
-        `SELECT 
-          c.id AS channel_id,
-          c.name AS channel_name,
-          c.type AS channel_type,
-          cat.id AS category_id,
-          cat.name AS category_name
-          FROM channels c
-          JOIN channels_category cc ON c.id = cc.channel_id
-          JOIN categories cat ON cc.category_id = cat.id
-          WHERE c.server_id = $1
-          GROUP BY cat.id, c.id
-          order by cat.name asc`,
-        [id]
-      );
 
-      const channels = this.groupChannel(channelsQuery.rows);
       const serverSettings = await this.databaseService.pool.query(
-        `select * from server_settings where server_id=$1`,
+        `select * from server_settings where server_id = $1`,
         [server.rows[0].id]
       );
       server.rows[0].settings = serverSettings.rows[0];
 
       return {
-        data: {
-          channels: channels,
-          server: server.rows,
-        },
+        data: server.rows[0],
         error: false,
       };
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }

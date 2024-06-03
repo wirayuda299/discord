@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 
-import { ApiRequest } from "../utils/api";
+import { ApiRequest } from '../utils/api';
 
 const api = new ApiRequest();
 
@@ -13,32 +13,40 @@ export async function createServer(
   userId: string,
 ) {
   try {
-    await api.post("/servers/create", {
-      name,
-      logo,
-      ownerId: userId,
-      logoAssetId,
-    });
-    revalidatePath("/");
+    await api.update(
+      '/servers/create',
+      {
+        name,
+        logo,
+        ownerId: userId,
+        logoAssetId,
+      },
+      'POST',
+    );
+    revalidatePath('/');
   } catch (error) {
     throw error;
   }
 }
 
 export async function inviteUser(
-	serverId: string,
-	userId: string,
-	inviteCode: string,
+  serverId: string,
+  userId: string,
+  inviteCode: string,
 ) {
-	try {
-		await api.post('/servers/invite-user', {
-			inviteCode,
-			userId,
-			serverId,
-    });
-	} catch (error) {
-		console.log(error);
+  try {
+    await api.update(
+      '/servers/invite-user',
+      {
+        inviteCode,
+        userId,
+        serverId,
+      },
+      'POST',
+    );
+  } catch (error) {
+    console.log(error);
 
-		throw error;
-	}
+    throw error;
+  }
 }

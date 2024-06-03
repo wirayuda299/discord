@@ -93,6 +93,8 @@ export class ServersController {
       showProgressBar,
     } = req.body;
 
+    console.log(req.body);
+
     return this.serverService.updateServer(
       serverId,
       currentSessionId,

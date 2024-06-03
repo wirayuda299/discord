@@ -1,5 +1,5 @@
-import GeneralLoader from "@/components/shared/loader/general";
+import PulseLoader from '@/components/shared/pulse-loader';
 
 export default function Loader() {
-	return <GeneralLoader/>
+  return <PulseLoader />;
 }

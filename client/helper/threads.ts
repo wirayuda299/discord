@@ -1,24 +1,25 @@
-import { Thread } from "@/types/messages";
-import { prepareHeaders } from "./cookies";
+import { ApiRequest } from '@/utils/api';
 
-const serverUrl = process.env.SERVER_URL;
+const api = new ApiRequest();
+export type AllThread = {
+  thread_id: string;
+  message_id: string;
+  author: string;
+  thread_name: string;
+  username: string;
+  avatar: string;
+  channel_id: string;
+  created_at: string;
+};
 
 export async function getAllThreads(
   channelId: string,
   serverId: string,
-): Promise<Thread[]> {
-  
+): Promise<AllThread[]> {
   try {
-    const res = await fetch(
-      `${serverUrl}/threads?channelId=${channelId}&serverId=${serverId}`,
-      {
-        headers: await prepareHeaders(),
-        method: "GET",
-        credentials: "include",
-      },
+    return await api.getData(
+      `/threads?channelId=${channelId}&serverId=${serverId}`,
     );
-    const threads = await res.json();
-    return threads.data;
   } catch (error) {
     throw error;
   }

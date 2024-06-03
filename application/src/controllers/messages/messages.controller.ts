@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { MessagesService } from 'src/services/messages/messages.service';
 
@@ -15,9 +24,26 @@ export class MessagesController {
     return this.messageService.pinMessage(msgId, channelId, author);
   }
 
-  @Get('pinned-messages')
-  getPinnedMessages(@Query('channelId') id: string) {
-    return this.messageService.getPinnedMessages(id);
+  @Post('/pin-personal-message')
+  pinPersonalMessage(
+    @Body('messageId') msgId: string,
+    @Body('conversationId') id: string,
+    @Body('pinnedBy') author: string
+  ) {
+    return this.messageService.pinPersonalMessage(msgId, author, id);
+  }
+
+  @Get('/pinned-messages')
+  getPinnedMessages(
+    @Query('channelId') id: string,
+    @Query('serverId') serverId: string
+  ) {
+    return this.messageService.getPinnedMessages(id, serverId);
+  }
+
+  @Get('/personal-pinned-messages')
+  getPersonalPinnedMessages(@Query('conversationId') id: string) {
+    return this.messageService.getPersonalPinnedMessages(id);
   }
 
   @Get('message-channel')
@@ -37,5 +63,22 @@ export class MessagesController {
       messageId,
       content
     );
+  }
+
+  @Delete('/delete-personal-pinned-message')
+  deletePersonalPinnedMessage(@Body('messageId') id: string) {
+    return this.messageService.deletePersonalPinnedMessage(id);
+  }
+
+  @Delete('/delete-channel-pinned-message')
+  deleteChannelPinnedMessage(
+    @Body('messageId') id: string,
+    @Body('channelId') channelId: string
+  ) {
+    return this.messageService.deleteChannelPinnedMessage(id, channelId);
+  }
+  @Delete('/delete')
+  deleteMessage(@Body('messageId') id: string) {
+    return this.messageService.deleteMessage(id);
   }
 }

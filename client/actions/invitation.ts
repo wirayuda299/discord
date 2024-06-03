@@ -1,19 +1,19 @@
-"use server";
+'use server';
 
-import { ApiRequest } from "@/utils/api";
+import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
 
-export async function acceptinvitation(friendId: string, userId:string) {
+export async function acceptinvitation(friendId: string, userId: string) {
   try {
-    await api.post("/invitation/accept", { userId, friendId });
+    await api.update('/invitation/accept', { userId, friendId }, 'POST');
   } catch (error) {
     throw error;
   }
 }
 export async function cancelInvitation(userId: string) {
   try {
-    await api.post("/invitation/cancel", { userId });
+    await api.update('/invitation/cancel', { userId }, 'POST');
   } catch (error) {
     throw error;
   }

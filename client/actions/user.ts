@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { ApiRequest } from "../utils/api";
+import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
 const serverUrl = process.env.SERVER_URL;
@@ -13,9 +13,9 @@ export async function createUser(
 ) {
   try {
     await fetch(`${serverUrl}/user/create`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "content-type": "application/json",
+        'content-type': 'application/json',
       },
       body: JSON.stringify({
         id,
@@ -33,10 +33,14 @@ export async function createUser(
 
 export async function inviteUser(userToInvite: string, id: string) {
   try {
-    return await api.post(`/invitation/invite-user`, {
-      userToInvite,
-      userId: id,
-    });
+    return await api.update(
+      `/invitation/invite-user`,
+      {
+        userToInvite,
+        userId: id,
+      },
+      'POST',
+    );
   } catch (error) {
     throw error;
   }

@@ -10,6 +10,27 @@ import { DatabaseService } from '../database/database.service';
 export class ChannelsService {
   constructor(private db: DatabaseService) {}
 
+  private groupChannel(channels: any[]) {
+    const grouped = channels.reduce((acc, channel) => {
+      const existingCategory = acc.find(
+        (cat) => cat.channel_type === channel.channel_type
+      );
+      if (existingCategory) {
+        existingCategory.channels.push(channel);
+      } else {
+        acc.push({
+          ...channel,
+          channels: [channel],
+        });
+      }
+      return acc;
+    }, []);
+
+    return grouped.sort((a, b) =>
+      a.channel_type === 'text' ? -1 : b.channel_type === 'text' ? 1 : 0
+    );
+  }
+
   async isAllowedToCreateChannel(serverId: string, userId: string) {
     const isallowed = await this.db.pool.query(
       `SELECT p.manage_channel
@@ -100,6 +121,36 @@ export class ChannelsService {
 
       return {
         message: 'Channel created',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllChannelsInServer(serverId: string) {
+    try {
+      const channelsQuery = await this.db.pool.query(
+        `SELECT 
+          c.id AS channel_id,
+          c.name AS channel_name,
+          c.type AS channel_type,
+          cat.id AS category_id,
+          cat.name AS category_name
+          FROM channels c
+          JOIN channels_category cc ON c.id = cc.channel_id
+          JOIN categories cat ON cc.category_id = cat.id
+          WHERE c.server_id = $1
+          GROUP BY cat.id, c.id
+          order by cat.name asc`,
+        [serverId]
+      );
+      console.log(channelsQuery.rows);
+
+      const categories = this.groupChannel(channelsQuery.rows);
+
+      return {
+        data: categories,
         error: false,
       };
     } catch (error) {

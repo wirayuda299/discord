@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Request } from 'express';
+
 import { ThreadsService } from 'src/services/threads/threads.service';
 
 @Controller('api/v1/threads')
@@ -14,23 +16,20 @@ export class ThreadsController {
   }
 
   @Post('/create')
-  createThread(
-    @Body('messageId') msgId: string,
-    @Body('userId') userId: string,
-    @Body('name') threadName: string,
-    @Body('image') imageUrl: string,
-    @Body('message') message: string,
-    @Body('imageAssetId') imageAssetId: string,
-    @Body('channelId') channelId: string
-  ) {
+  createThread(@Req() req: Request) {
+    const { imageAssetId, message, image, name, userId, messageId, channelId } =
+      req.body;
+
+    console.log(req.body);
+
     return this.threadService.createThread(
-      msgId,
+      messageId,
       userId,
-      imageUrl,
+      image,
       imageAssetId,
       message,
       channelId,
-      threadName
+      name
     );
   }
 }

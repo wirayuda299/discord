@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import { ApiRequest } from "@/utils/api";
+import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
 
@@ -19,21 +19,25 @@ export async function createThread(props: Props) {
     const {
       channelId,
       imageAssetId,
-      imageUrl = "",
-      message = "",
+      imageUrl = '',
+      message = '',
       msgId,
       threadName,
       userId,
     } = props;
-     await api.post("/threads/create", {
-      imageAssetId,
-      message,
-      image: imageUrl,
-      name: threadName,
-      userId,
-      messageId: msgId,
-      channelId,
-     });
+    await api.update(
+      '/threads/create',
+      {
+        imageAssetId,
+        message,
+        image: imageUrl,
+        name: threadName,
+        userId,
+        messageId: msgId,
+        channelId,
+      },
+      'POST',
+    );
   } catch (error) {
     throw error;
   }
@@ -52,20 +56,24 @@ export async function replyThread(props: ReplyProps) {
   try {
     const {
       content,
-      imageAssetId = "",
-      imageUrl = "",
+      imageAssetId = '',
+      imageUrl = '',
       messageId,
       userId,
       threadId,
     } = props;
-    await api.post("/threads/reply", {
-      messageId,
-      threadId,
-      content,
-      userId,
-      imageUrl,
-      imageAssetId,
-    });
+    await api.update(
+      '/threads/reply',
+      {
+        messageId,
+        threadId,
+        content,
+        userId,
+        imageUrl,
+        imageAssetId,
+      },
+      'POST',
+    );
   } catch (error) {
     throw error;
   }

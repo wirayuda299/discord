@@ -48,4 +48,16 @@ export class ReactionsService {
       throw error;
     }
   }
+
+  async getReactions(messageId: string) {
+    try {
+      const reactions = await this.db.pool.query(
+        `SELECT * FROM reactions WHERE message_id = $1`,
+        [messageId]
+      );
+      return reactions.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

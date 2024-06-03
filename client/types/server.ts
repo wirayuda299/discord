@@ -49,36 +49,35 @@ interface UserRole {
   user_id: string;
 }
 export type Member = {
-	id: string;
-	server_id: string;
-	user_id: string;
-	role: UserRole;
-	username: string;
-	avatar_asset_id: string | null;
-	bio: string | null;
+  id: string;
+  server_id: string;
+  user_id: string;
+  role: UserRole;
+  username: string;
+  avatar_asset_id: string | null;
+  bio: string | null;
   avatar: string;
-  serverProfile:ServerProfile
+  serverProfile: ServerProfile;
 };
 
 export interface MemberWithRole extends Member {
-	role_id: string;
-	permission_id: string;
-	name: string;
-	role_color: string;
-	icon: string;
-	icon_asset_id: string;
+  role_id: string;
+  permission_id: string;
+  name: string;
+  role_color: string;
+  icon: string;
+  icon_asset_id: string;
 }
 
-
 export type Permission = {
-	role_id: string;
-	permission_id: string;
-	id: string;
-	manage_channel: boolean;
-	manage_role: boolean;
-	kick_member: boolean;
-	ban_member: boolean;
-	attach_file: boolean;
-	manage_thread: boolean;
-	manage_message: boolean;
+  role_id: string;
+  permission_id: string;
+  id: string;
+  manage_channel: boolean;
+  manage_role: boolean;
+  kick_member: boolean;
+  ban_member: boolean;
+  attach_file: boolean;
+  manage_thread: boolean;
+  manage_message: boolean;
 };

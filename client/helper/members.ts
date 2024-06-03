@@ -1,37 +1,35 @@
-import { BannedMembers } from "@/types/socket-states";
-import { prepareHeaders } from "./cookies";
+import { BannedMembers } from '@/types/socket-states';
+import { prepareHeaders } from './cookies';
+import { ApiRequest } from '@/utils/api';
 
-export async function getBannedMembers(serverId:string):Promise<BannedMembers[]> {
+const api = new ApiRequest();
+
+export async function getBannedMembers(
+  serverId: string,
+): Promise<BannedMembers[]> {
   try {
-    const res = await fetch(process.env.SERVER_URL + `/members/banned?serverId=${serverId}`, {
-      method: 'GET',
-      headers: await prepareHeaders(),
-      credentials:'include'
-    });
-    const bannedMembers = await res.json()
-    return bannedMembers.data
+    const bannedMembers = await api.getData<BannedMembers[]>(
+      `/members/banned?serverId=${serverId}`,
+    );
+    return bannedMembers;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
-export async function revokeMember(serverId:string, memberId:string) {
+export async function revokeMember(serverId: string, memberId: string) {
   try {
-      const res = await fetch(
-				process.env.SERVER_URL + '/members/revoke',
-				{
-					method: 'PATCH',
-					headers: await prepareHeaders(),
-          credentials: 'include',
-          body: JSON.stringify({
-            serverId,
-            memberId
-          })
-				}
+    const revokeMember = await api.update(
+      '/members/revoke',
+      {
+        serverId,
+        memberId,
+      },
+      'PATCH',
     );
-    const result = await res.json()
-    return result
+
+    return revokeMember;
   } catch (error) {
-    throw error
+    throw error;
   }
 }

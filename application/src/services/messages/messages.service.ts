@@ -1,79 +1,23 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
+
 import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from '../../common/utils/groupMessageByEmoji';
 import { RolesService } from '../roles/roles.service';
-
-export type Permission = {
-  role_id: string;
-  permission_id: string;
-  id: string;
-  manage_channel: boolean;
-  manage_role: boolean;
-  kick_member: boolean;
-  ban_member: boolean;
-  attach_file: boolean;
-  manage_thread: boolean;
-  manage_message: boolean;
-};
-export interface Role {
-  id: string;
-  name: string;
-  serverId: string;
-  role_color: string;
-  icon: string;
-  icon_asset_id: string;
-  members: any[];
-  permissions: Permission;
-}
-
-export type Thread = {
-  username: string;
-  author_id: string;
-  thread_name: string;
-  thread_id: string;
-  channel_id: string;
-  message: string;
-  is_read: boolean;
-  author: string;
-  media_image: string;
-  message_type: string;
-  media_image_asset_id: string;
-  created_at: string;
-  update_at: string;
-};
-
-export interface Message {
-  message_id: string;
-  message: string;
-  is_read: boolean;
-  author: string;
-  media_image: string;
-  message_type: string;
-  media_image_asset_id: string;
-  created_at: string;
-  update_at: string;
-  username: string;
-  shouldAddLabel: boolean;
-  parent_message_id: string;
-  threads: Thread[];
-  reactions: {
-    emoji: string;
-    unified_emoji: string;
-    count: number;
-  }[];
-  reply_id?: string;
-  thread_name?: string;
-  role: Role | undefined;
-}
-
-type Props = Message & { shouldAddLabel: boolean };
+import { Message } from 'src/types';
+import { ReactionsService } from '../reactions/reactions.service';
 
 @Injectable()
 export class MessagesService {
   constructor(
     private db: DatabaseService,
-    private roleService: RolesService
+    private roleService: RolesService,
+    private reactionService: ReactionsService
   ) {}
 
   addLabelsToMessages(messages: Message[]) {
@@ -91,23 +35,11 @@ export class MessagesService {
     });
   }
 
-  async getReactions(messageId: string) {
-    try {
-      const reactions = await this.db.pool.query(
-        `SELECT * FROM reactions WHERE message_id = $1`,
-        [messageId]
-      );
-      return reactions.rows;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async getReplies(
     parentMessageId: string,
     channelId: string,
     serverId: string
-  ): Promise<Props[]> {
+  ): Promise<Message[]> {
     try {
       const replies = await this.db.pool.query(
         `SELECT
@@ -132,10 +64,12 @@ export class MessagesService {
         [parentMessageId, serverId]
       );
 
-      const allReplies: Props[] = [];
+      const allReplies: Message[] = [];
 
       for await (const reply of replies.rows) {
-        const reactions = await this.getReactions(reply.message_id);
+        const reactions = await this.reactionService.getReactions(
+          reply.message_id
+        );
         reply.reactions = reactions;
         const role = await this.roleService.getCurrentUserRole(
           reply.user_id,
@@ -166,7 +100,9 @@ export class MessagesService {
         );
 
         for (const subReply of subReplies) {
-          const reactions = await this.getReactions(subReply.message_id);
+          const reactions = await await this.reactionService.getReactions(
+            subReply.message_id
+          );
 
           subReply.reactions = reactions;
         }
@@ -186,7 +122,6 @@ export class MessagesService {
       content: string;
       is_read: boolean;
       user_id: string;
-      username: string;
       channelId: string;
       imageUrl: string;
       imageAssetId: string;
@@ -323,7 +258,9 @@ export class MessagesService {
       );
 
       for await (const message of messages.rows) {
-        const reactions = await this.getReactions(message.message_id);
+        const reactions = await await this.reactionService.getReactions(
+          message.message_id
+        );
         const threads = await this.getThreadByMessage(
           message.message_id,
           serverId
@@ -369,8 +306,6 @@ export class MessagesService {
         [channel_id]
       );
 
-      console.log(channelExists.rows);
-
       const messageExists = await this.db.pool.query(
         `SELECT EXISTS(SELECT 1 FROM messages WHERE id = $1)`,
         [messageId]
@@ -409,20 +344,75 @@ export class MessagesService {
     }
   }
 
-  async getPinnedMessages(channelId: string) {
+  async deleteChannelPinnedMessage(messageId: string, channelId: string) {
+    try {
+      await this.db.pool.query(
+        `
+      delete from channel_pinned_messages as cpm
+      where cpm.message_id = $1 and cpm.channel_id = $2
+      `,
+        [messageId, channelId]
+      );
+      return {
+        message: 'Pinned message deleted',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPinnedMessages(channelId: string, serverId: string) {
     try {
       const pinnedMessages = await this.db.pool.query(
-        `select * from channel_pinned_messages as pm
+        `select
+        pm.message_id as message_id,
+        pm.channel_id as channel_id, 
+        m."content" as message, 
+        m.image_url as image,
+        sp.user_id as pinned_by,
+        sp.username as username,
+        sp.avatar as avatar,
+        pm.created_at as created_at
+        from channel_pinned_messages as pm
           join messages as m on m.id = pm.message_id
-          join users on users.id = m.user_id 
-          where pm.channel_id = $1`,
-        [channelId]
+          join server_profile as sp on sp.user_id = pm.pinned_by and sp.server_id = $1
+          where pm.channel_id = $2`,
+        [serverId, channelId]
       );
       return {
         data: pinnedMessages.rows,
         error: false,
       };
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPersonalPinnedMessages(conversationId: string) {
+    try {
+      const pinnedMessages = await this.db.pool.query(
+        `select
+          ppm.message_id as message_id, 
+          ppm.pinned_by as pinned_by,
+          m."content" as message,
+          m.image_url as image,
+          u.image as avatar,
+          u.username as username,
+          ppm.created_at as created_at 
+        from personal_pinned_messages as ppm
+        join messages as m on m.id = ppm.message_id
+        join users as u on ppm.pinned_by = u.id
+        where ppm.conversation_id = $1 `,
+        [conversationId]
+      );
+      return {
+        data: pinnedMessages.rows,
+        error: false,
+      };
+    } catch (error) {
+      console.log(error);
+
       throw error;
     }
   }
@@ -524,7 +514,11 @@ export class MessagesService {
     }
   }
 
-  async fetchReplies(messageId: string, messages: any[]) {
+  async fetchReplies(
+    messageId: string,
+    messages: any[],
+    conversationId: string
+  ) {
     const replies = await this.db.pool.query(
       `SELECT
           mr.parent_message_id as parent_message_id,
@@ -549,10 +543,13 @@ export class MessagesService {
     );
 
     for await (const reply of replies.rows) {
-      const replyReactions = await this.getReactions(reply.message_id);
+      reply.conversation_id = conversationId;
+      const replyReactions = await await this.reactionService.getReactions(
+        reply.message_id
+      );
       reply.reactions = replyReactions;
       messages.push(reply);
-      await this.fetchReplies(reply.message_id, messages);
+      await this.fetchReplies(reply.message_id, messages, conversationId);
     }
   }
 
@@ -564,7 +561,8 @@ export class MessagesService {
       const messages = [];
 
       const baseMessages = await this.db.pool.query(
-        `SELECT 
+        `SELECT
+        pm.conversation_id as conversation_id,
         m.content AS message,
         m.is_read AS is_read,
         m.user_id AS author,
@@ -574,7 +572,6 @@ export class MessagesService {
         m.image_asset_id AS media_image_asset_id,
         m.created_at AS created_at,
         m.updated_at AS update_at,
-        pm.conversation_id AS conversationId,
         u.username AS username
         FROM personal_messages AS pm
         JOIN messages AS m ON m.id = pm.message_id
@@ -585,10 +582,16 @@ export class MessagesService {
       );
 
       for await (const message of baseMessages.rows) {
-        const reactions = await this.getReactions(message.message_id);
+        const reactions = await await this.reactionService.getReactions(
+          message.message_id
+        );
         message.reactions = reactions;
         messages.push(message);
-        await this.fetchReplies(message.message_id, messages);
+        await this.fetchReplies(
+          message.message_id,
+          messages,
+          message.conversation_id
+        );
       }
 
       messages.sort(
@@ -599,6 +602,78 @@ export class MessagesService {
       const groupedMessages = groupReactionsByEmoji(messages);
       const allMessages = this.addLabelsToMessages(groupedMessages);
       return allMessages;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async pinPersonalMessage(
+    messageId: string,
+    pinnedBy: string,
+    conversationId: string
+  ) {
+    try {
+      const message = await this.db.pool.query(
+        `select * from personal_pinned_messages as ppm
+        where message_id = $1`,
+        [messageId]
+      );
+      if (message.rows.length >= 1) {
+        throw new HttpException(
+          'Message already pinned',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      await this.db.pool.query(
+        `
+      insert into personal_pinned_messages(message_id, pinned_by, conversation_id)
+      values($1, $2, $3)
+      `,
+        [messageId, pinnedBy, conversationId]
+      );
+
+      return {
+        message: 'Message pinned',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deletePersonalPinnedMessage(messageId: string) {
+    try {
+      await this.db.pool.query(
+        `
+    delete from personal_pinned_messages as ppr
+    where ppr.message_id = $1
+    `,
+        [messageId]
+      );
+
+      return {
+        message: 'Pinned message deleted',
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteMessage(id: string) {
+    try {
+      const foundMessage = await this.db.pool.query(
+        `select * from messages where id = $1`,
+        [id]
+      );
+      if (foundMessage.rows.length < 1) {
+        throw new NotFoundException('Message not found');
+      }
+      await this.db.pool.query(`delete from messages where id = $1`, [id]);
+      return {
+        messages: 'Message deleted',
+        error: false,
+      };
     } catch (error) {
       throw error;
     }

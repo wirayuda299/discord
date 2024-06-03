@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, useCallback, useState } from 'react';
 import type {
   FieldValues,
   Path,
   PathValue,
   UseFormReturn,
-} from "react-hook-form";
+} from 'react-hook-form';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 export default function useUploadFile<T extends FieldValues>(
   form: UseFormReturn<T>,
@@ -52,7 +52,7 @@ export default function useUploadFile<T extends FieldValues>(
       setIsChecking((prev) => ({ ...prev, [field]: true }));
 
       try {
-        if (field !== "audio") {
+        if (field !== 'audio') {
           handleFileChange(field, file);
 
           const reader = new FileReader();
@@ -69,7 +69,7 @@ export default function useUploadFile<T extends FieldValues>(
         if (error instanceof Error) {
           toast.error(error.message);
         } else {
-          toast.error("Something went wrong while uploading image");
+          toast.error('Something went wrong while uploading image');
         }
       } finally {
         setIsChecking((prev) => ({ ...prev, [field]: false }));

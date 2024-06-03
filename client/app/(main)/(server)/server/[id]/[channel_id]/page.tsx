@@ -1,44 +1,26 @@
-import { currentUser } from '@clerk/nextjs';
+import PulseLoader from '@/components/shared/pulse-loader';
 import dynamic from 'next/dynamic';
-import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 
-import { isMemberOrAdmin } from '@/helper/server';
-
-const VideoCall = dynamic(
-	() => import('@/components/servers/channels/video-call')
-);
-const SelectedChannel = dynamic(
-	() => import('@/components/servers/channels/selected-channel')
+const ChannelsDetail = dynamic(
+  () => import('@/components/servers/channels/channel-detail'),
 );
 
 type Props = {
-	params: {
-		id: string;
-		channel_id: string;
-	};
-	searchParams: { channel_type: string };
+  params: {
+    id: string;
+    channel_id: string;
+  };
+  searchParams: { channel_type: string; channel_name: string };
 };
-
-export default async function ChannelId({ searchParams, params }: Props) {
-	const user = await currentUser();
-
-	if (!user || user === null) return null;
-
-	const isMemberOrAuthor = await isMemberOrAdmin(user.id, params.id);
-
-	if (!isMemberOrAuthor.isAuthor && !isMemberOrAuthor.isMember) {
-		redirect('/direct-messages');
-	}
-
-	if (searchParams.channel_type === 'text') {
-		return (
-			<SelectedChannel
-				channelId={params.channel_id}
-				serverId={params.id}
-			/>
-		);
-	}
-	if (searchParams.channel_type === 'audio') {
-		return <VideoCall room={params.channel_id} serverId={params.id} />;
-	}
+export default function ChannelId({ searchParams, params }: Props) {
+  return (
+    <Suspense key={params.channel_id} fallback={<PulseLoader />}>
+      <ChannelsDetail
+        serverId={params.id}
+        channelName={searchParams.channel_name}
+        channelId={params.channel_id}
+      />
+    </Suspense>
+  );
 }

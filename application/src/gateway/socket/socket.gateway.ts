@@ -14,7 +14,6 @@ type PayloadTypes = {
   content: string;
   is_read: boolean;
   user_id: string;
-  username: string;
   channelId: string;
   serverId: string;
   imageUrl: string;
@@ -24,7 +23,6 @@ type PayloadTypes = {
   parentMessageId: string;
   threadId: string;
   recipientId: string;
-  isNew: boolean;
   conversationId: string;
 };
 
@@ -100,8 +98,6 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
-    console.log(payload);
-
     switch (payload.type) {
       case 'channel':
         await this.messagesService.sendMessage(payload);
@@ -117,23 +113,19 @@ export class SocketGateway implements OnModuleInit {
         await this.handleReplyMessage(payload);
         break;
       case 'thread':
-        process.nextTick(async () => {
-          await this.threadsService.sendThreadMessage(
-            payload.content,
-            payload.user_id,
-            payload.imageUrl,
-            payload.imageAssetId,
-            payload.threadId
-          );
-        });
+        await this.threadsService.sendThreadMessage(
+          payload.content,
+          payload.user_id,
+          payload.imageUrl,
+          payload.imageAssetId,
+          payload.threadId
+        );
 
         const threadMessages = await this.threadsService.getThreadMessage(
           payload.threadId,
           payload.serverId
         );
-        process.nextTick(() => {
-          this.server.emit('set-thread-messages', threadMessages);
-        });
+        this.server.emit('set-thread-messages', threadMessages);
         break;
       case 'personal':
         await this.messagesService.sendPersonalMessage(
@@ -180,17 +172,16 @@ export class SocketGateway implements OnModuleInit {
     payload: {
       threadId: string;
       serverId: string;
-      channelId: string;
     }
   ) {
+    console.log({ payload });
+
     try {
       const messages = await this.threadsService.getThreadMessage(
         payload.threadId,
         payload.serverId
       );
-      process.nextTick(() => {
-        this.server.emit('set-thread-messages', messages);
-      });
+      this.server.emit('set-thread-messages', messages);
     } catch (error) {
       this.logger.error('Error getting thread messages', error);
     }

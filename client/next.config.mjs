@@ -9,38 +9,19 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "gph.is",
-        pathname: "/*",
-        port: "",
-        protocol: "https",
+        hostname: 'res.cloudinary.com',
+        pathname: '/**/*',
+        port: '',
+        protocol: 'https',
       },
       {
-        hostname: "res.cloudinary.com",
-        pathname: "/**/*",
-        port: "",
-        protocol: "https",
-      },
-      {
-        hostname: "img.clerk.com",
-        pathname: "/*",
-        port: "",
-        protocol: "https",
-      },
-      {
-        hostname: "**.giphy.com",
-        pathname: "/**/*",
-        port: "",
-        protocol: "https",
-      },
-      {
-        hostname: "media.tenor.com",
-        pathname: "/**/*",
-        port: "",
-        protocol: "https",
+        hostname: 'img.clerk.com',
+        pathname: '/*',
+        port: '',
+        protocol: 'https',
       },
     ],
   },
- 
 };
 
-export default nextConfig
+export default nextConfig;

@@ -1,30 +1,37 @@
-import Image from "next/image";
+import Image from 'next/image';
+import type { ClassValue } from 'clsx';
 
-import { cn } from "@/lib/utils/mergeStyle";
+import { cn } from '@/lib/utils';
 
-export default function SearchForm({ styles }: { styles?: string }) {
+export default function SearchForm({
+  styles,
+  placeholder,
+}: {
+  styles?: ClassValue;
+  placeholder?: string;
+}) {
   return (
-    <form className="w-full">
+    <form className='w-full'>
       <label
-        htmlFor="search"
+        htmlFor='search'
         className={cn(
-          "flex max-w-40 items-center rounded bg-foreground px-2 py-0.5",
+          'flex max-w-40 items-center rounded bg-background px-2 py-0.5',
           styles,
         )}
       >
         <input
-          type="search"
-          id="search"
-          autoComplete="off"
-          className="w-full bg-transparent text-gray-2 placeholder:text-sm focus-visible:outline-none"
-          placeholder="Search"
+          type='search'
+          id='search'
+          autoComplete='off'
+          className='w-full bg-transparent text-gray-2 placeholder:text-sm focus-visible:outline-none'
+          placeholder={placeholder || 'Search'}
         />
         <Image
-          src={"/icons/search.svg"}
+          src={'/general/icons/search.svg'}
           width={18}
           height={18}
-          alt={"hashtag"}
-          key={"hashtag"}
+          alt={'hashtag'}
+          key={'hashtag'}
         />
       </label>
     </form>

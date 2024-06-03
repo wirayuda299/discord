@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from 'src/common/utils/groupMessageByEmoji';
+import { ReactionsService } from '../reactions/reactions.service';
 import { MessagesService } from '../messages/messages.service';
 
 @Injectable()
 export class ThreadsService {
   constructor(
     private db: DatabaseService,
+    private reactionService: ReactionsService,
     private messageService: MessagesService
   ) {}
 
@@ -18,8 +20,6 @@ export class ThreadsService {
     imageAssetId: string,
     threadId: string
   ) {
-    console.log('sendThreadMessage func run');
-
     try {
       const {
         rows: [threadMessage],
@@ -51,8 +51,6 @@ export class ThreadsService {
     name: string = ''
   ) {
     try {
-      console.log('Create thread');
-
       await this.db.pool.query('begin');
       const {
         rows: [thread],
@@ -89,7 +87,7 @@ export class ThreadsService {
     serverId: string,
     messagesWithReactions: any[]
   ) => {
-    const reactions = await this.messageService.getReactions(
+    const reactions = await this.reactionService.getReactions(
       message.message_id
     );
     const threads = await this.messageService.getThreadByMessage(
@@ -156,7 +154,7 @@ export class ThreadsService {
       );
 
       const processMessage = async (message) => {
-        const reactions = await this.messageService.getReactions(
+        const reactions = await this.reactionService.getReactions(
           message.message_id
         );
         const threads = await this.messageService.getThreadByMessage(
@@ -224,6 +222,7 @@ export class ThreadsService {
         t.author as author,
         t."name" as thread_name,
         sp.username as username,
+        t.created_at as created_at,
         sp.avatar as avatar,
         t.channel_id as channel_id
         from threads as t
