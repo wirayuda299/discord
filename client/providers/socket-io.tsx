@@ -213,3 +213,6 @@ export const useSocketState = <K extends keyof SocketStates>(
 ): SocketStates[K] => {
   return useContext(SocketContext).states[key];
 };
+export const useUpdateSocketState = () => {
+  return useContext(SocketContext).handleUpdate;
+};

@@ -16,7 +16,6 @@ import { messageData } from '@/utils/messages';
 import { useSocketState } from '@/providers/socket-io';
 import EmojiPicker from './emoji-picker';
 import useUploadFile from '@/hooks/useFileUpload';
-import { uploadFile } from '@/helper/file';
 import { useServerContext } from '@/providers/servers';
 
 const chatSchema = z.object({
@@ -66,6 +65,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     let attachment: { publicId: string; url: string } | null = null;
 
     if (image && files && files.image) {
+      const { uploadFile } = await import('@/helper/file');
       attachment = await uploadFile(files.image);
     }
 

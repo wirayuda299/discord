@@ -40,7 +40,7 @@ export class RolesService {
     try {
       const isAllowed = await this.isAllowedToCreateRole(serverId, userId);
 
-      if (isAllowed.length < 1 || userId !== serverAuthor) {
+      if (isAllowed.length < 1 && userId !== serverAuthor) {
         throw new HttpException(
           'You are not allowed to create role',
           HttpStatus.FORBIDDEN

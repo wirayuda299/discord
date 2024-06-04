@@ -2,7 +2,6 @@ import type { Socket } from 'socket.io-client';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 import ChatItem from '@/components/shared/chat-item/chat-item';
-import { reloadThreadMessage } from '@/providers/socket-io';
 import { Message, Thread } from '@/types/messages';
 
 function ThreadsMessages({
@@ -18,8 +17,9 @@ function ThreadsMessages({
 }) {
   const [threadMessages, setThreadMessages] = useState<Message[]>([]);
 
-  const reloadThread = useCallback(() => {
+  const reloadThread = useCallback(async () => {
     if (!thread) return;
+    const { reloadThreadMessage } = await import('@/providers/socket-io');
 
     reloadThreadMessage(socket, thread?.thread_id, serverId);
   }, [serverId, socket, thread]);

@@ -145,7 +145,6 @@ export class ChannelsService {
           order by cat.name asc`,
         [serverId]
       );
-      console.log(channelsQuery.rows);
 
       const categories = this.groupChannel(channelsQuery.rows);
 

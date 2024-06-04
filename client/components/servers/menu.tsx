@@ -21,7 +21,7 @@ export default function ServersMenu({ server }: { server: Servers }) {
         className='flex-center z-10 w-full justify-between border-b border-b-background !bg-transparent p-3 text-white backdrop-blur-sm'
       >
         <span className='truncate'>{server.name || 'Server name'}</span>
-        <ChevronDown />
+        <ChevronDown size={18} className='text-gray-1' />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-full min-w-[250px] space-y-1 !border-none bg-[#111214]'>
         <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>

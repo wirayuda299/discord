@@ -11,8 +11,6 @@ import {
 import TopEmoji from './top-emoji';
 import { Message } from '@/types/messages';
 import EmojiPicker from '../emoji-picker';
-import { addOrRemoveReaction } from '@/actions/reactions';
-import { createError } from '@/utils/error';
 import { useMessage } from '@/providers/message';
 import { copyText } from '@/utils/copy';
 
@@ -40,7 +38,9 @@ export default function MessageMenuMobile({
     emoji: string,
     unifiedEmoji: string,
   ) => {
+    const { createError } = await import('@/utils/error');
     try {
+      const { addOrRemoveReaction } = await import('@/actions/reactions');
       await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId!!);
       reloadMessage();
     } catch (error) {

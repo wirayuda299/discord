@@ -18,12 +18,9 @@ import EmojiPicker from '../emoji-picker';
 import { Message } from '@/types/messages';
 
 import { discordEmojis } from '@/constants/emoji';
-import { createError } from '@/utils/error';
-import { addOrRemoveReaction } from '@/actions/reactions';
 import { useMessage } from '@/providers/message';
 import TopEmoji from './top-emoji';
 import { copyText } from '@/utils/copy';
-import { deleteMessage } from '@/helper/message';
 import { revalidate } from '@/utils/cache';
 
 type Props = {
@@ -48,6 +45,8 @@ function MessageMenu({
 
   const handleAddOrRemoveReactions = useCallback(
     async (messageId: string, emoji: string, unifiedEmoji: string) => {
+      const { createError } = await import('@/utils/error');
+      const { addOrRemoveReaction } = await import('@/actions/reactions');
       try {
         await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId!!);
         reloadMessage();
@@ -215,14 +214,12 @@ function MessageMenu({
             <DropdownMenuItem
               aria-label='delete message'
               title='delete message'
-              onClick={() =>
-                deleteMessage(msg.message_id, msg.media_image_asset_id).then(
-                  () => {
-                    reloadMessage();
-                    revalidate(pathname);
-                  },
-                )
-              }
+              onClick={async () => {
+                const { deleteMessage } = await import('@/helper/message');
+                deleteMessage(msg.message_id, msg.media_image_asset_id);
+                reloadMessage();
+                revalidate(pathname);
+              }}
               className='flex-center cursor-pointer justify-between !bg-transparent text-xs !text-red-600'
             >
               <span> Delete Message</span>

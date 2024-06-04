@@ -3,15 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { useParams, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
 
-import {
-  reloadChannelMessages,
-  reloadThreadMessage,
-  useSocketState,
-} from '@/providers/socket-io';
-import { pinMessage } from '@/actions/messages';
-import { createError } from '@/utils/error';
+import { useSocketState } from '@/providers/socket-io';
 import { useServerContext } from '@/providers/servers';
 
 const ThreadsMessages = dynamic(() => import('../threads/thread-messages'));
@@ -32,18 +25,24 @@ export default function ChannelsMessages() {
   const serverId = params?.id as string;
   const channelId = params?.channel_id as string;
 
-  const reloadChannelMessage = useCallback(() => {
+  const reloadChannelMessage = useCallback(async () => {
+    const { reloadChannelMessages } = await import('@/providers/socket-io');
     reloadChannelMessages(socket, serverId, channelId);
   }, [channelId, serverId, socket]);
 
-  const reloadThread = useCallback(() => {
+  const reloadThread = useCallback(async () => {
     if (!thread) return;
+    const { reloadThreadMessage } = await import('@/providers/socket-io');
 
     reloadThreadMessage(socket, thread?.thread_id, serverId);
   }, [serverId, socket, thread]);
 
   const handlePinMessage = useCallback(
     async (msgId: string, userId: string) => {
+      const { toast } = await import('sonner');
+      const { createError } = await import('@/utils/error');
+      const { pinMessage } = await import('@/actions/messages');
+
       try {
         await pinMessage(channelId, msgId, userId, pathname).then(() => {
           toast.success('Message pinned');

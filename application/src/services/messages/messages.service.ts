@@ -56,43 +56,42 @@ export class MessagesService {
         m.created_at as created_at,
         m.updated_at as update_at,
         sp.username as username
-        FROM messages_replies as mr 
-        JOIN messages as m ON m.id = mr.message_id
-        JOIN server_profile as sp ON sp.user_id = m.user_id AND  sp.server_id = $2
-        WHERE mr.parent_message_id = $1 
-        ORDER BY m.created_at ASC`,
+      FROM messages_replies as mr 
+      JOIN messages as m ON m.id = mr.message_id
+      JOIN server_profile as sp ON sp.user_id = m.user_id AND sp.server_id = $2
+      WHERE mr.parent_message_id = $1 
+      ORDER BY m.created_at ASC`,
         [parentMessageId, serverId]
       );
 
-      const allReplies: Message[] = [];
+      const replyPromises = replies.rows.map(async (reply) => {
+        const [reactions, role, threads] = await Promise.all([
+          this.reactionService.getReactions(reply.message_id),
+          this.roleService.getCurrentUserRole(reply.user_id, serverId),
+          this.db.pool.query(
+            `SELECT
+            sp.username as username,
+            sp.user_id as author_id,
+            t.name as thread_name,
+            t.id as thread_id,
+            t.channel_id as channel_id
+          FROM threads as t
+          JOIN server_profile as sp ON sp.user_id = t.author AND sp.server_id = $2
+          WHERE t.message_id = $1`,
+            [reply.message_id, serverId]
+          ),
+        ]);
 
-      for await (const reply of replies.rows) {
-        const reactions = await this.reactionService.getReactions(
-          reply.message_id
-        );
         reply.reactions = reactions;
-        const role = await this.roleService.getCurrentUserRole(
-          reply.user_id,
-          serverId
-        );
-
         reply.role = role.data;
-        const threads = await this.db.pool.query(
-          `select
-          sp.username as username,
-          sp.user_id as author_id,
-          t.name as thread_name,
-          t.id as thread_id,
-          t.channel_id as channel_id
-          from threads as t
-          join server_profile as sp on sp.user_id = t.author and sp.server_id = $2
-          where t.message_id = $1
-        `,
-          [reply.message_id, serverId]
-        );
-
         reply.threads = threads.rows || [];
 
+        return reply;
+      });
+
+      const allReplies = await Promise.all(replyPromises);
+
+      const subRepliesPromises = allReplies.map(async (reply) => {
         const subReplies = await this.getReplies(
           reply.message_id,
           channelId,
@@ -100,17 +99,19 @@ export class MessagesService {
         );
 
         for (const subReply of subReplies) {
-          const reactions = await await this.reactionService.getReactions(
+          const reactions = await this.reactionService.getReactions(
             subReply.message_id
           );
-
           subReply.reactions = reactions;
         }
 
-        allReplies.push(...subReplies, reply);
-      }
+        return [reply, ...subReplies];
+      });
 
-      return allReplies;
+      const nestedReplies = await Promise.all(subRepliesPromises);
+      const flattenedReplies = nestedReplies.flat();
+
+      return flattenedReplies;
     } catch (error) {
       throw error;
     }
@@ -226,15 +227,12 @@ export class MessagesService {
       return threads.rows;
     } catch (error) {
       console.log(error);
-
       throw error;
     }
   }
 
   async getMessageByChannelId(channel_id: string, serverId: string) {
     try {
-      const messagesWithReactions = [];
-
       const messages = await this.db.pool.query(
         `
         SELECT 
@@ -257,24 +255,16 @@ export class MessagesService {
         [serverId, channel_id]
       );
 
-      for await (const message of messages.rows) {
-        const reactions = await await this.reactionService.getReactions(
-          message.message_id
-        );
-        const threads = await this.getThreadByMessage(
-          message.message_id,
-          serverId
-        );
-
-        const role = await this.roleService.getCurrentUserRole(
-          message.author,
-          serverId
-        );
+      const messagePromises = messages.rows.map(async (message) => {
+        const [reactions, threads, role] = await Promise.all([
+          this.reactionService.getReactions(message.message_id),
+          this.getThreadByMessage(message.message_id, serverId),
+          this.roleService.getCurrentUserRole(message.author, serverId),
+        ]);
 
         message.role = role.data;
         message.threads = threads || [];
         message.reactions = reactions;
-        messagesWithReactions.push(message);
 
         const replies = await this.getReplies(
           message.message_id,
@@ -282,18 +272,21 @@ export class MessagesService {
           serverId
         );
 
-        messagesWithReactions.push(...replies);
-      }
+        return [message, ...replies];
+      });
 
-      messagesWithReactions.sort(
+      const allMessageResults = await Promise.all(messagePromises);
+      const allMessages = allMessageResults.flat();
+
+      allMessages.sort(
         (a, b) =>
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
-      const groupedMessages = groupReactionsByEmoji(messagesWithReactions);
-      const allMessages = this.addLabelsToMessages(groupedMessages);
+      const groupedMessages = groupReactionsByEmoji(allMessages);
+      const finalMessages = this.addLabelsToMessages(groupedMessages);
 
-      return allMessages;
+      return finalMessages;
     } catch (error) {
       throw error;
     }

@@ -15,16 +15,13 @@ const Inbox = dynamic(() => import('@/components/shared/inbox'));
 const PinnedMessage = dynamic(
   () => import('@/components/shared/pinned-message'),
 );
-const SearchForm = dynamic(() => import('@/components/shared/search-form'));
 
-import {
-  PinnedMessageType,
-  deleteChannelPinnedMessage,
-} from '@/helper/message';
+import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
 import { useServerContext } from '@/providers/servers';
 import { useUpdateServerState } from '@/hooks/useUpdateServerState';
 import { createError } from '@/utils/error';
+import SearchForm from '@/components/shared/search-form';
 
 export default function ChannelsHeader({
   channelName,
@@ -44,6 +41,7 @@ export default function ChannelsHeader({
 
   const handleDeletePinnedMessage = async (id: string) => {
     try {
+      const { deleteChannelPinnedMessage } = await import('@/helper/message');
       await deleteChannelPinnedMessage(
         id,
         channelId,

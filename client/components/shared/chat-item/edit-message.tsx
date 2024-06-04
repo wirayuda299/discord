@@ -3,7 +3,6 @@
 import { FormEvent, useRef } from 'react';
 import { toast } from 'sonner';
 
-import { editMessage } from '@/helper/message';
 import { Textarea } from '../../ui/textarea';
 import { createError } from '@/utils/error';
 
@@ -36,6 +35,7 @@ export default function EditMessageForm({
       if (value === message) {
         return toast.error('Previous message still same');
       }
+      const { editMessage } = await import('@/helper/message');
       await editMessage(messageAuthor, currentUser, messageId, value).then(
         () => {
           handleClose();

@@ -22,10 +22,8 @@ import { Button } from '@/components/ui/button';
 import { Servers } from '@/types/server';
 import { cn } from '@/lib/utils';
 import useUploadFile from '@/hooks/useFileUpload';
-import { updateServer } from '@/helper/server';
 import { createError } from '@/utils/error';
 import { revalidate } from '@/utils/cache';
-import { deleteImage, uploadFile } from '@/helper/file';
 
 type ImageResType = { url: string; publicId: string };
 
@@ -67,10 +65,13 @@ export default function ServerOverview({ server }: { server: Servers }) {
     try {
       if (files && files[fileKey]) {
         if (assetId) {
+          const { deleteImage } = await import('@/helper/file');
           setStatus(`Deleting ${fileKey}...`);
           await deleteImage(assetId);
         }
         setStatus(`Uploading new ${fileKey}...`);
+
+        const { uploadFile } = await import('@/helper/file');
         const uploadedFile = await uploadFile(files[fileKey]);
         return uploadedFile;
       }
@@ -89,6 +90,7 @@ export default function ServerOverview({ server }: { server: Servers }) {
   ) => {
     try {
       setStatus('Updating server...');
+      const { updateServer } = await import('@/helper/server');
       await updateServer(
         server.id,
         name,

@@ -5,6 +5,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ArrowLeft, Check, ImagePlus, Plus } from 'lucide-react';
 import Image from 'next/image';
+import { useSWRConfig } from 'swr';
+import { useAuth } from '@clerk/nextjs';
+import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Role } from '@/helper/roles';
@@ -21,6 +25,9 @@ import { Input } from '@/components/ui/input';
 import { colors } from '@/constants/colors';
 import useUploadFile from '@/hooks/useFileUpload';
 import { Switch } from '@/components/ui/switch';
+import { createError } from '@/utils/error';
+import { revalidate } from '@/utils/cache';
+import MemberWithRole from './memberWithRole';
 
 const tabs = ['display', 'permissions', 'manage members'] as const;
 
@@ -29,6 +36,10 @@ type Props = {
   selectedRole: Role | null;
   selectTab: (tab?: string) => void;
   type: 'create' | 'update' | null;
+  serverAuthor: string;
+  roles: Role[];
+  selectRole: (role: Role | null) => void;
+  selectType: (type: 'create' | 'update' | null) => void;
 };
 
 const schema = z.object({
@@ -49,7 +60,15 @@ export default function RolesSettings({
   selectTab,
   type,
   selectedTab,
+  serverAuthor,
+  roles,
+  selectRole,
+  selectType,
 }: Props) {
+  const { userId } = useAuth();
+  const { mutate } = useSWRConfig();
+  const params = useParams();
+
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -74,15 +93,104 @@ export default function RolesSettings({
 
   const icon = form.watch('icon');
   const isEdited = form.formState.isDirty;
+  const editedFields = form.formState.dirtyFields;
   const isSubmitting = form.formState.isSubmitting;
 
   const { handleChange, preview, files } = useUploadFile(form);
+
+  const handleCreateOrUpdateRole = async (data: z.infer<typeof schema>) => {
+    const { createRole } = await import('@/actions/roles');
+    const { deleteImage, uploadFile } = await import('@/helper/file');
+    const { updateRole } = await import('@/helper/roles');
+
+    let media = null;
+    if (!userId) return;
+
+    const {
+      color,
+      name,
+      attach_file,
+      ban_member,
+      icon,
+      kick_member,
+      manage_channel,
+      manage_message,
+      manage_role,
+      manage_thread,
+    } = data;
+
+    try {
+      if (type === 'create') {
+        if (files && files.icon) {
+          media = await uploadFile(files.icon);
+        }
+        await createRole(
+          color,
+          name,
+          media?.publicId || '',
+          media?.url || '',
+          params.id as string,
+          attach_file,
+          ban_member,
+          kick_member,
+          manage_channel,
+          manage_message,
+          manage_role,
+          manage_thread,
+          userId,
+          serverAuthor,
+        );
+        toast.success('Role has been created');
+      }
+
+      if (type === 'update' && selectedRole) {
+        if (editedFields.icon && files && files.icon) {
+          media = await uploadFile(files.icon);
+        }
+
+        if (selectedRole?.icon) {
+          await deleteImage(selectedRole.icon_asset_id);
+        }
+
+        await updateRole(
+          color,
+          name,
+          media?.url || icon || '',
+          media?.publicId || '',
+          params.id as string,
+          selectedRole?.id,
+          attach_file,
+          ban_member,
+          kick_member,
+          manage_channel,
+          manage_message,
+          manage_role,
+          manage_thread,
+        );
+        toast.success('Role has been updated');
+      }
+    } catch (error) {
+      createError(error);
+    } finally {
+      mutate('roles');
+      mutate('user-permissions');
+
+      revalidate(`/server/${params.id}`);
+      revalidate(`/server/${params.id}/${params.channel_id}`);
+    }
+  };
 
   return (
     <div className='flex h-full w-full py-7'>
       <aside className='sticky top-0 min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background'>
         <header className='flex-center w-full justify-between'>
-          <Button className='inline-flex gap-1 !bg-transparent uppercase text-gray-2'>
+          <Button
+            onClick={() => {
+              selectRole(null);
+              selectType(null);
+            }}
+            className='inline-flex gap-1 !bg-transparent uppercase text-gray-2'
+          >
             <ArrowLeft size={20} /> Back
           </Button>
           <Button
@@ -92,6 +200,26 @@ export default function RolesSettings({
             <Plus size={20} />
           </Button>
         </header>
+
+        <ul className='flex w-full flex-col gap-3 pl-9 pr-4'>
+          {roles.map((role) => (
+            <li
+              onClick={() => selectRole(role)}
+              key={role.name}
+              className={cn(
+                'flex cursor-pointer items-center gap-2 rounded py-2 text-sm font-medium capitalize text-gray-2 hover:bg-foreground hover:brightness-110',
+                selectedRole?.name === role.name &&
+                  'bg-foreground brightness-110',
+              )}
+            >
+              <div
+                className='size-2 rounded-full'
+                style={{ background: role.role_color }}
+              ></div>
+              {role.name}
+            </li>
+          ))}
+        </ul>
       </aside>
       <div className='w-full overflow-y-auto px-4 pt-1'>
         <h4 className='text-lg font-medium uppercase text-gray-2'>
@@ -114,9 +242,12 @@ export default function RolesSettings({
             </li>
           ))}
         </ul>
-        {selectedTab !== 'manage members' && (
+        {selectedTab !== 'manage members' ? (
           <Form {...form}>
-            <form className='mt-5 space-y-5'>
+            <form
+              className='mt-5 space-y-5'
+              onSubmit={form.handleSubmit(handleCreateOrUpdateRole)}
+            >
               {selectedTab === 'display' && (
                 <>
                   <FormField
@@ -168,7 +299,11 @@ export default function RolesSettings({
                                 <button
                                   type='button'
                                   title={color}
-                                  onClick={() => form.setValue('color', color)}
+                                  onClick={() =>
+                                    form.setValue('color', color, {
+                                      shouldDirty: true,
+                                    })
+                                  }
                                   key={color}
                                   className={`size-10 rounded-md`}
                                   style={{ backgroundColor: color }}
@@ -427,37 +562,42 @@ export default function RolesSettings({
                   />
                 </div>
               )}
+              <div
+                className={cn(
+                  'sticky -bottom-full left-0 right-0 mt-10 flex w-full items-center justify-between rounded-sm bg-black p-2 transition-all duration-300 ease-in-out',
+                  isEdited
+                    ? 'bottom-0 mt-0 opacity-100'
+                    : '-bottom-full mt-10 opacity-0',
+                )}
+              >
+                <p className='text-sm font-medium text-gray-2'>
+                  Careful - <span>you have unsave changes!</span>
+                </p>
+                <div className='flex-center gap-4'>
+                  <Button
+                    disabled={!isEdited}
+                    type='button'
+                    className='!bg-transparent'
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type='submit'
+                    disabled={!isEdited || isSubmitting}
+                    className='rounded bg-green-700 text-sm hover:bg-green-800'
+                  >
+                    Save changes
+                  </Button>
+                </div>
+              </div>
             </form>
           </Form>
+        ) : (
+          <MemberWithRole
+            selectedRole={selectedRole}
+            serverId={params.id as string}
+          />
         )}
-
-        <div
-          className={cn(
-            'sticky -bottom-full left-0 right-0 mt-10 flex w-full items-center justify-between rounded-sm bg-black p-2 transition-all duration-300 ease-in-out',
-            isEdited
-              ? 'bottom-0 mt-0 opacity-100'
-              : '-bottom-full mt-10 opacity-0',
-          )}
-        >
-          <p className='text-sm font-medium text-gray-2'>
-            Careful - <span>you have unsave changes!</span>
-          </p>
-          <div className='flex-center gap-4'>
-            <Button
-              disabled={!isEdited}
-              type='button'
-              className='!bg-transparent'
-            >
-              Reset
-            </Button>
-            <Button
-              disabled={!isEdited || isSubmitting}
-              className='rounded bg-green-700 text-sm hover:bg-green-800'
-            >
-              {isSubmitting ? status : 'Save changes'}
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

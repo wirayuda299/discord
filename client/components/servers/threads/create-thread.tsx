@@ -1,15 +1,11 @@
 import Image from 'next/image';
 import { SendHorizontal, X } from 'lucide-react';
 import { FormEvent, useCallback, useRef } from 'react';
-import { toast } from 'sonner';
 import { useAuth } from '@clerk/nextjs';
 
 import { cn } from '@/lib/utils';
 import { useMessage } from '@/providers/message';
 import EmojiPicker from '@/components/shared/emoji-picker';
-import { createThread } from '@/actions/threads';
-import { createError } from '@/utils/error';
-import { revalidate } from '@/utils/cache';
 import { formatDate } from '@/utils/date';
 
 export default function CreateThread({
@@ -35,6 +31,7 @@ export default function CreateThread({
     const threadName = e.target.thread_name.value;
     // @ts-ignore
     const message = e.target.message.value;
+    const { toast } = await import('sonner');
 
     if (!state || !state.message) {
       toast.message('Please select a message to start create thread');
@@ -45,8 +42,11 @@ export default function CreateThread({
       toast.error('Please add thread name and message');
       return;
     }
+    const { createError } = await import('@/utils/error');
+    const { revalidate } = await import('@/utils/cache');
 
     try {
+      const { createThread } = await import('@/actions/threads');
       await createThread({
         channelId,
         message,

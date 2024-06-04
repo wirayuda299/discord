@@ -64,6 +64,7 @@ export const ServerContextProvider = ({
 export const useServerContext = <K extends keyof ServerStates>(key: K) => {
   return useContext(ServerStatesContext).states[key];
 };
+
 export const useUpdateServerState = () => {
   return useContext(ServerStatesContext).updateState;
 };

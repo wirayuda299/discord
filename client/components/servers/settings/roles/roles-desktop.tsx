@@ -2,12 +2,32 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import SearchForm from '@/components/shared/search-form';
 import { Button } from '@/components/ui/button';
-import { Role } from '@/helper/roles';
+import { Role, getAllRoles } from '@/helper/roles';
+import useFetch from '@/hooks/useFetch';
+import PulseLoader from '@/components/shared/pulse-loader';
 const RoleSettings = dynamic(() => import('./role-settings'));
 
-export default function RolesDesktop() {
+export default function RolesDesktop({
+  serverAuthor,
+  serverId,
+}: {
+  serverAuthor: string;
+  serverId: string;
+}) {
+  const { data, isLoading, error } = useFetch('roles', () =>
+    getAllRoles(serverId),
+  );
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>('display');
   const [type, setType] = useState<'create' | 'update' | null>(null);
@@ -25,10 +45,17 @@ export default function RolesDesktop() {
     [],
   );
 
+  if (isLoading) return <PulseLoader />;
+  if (error) return <p>{error.message}</p>;
+
   return (
     <>
       {type === 'create' || type === 'update' || selectedRole ? (
         <RoleSettings
+          selectType={selectType}
+          roles={data || []}
+          selectRole={selectRole}
+          serverAuthor={serverAuthor}
           selectTab={selectTab}
           selectedRole={selectedRole}
           selectedTab={selectedTab}
@@ -78,6 +105,47 @@ export default function RolesDesktop() {
               Create role
             </Button>
           </div>
+
+          <Table>
+            <TableCaption>A list of role that been created.</TableCaption>
+            <TableHeader className='!bg-transparent'>
+              <TableRow className='border-gray-2/15 !bg-transparent'>
+                <TableHead className='text-white'>Roles</TableHead>
+                <TableHead className='text-white'>Member</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className='border-foreground'>
+              {data?.map((role) => (
+                <TableRow
+                  key={role.name}
+                  onClick={() => {
+                    selectRole(role);
+                    setType('update');
+                  }}
+                  className='cursor-pointer border-gray-2/10 hover:!bg-foreground hover:!brightness-110'
+                >
+                  <TableCell className='text-base'>
+                    <div className='flex items-center gap-2 text-gray-2'>
+                      <div
+                        className='size-2 rounded-full'
+                        style={{ backgroundColor: role.role_color }}
+                      ></div>
+                      {role.name}
+                    </div>
+                  </TableCell>
+                  <TableCell className='inline-flex gap-2'>
+                    <span className='text-gray-2'>{role.members.length}</span>
+                    <Image
+                      src={'/server/icons/member.svg'}
+                      width={20}
+                      height={20}
+                      alt='member'
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </>
