@@ -22,8 +22,6 @@ import { Button } from '@/components/ui/button';
 import { Servers } from '@/types/server';
 import { cn } from '@/lib/utils';
 import useUploadFile from '@/hooks/useFileUpload';
-import { createError } from '@/utils/error';
-import { revalidate } from '@/utils/cache';
 
 type ImageResType = { url: string; publicId: string };
 
@@ -62,6 +60,8 @@ export default function ServerOverview({ server }: { server: Servers }) {
     });
 
   const handleFileUpload = async (fileKey: string, assetId?: string) => {
+    const { createError } = await import('@/utils/error');
+    const { revalidate } = await import('@/utils/cache');
     try {
       if (files && files[fileKey]) {
         if (assetId) {
@@ -88,6 +88,8 @@ export default function ServerOverview({ server }: { server: Servers }) {
     showBanner: boolean,
     showProgressBar: boolean,
   ) => {
+    const { revalidate } = await import('@/utils/cache');
+    const { createError } = await import('@/utils/error');
     try {
       setStatus('Updating server...');
       const { updateServer } = await import('@/helper/server');
@@ -109,6 +111,8 @@ export default function ServerOverview({ server }: { server: Servers }) {
   };
 
   const handleUpdateServer = async (data: UpdateServerSchemaType) => {
+    const { revalidate } = await import('@/utils/cache');
+    const { createError } = await import('@/utils/error');
     try {
       let logo, banner;
 

@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import type { ClassValue } from 'clsx';
 
 import { cn } from '@/lib/utils';
 
@@ -7,7 +6,7 @@ export default function SearchForm({
   styles,
   placeholder,
 }: {
-  styles?: ClassValue;
+  styles?: string;
   placeholder?: string;
 }) {
   return (

@@ -8,7 +8,6 @@ import SearchForm from '../../../shared/search-form';
 import { Role } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import { getMembersByRole } from '@/helper/server';
-import { createError } from '@/utils/error';
 const AssignRole = dynamic(() => import('./assignRole'), { ssr: false });
 
 export default function MemberWithRole({
@@ -24,6 +23,7 @@ export default function MemberWithRole({
   );
 
   const handleDeleteRole = async (userId: string) => {
+    const { createError } = await import('@/utils/error');
     try {
       const { removeRoleFromUser } = await import('@/helper/roles');
       await removeRoleFromUser(userId);

@@ -4,12 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Camera, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 
-import { deleteImage, uploadFile } from '@/helper/file';
-import { createServer } from '@/actions/server';
 import useUploadFile from '@/hooks/useFileUpload';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +21,6 @@ import { Input } from '@/components/ui/input';
 import { CreateServerSchemaType, createServerSchema } from '@/validations';
 import { createError } from '@/utils/error';
 import { DialogClose } from '@/components/ui/dialog';
-import { revalidate } from '@/utils/cache';
 import { usePathname } from 'next/navigation';
 
 export default function CreateServerForm() {
@@ -47,6 +43,11 @@ export default function CreateServerForm() {
     if (!files || !user) return;
 
     let file: { publicId: string; url: string } | null = null;
+
+    const { toast } = await import('sonner');
+    const { revalidate } = await import('@/utils/cache');
+    const { createServer } = await import('@/actions/server');
+    const { deleteImage, uploadFile } = await import('@/helper/file');
 
     setStatus('Uploading image...');
     try {

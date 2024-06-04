@@ -1,12 +1,12 @@
 import Image from 'next/image';
-import { ReactNode, memo } from 'react';
+import { type ReactNode, memo } from 'react';
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PinnedMessageType } from '@/helper/message';
+import type { PinnedMessageType } from '@/helper/message';
 
 function PinnedMessages({
   children,

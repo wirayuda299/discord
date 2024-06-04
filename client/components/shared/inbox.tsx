@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import Image from 'next/image';
 
 import {
@@ -15,6 +15,7 @@ const items = ['for you', 'unreads', 'mentions'] as const;
 export default function Inbox({ children }: { children: ReactNode }) {
   const [selectedFilter, setSelectedFilter] =
     useState<(typeof items)[number]>('for you');
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger aria-label='inbox' name='inbox' title='inbox'>

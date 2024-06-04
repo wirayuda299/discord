@@ -35,6 +35,8 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const thread = useServerContext('selectedThread');
   const searchParams = useSearchParams();
   const params = useParams();
+  const recipientId = searchParams.get('userId') as string;
+  const conversationId = searchParams.get('conversationId') as string;
 
   const { state, setMessage } = useMessage();
 
@@ -62,10 +64,12 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
 
   const onSubmit = async (data: z.infer<typeof chatSchema>) => {
     if (!socket) return;
+
     let attachment: { publicId: string; url: string } | null = null;
 
     if (image && files && files.image) {
       const { uploadFile } = await import('@/helper/file');
+
       attachment = await uploadFile(files.image);
     }
 
@@ -77,8 +81,8 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         imageUrl: attachment ? attachment?.url : '',
         type: 'personal',
         userId: userId as string,
-        recipientId: searchParams.get('userId') as string,
-        conversationId: searchParams.get('conversationId') as string,
+        recipientId,
+        conversationId,
       });
       if (socket) {
         socket?.emit('message', values);
@@ -100,8 +104,8 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         parentMessageId: state.message.message_id,
         messageId: state.message.message_id,
         userId: userId as string,
-        recipientId: searchParams.get('userId') as string,
-        conversationId: searchParams.get('conversationId') as string,
+        recipientId,
+        conversationId,
       });
       if (socket) {
         socket?.emit('message', values);
@@ -162,7 +166,6 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       });
       if (socket) {
         socket.emit('message', values);
-        reloadMessage();
       }
     }
     form.reset();
@@ -183,6 +186,9 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
               </span>
             </p>
             <button
+              aria-label='delete'
+              name='delete'
+              title='delete'
               className='flex size-5 items-center justify-center rounded-full bg-gray-2'
               onClick={resetSelectedMessage}
             >

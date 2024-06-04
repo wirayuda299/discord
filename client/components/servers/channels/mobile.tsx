@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Categories } from '@/types/channels';
+import type { Categories } from '@/types/channels';
 
 export default function ChannelsDetailMobile({
   channel,

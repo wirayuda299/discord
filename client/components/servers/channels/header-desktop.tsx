@@ -20,7 +20,6 @@ import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
 import { useServerContext } from '@/providers/servers';
 import { useUpdateServerState } from '@/hooks/useUpdateServerState';
-import { createError } from '@/utils/error';
 import SearchForm from '@/components/shared/search-form';
 
 export default function ChannelsHeader({
@@ -40,6 +39,7 @@ export default function ChannelsHeader({
   const updateState = useUpdateServerState();
 
   const handleDeletePinnedMessage = async (id: string) => {
+    const { createError } = await import('@/utils/error');
     try {
       const { deleteChannelPinnedMessage } = await import('@/helper/message');
       await deleteChannelPinnedMessage(

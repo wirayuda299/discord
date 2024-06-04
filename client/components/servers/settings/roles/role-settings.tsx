@@ -25,8 +25,7 @@ import { Input } from '@/components/ui/input';
 import { colors } from '@/constants/colors';
 import useUploadFile from '@/hooks/useFileUpload';
 import { Switch } from '@/components/ui/switch';
-import { createError } from '@/utils/error';
-import { revalidate } from '@/utils/cache';
+
 import MemberWithRole from './memberWithRole';
 
 const tabs = ['display', 'permissions', 'manage members'] as const;
@@ -99,6 +98,8 @@ export default function RolesSettings({
   const { handleChange, preview, files } = useUploadFile(form);
 
   const handleCreateOrUpdateRole = async (data: z.infer<typeof schema>) => {
+    const { revalidate } = await import('@/utils/cache');
+    const { createError } = await import('@/utils/error');
     const { createRole } = await import('@/actions/roles');
     const { deleteImage, uploadFile } = await import('@/helper/file');
     const { updateRole } = await import('@/helper/roles');

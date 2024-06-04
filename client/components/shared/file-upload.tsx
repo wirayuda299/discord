@@ -1,7 +1,6 @@
-import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
-import type { FieldValues } from 'react-hook-form';
-import type { ChangeEvent } from 'react';
+import { type ChangeEvent, memo } from 'react';
+import { Plus, X } from 'lucide-react';
 
 type Props = {
   image: string;
@@ -14,7 +13,7 @@ type Props = {
   ) => Promise<void>;
 };
 
-export default function FileUpload<T extends FieldValues>({
+function FileUpload({
   image,
   isSubmitting,
   deleteImage,
@@ -68,3 +67,5 @@ export default function FileUpload<T extends FieldValues>({
     </div>
   );
 }
+
+export default memo(FileUpload);

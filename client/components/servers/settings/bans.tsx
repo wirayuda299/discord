@@ -6,7 +6,7 @@ import SearchForm from '@/components/shared/search-form';
 import { Button } from '@/components/ui/button';
 import { getBannedMembers } from '@/helper/members';
 import useFetch from '@/hooks/useFetch';
-import { createError } from '@/utils/error';
+
 import {
   Dialog,
   DialogClose,
@@ -32,6 +32,7 @@ export default function ServerBanList({
   if (error) return <p>{error.message}</p>;
 
   const handleRevokeMembers = async (memberId: string) => {
+    const { createError } = await import('@/utils/error');
     try {
       const { revokeMember } = await import('@/helper/members');
       await revokeMember(serverId, memberId).then(() => {
@@ -45,6 +46,8 @@ export default function ServerBanList({
 
   const handleKickMember = async (memberId: string) => {
     if (!userId) return;
+
+    const { createError } = await import('@/utils/error');
 
     try {
       const { kickMember } = await import('@/actions/members');

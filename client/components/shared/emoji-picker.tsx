@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Image from 'next/image';
 
 import {
@@ -8,7 +9,7 @@ import {
 import { emojiList } from '@/constants/emoji';
 import { cn } from '@/lib/utils';
 
-export default function EmojiPicker({
+function EmojiPicker({
   appendEmoji,
   style,
 }: {
@@ -46,3 +47,5 @@ export default function EmojiPicker({
     </DropdownMenu>
   );
 }
+
+export default memo(EmojiPicker);
