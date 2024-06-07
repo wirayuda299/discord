@@ -6,10 +6,7 @@ import { useParams, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { createError } from '@/utils/error';
-import {
-  reloadThreadMessage,
-  reloadChannelMessages,
-} from '@/providers/socket-io';
+import { reloadChannelMessages } from '@/providers/socket-io';
 import { useServerStates, useSocketStore } from '@/providers';
 
 const ThreadsMessages = dynamic(() => import('../threads/thread-messages'));
@@ -77,11 +74,6 @@ export default function ChannelsMessages() {
       <div className='sticky bottom-0 left-0 right-0 backdrop-blur-sm'>
         <ChatForm
           placeholder='send message'
-          reloadMessage={
-            thread
-              ? () => reloadThreadMessage(socket, thread?.thread_id, serverId)
-              : () => reloadChannelMessages(socket, serverId, channelId)
-          }
           type={thread ? 'thread' : 'channel'}
         />
       </div>

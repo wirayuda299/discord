@@ -28,16 +28,15 @@ const chatSchema = z.object({
 type Props = {
   placeholder: string;
   type: string;
-  reloadMessage: () => void;
 };
 
-export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
+export default function ChatForm({ placeholder, type }: Props) {
   const { userId } = useAuth();
   const params = useParams();
+  const searchParams = useSearchParams();
 
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
-  const searchParams = useSearchParams();
   const recipientId = searchParams.get('userId') as string;
   const conversationId = searchParams.get('conversationId') as string;
 
@@ -115,7 +114,6 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       });
       if (socket) {
         socket?.emit('message', values);
-        resetSelectedMessage();
       }
     }
 
@@ -155,7 +153,6 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       });
       if (socket) {
         socket?.emit('message', values);
-        resetSelectedMessage();
       }
     }
 
@@ -175,7 +172,9 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       }
     }
     form.reset();
-    reloadMessage();
+    if (selectedMessage) {
+      resetSelectedMessage();
+    }
   };
 
   return (

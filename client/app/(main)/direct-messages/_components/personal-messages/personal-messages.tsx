@@ -66,7 +66,7 @@ export default function PersonalMessages({
         createError(error);
       }
     },
-    [],
+    [pathname],
   );
   if (!recipientId) return null;
 
@@ -100,7 +100,6 @@ export default function PersonalMessages({
       </ul>
       <div className='sticky bottom-0 left-0 right-0 p-3 backdrop-blur-sm'>
         <ChatForm
-          reloadMessage={reloadPersonalMessage}
           placeholder={`Message to ${friend?.username}`}
           type='personal'
         />
