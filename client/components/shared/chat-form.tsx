@@ -68,7 +68,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const isValid = form.formState.isValid;
   const image = form.watch('image');
 
-  const onSubmit = useCallback(async (data: z.infer<typeof chatSchema>) => {
+  const onSubmit = async (data: z.infer<typeof chatSchema>) => {
     if (!socket) return;
 
     let attachment: { publicId: string; url: string } | null = null;
@@ -176,11 +176,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     }
     form.reset();
     reloadMessage();
-  }, []);
-
-  useEffect(() => {
-    console.log('OnSubmit change');
-  }, [onSubmit]);
+  };
 
   return (
     <>
