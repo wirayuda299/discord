@@ -1,21 +1,13 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useEffect, type ReactNode } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useShallow } from 'zustand/react/shallow';
 import { Socket, io } from 'socket.io-client';
 import { useParams, useSearchParams } from 'next/navigation';
 
 import { Message } from '@/types/messages';
 import { useServerStates, useSocketStore } from '.';
-import { useShallow } from 'zustand/react/shallow';
 
 export const reloadChannelMessages = (
   socket: Socket | null,

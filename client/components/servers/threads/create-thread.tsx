@@ -2,11 +2,14 @@ import Image from 'next/image';
 import { SendHorizontal, X } from 'lucide-react';
 import { FormEvent, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { createError } from '@/utils/error';
+import { revalidate } from '@/utils/cache';
 
 import { cn } from '@/lib/utils';
 import EmojiPicker from '@/components/shared/emoji-picker';
 import { formatDate } from '@/utils/date';
 import { useSelectedMessageStore } from '@/providers';
+import { toast } from 'sonner';
 
 export default function CreateThread({
   channelId,
@@ -15,12 +18,13 @@ export default function CreateThread({
   channelId: string;
   pathname: string;
 }) {
+  const { userId } = useAuth();
+  const ref = useRef<HTMLInputElement>(null);
+
   const { selectedMessage, setMessage } = useSelectedMessageStore((state) => ({
     selectedMessage: state.selectedMessage,
     setMessage: state.setSelectedMessage,
   }));
-  const { userId } = useAuth();
-  const ref = useRef<HTMLInputElement>(null);
 
   const appendEmoji = useCallback((emoji: string) => {
     if (ref.current) {
@@ -34,7 +38,6 @@ export default function CreateThread({
     const threadName = e.target.thread_name.value;
     // @ts-ignore
     const message = e.target.message.value;
-    const { toast } = await import('sonner');
 
     if (!message) {
       toast.message('Please select a message to start create thread');
@@ -45,15 +48,13 @@ export default function CreateThread({
       toast.error('Please add thread name and message');
       return;
     }
-    const { createError } = await import('@/utils/error');
-    const { revalidate } = await import('@/utils/cache');
 
     try {
       const { createThread } = await import('@/actions/threads');
       await createThread({
         channelId,
         message,
-        msgId: message?.message_id || '',
+        msgId: selectedMessage?.message?.message_id || '',
         threadName,
         userId: userId!!,
         imageAssetId: '',
@@ -67,6 +68,8 @@ export default function CreateThread({
       createError(error);
     }
   };
+
+  console.log(selectedMessage);
 
   return (
     <aside
