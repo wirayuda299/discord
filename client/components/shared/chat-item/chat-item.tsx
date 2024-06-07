@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Message } from '@/types/messages';
 import { formatMessageTimestamp } from '@/utils/date';
 import { foundMessage } from '@/utils/messages';
-import { useUpdateServerState } from '@/hooks/useUpdateServerState';
+import { useServerStates } from '@/providers';
 
 const MessageContent = dynamic(() => import('./MessageContent'));
 const RepliedMessage = dynamic(() => import('./RepliedMessage'));
@@ -31,7 +31,7 @@ export default function ChatItem({
 }: Props) {
   const { userId } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const updateState = useUpdateServerState();
+  const setSelectedThread = useServerStates((state) => state.setSelectedThread);
 
   const allMessages = useMemo(() => messages, [messages]);
 
@@ -106,7 +106,7 @@ export default function ChatItem({
         <ul className='flex flex-col gap-2 pt-2'>
           {(msg.threads || []).map((thread) => (
             <li
-              onClick={() => updateState({ selectedThread: thread })}
+              onClick={() => setSelectedThread(thread)}
               key={thread.thread_id}
               className='flex-center cursor-pointer gap-2 text-sm'
             >

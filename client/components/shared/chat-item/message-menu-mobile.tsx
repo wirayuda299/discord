@@ -11,8 +11,8 @@ import {
 import TopEmoji from './top-emoji';
 import { Message } from '@/types/messages';
 import EmojiPicker from '../emoji-picker';
-import { useMessage } from '@/providers/message';
 import { copyText } from '@/utils/copy';
+import { useSelectedMessageStore } from '@/providers';
 
 type Props = {
   msg: Message;
@@ -31,7 +31,9 @@ export default function MessageMenuMobile({
   type,
   pinMessage,
 }: Props) {
-  const { setMessage } = useMessage();
+  const setMessage = useSelectedMessageStore(
+    (state) => state.setSelectedMessage,
+  );
 
   const handleAddOrRemoveReactions = async (
     messageId: string,

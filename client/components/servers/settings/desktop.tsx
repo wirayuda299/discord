@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Cog, Trash, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 
 import {
@@ -17,17 +18,21 @@ const ServerOverview = dynamic(() => import('./overview/server-overview'));
 const RolesDesktop = dynamic(() => import('./roles/roles-desktop'));
 const EmojiUpload = dynamic(() => import('./emoji-upload'));
 const StickerUpload = dynamic(() => import('./sticker-upload'));
+const ServerBanList = dynamic(() => import('./bans'));
 
 import { cn } from '@/lib/utils';
-import { useServerContext, useUpdateServerState } from '@/providers/servers';
 import { Button } from '@/components/ui/button';
-import ServerBanList from './bans';
+import { useServerStates } from '@/providers';
 
 export default function ServerSettingsDesktop({ server }: { server: Servers }) {
-  const settings = useMemo(() => getServerSettings(server.name), [server.name]);
-  const selectedSetting = useServerContext('selectedSetting');
-  const updateState = useUpdateServerState();
+  const { selectedSetting, setSelectedSetting } = useServerStates(
+    useShallow((state) => ({
+      selectedSetting: state.selectedSetting,
+      setSelectedSetting: state.setSelectedSetting,
+    })),
+  );
 
+  const settings = useMemo(() => getServerSettings(server.name), [server.name]);
   return (
     <Dialog>
       <DialogTrigger className='flex w-full items-center justify-between rounded px-2 py-2 !text-gray-2 hover:!bg-primary hover:!text-white'>
@@ -47,11 +52,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
 
                     {setting.items.map((item) => (
                       <li
-                        onClick={() =>
-                          updateState({
-                            selectedSetting: item,
-                          })
-                        }
+                        onClick={() => setSelectedSetting(item)}
                         className={cn(
                           'cursor-pointer rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110',
                           selectedSetting === item &&
@@ -68,7 +69,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
               ))}
               <li className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
                 Delete server
-                <Trash size={18} />
+                <Trash size={18} className='text-red-600' />
               </li>
             </ul>
           </aside>

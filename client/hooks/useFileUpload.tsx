@@ -1,5 +1,6 @@
 'use client';
 
+import { createError } from '@/utils/error';
 import { ChangeEvent, useCallback, useState } from 'react';
 import type {
   FieldValues,
@@ -7,8 +8,6 @@ import type {
   PathValue,
   UseFormReturn,
 } from 'react-hook-form';
-
-import { toast } from 'sonner';
 
 export default function useUploadFile<T extends FieldValues>(
   form: UseFormReturn<T>,
@@ -66,11 +65,7 @@ export default function useUploadFile<T extends FieldValues>(
           handleFileChange(field, file);
         }
       } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error('Something went wrong while uploading image');
-        }
+        createError(error);
       } finally {
         setIsChecking((prev) => ({ ...prev, [field]: false }));
       }

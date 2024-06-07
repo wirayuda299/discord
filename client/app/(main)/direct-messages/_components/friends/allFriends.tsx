@@ -12,9 +12,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSocketState } from '@/providers/socket-io';
 import { cn } from '@/lib/utils';
 import PersonalMessagesMobile from '../../../../../components/shared/personal-message-mobile';
+import { useSocketStore } from '@/providers';
 
 export default function AllFriends({
   conversationId,
@@ -22,7 +22,7 @@ export default function AllFriends({
   conversationId: string;
 }) {
   const { userId } = useAuth();
-  const activeUsers = useSocketState('active_users');
+  const activeUsers = useSocketStore((state) => state.active_users);
 
   const { data, isLoading, error } = useFetch('friend-list', () =>
     getFriendList(userId!!),

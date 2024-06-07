@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { SendHorizontal, X } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -11,12 +11,14 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { Form, FormControl, FormField, FormItem } from '../ui/form';
 import FileUpload from './file-upload';
 import { Textarea } from '../ui/textarea';
-import { useMessage } from '@/providers/message';
 import { messageData } from '@/utils/messages';
-import { useSocketState } from '@/providers/socket-io';
 import EmojiPicker from './emoji-picker';
 import useUploadFile from '@/hooks/useFileUpload';
-import { useServerContext } from '@/providers/servers';
+import {
+  useSelectedMessageStore,
+  useServerStates,
+  useSocketStore,
+} from '@/providers';
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Please add message'),
@@ -31,14 +33,18 @@ type Props = {
 
 export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const { userId } = useAuth();
-  const socket = useSocketState('socket');
-  const thread = useServerContext('selectedThread');
-  const searchParams = useSearchParams();
   const params = useParams();
+
+  const thread = useServerStates((state) => state.selectedThread);
+  const socket = useSocketStore((state) => state.socket);
+  const searchParams = useSearchParams();
   const recipientId = searchParams.get('userId') as string;
   const conversationId = searchParams.get('conversationId') as string;
 
-  const { state, setMessage } = useMessage();
+  const { selectedMessage, setMessage } = useSelectedMessageStore((state) => ({
+    selectedMessage: state.selectedMessage,
+    setMessage: state.setSelectedMessage,
+  }));
 
   const form = useForm({
     resolver: zodResolver(chatSchema),
@@ -49,20 +55,20 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   });
   const { handleChange, preview, files } = useUploadFile(form);
 
-  const deleteImage = useCallback(() => form.setValue('image', null), []);
+  const deleteImage = useCallback(() => form.setValue('image', null), [form]);
 
   const appendEmoji = useCallback(() => {
     (emoji: string) =>
       form.setValue('message', form.getValues('message') + emoji);
-  }, []);
+  }, [form]);
 
-  const resetSelectedMessage = () => setMessage(null);
+  const resetSelectedMessage = useCallback(() => setMessage(null), []);
 
   const isSubmitting = form.formState.isSubmitting;
   const isValid = form.formState.isValid;
   const image = form.watch('image');
 
-  const onSubmit = async (data: z.infer<typeof chatSchema>) => {
+  const onSubmit = useCallback(async (data: z.infer<typeof chatSchema>) => {
     if (!socket) return;
 
     let attachment: { publicId: string; url: string } | null = null;
@@ -74,7 +80,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     }
 
     // general personal message
-    if (type === 'personal' && !state?.message) {
+    if (type === 'personal' && !selectedMessage?.message) {
       const values = messageData({
         content: data.message,
         imageAssetId: attachment ? attachment?.publicId : '',
@@ -92,17 +98,17 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     // reply personal message
     if (
       type === 'personal' &&
-      state?.message &&
-      state.type === type &&
-      state.action === 'reply'
+      selectedMessage?.message &&
+      selectedMessage.type === type &&
+      selectedMessage.action === 'reply'
     ) {
       const values = messageData({
         content: data.message,
         imageAssetId: attachment ? attachment?.publicId : '',
         imageUrl: attachment ? attachment?.url : '',
         type: 'reply',
-        parentMessageId: state.message.message_id,
-        messageId: state.message.message_id,
+        parentMessageId: selectedMessage.message.message_id,
+        messageId: selectedMessage.message.message_id,
         userId: userId as string,
         recipientId,
         conversationId,
@@ -114,7 +120,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     }
 
     //common message in channel
-    if (type === 'channel' && !state?.message) {
+    if (type === 'channel' && !selectedMessage?.message) {
       const values = messageData({
         content: data.message,
         imageAssetId: attachment ? attachment?.publicId : '',
@@ -132,17 +138,17 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     // reply message in channel
     if (
       type === 'channel' &&
-      state?.message &&
-      state.type === type &&
-      state.action === 'reply'
+      selectedMessage?.message &&
+      selectedMessage.type === type &&
+      selectedMessage.action === 'reply'
     ) {
       const values = messageData({
         content: data.message,
         imageAssetId: attachment ? attachment?.publicId : '',
         imageUrl: attachment ? attachment?.url : '',
         type: 'reply',
-        parentMessageId: state.message.message_id,
-        messageId: state.message.message_id,
+        parentMessageId: selectedMessage.message.message_id,
+        messageId: selectedMessage.message.message_id,
         userId: userId as string,
         channelId: params.channel_id as string,
         serverId: params.id as string,
@@ -153,7 +159,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       }
     }
 
-    if (thread && type === 'thread' && !state?.message) {
+    if (thread && type === 'thread' && !selectedMessage?.message) {
       const values = messageData({
         content: data.message,
         imageAssetId: attachment?.publicId || '',
@@ -170,19 +176,23 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     }
     form.reset();
     reloadMessage();
-  };
+  }, []);
+
+  useEffect(() => {
+    console.log('OnSubmit change');
+  }, [onSubmit]);
 
   return (
     <>
-      {state &&
-        state.message &&
-        state.action === 'reply' &&
-        state.type === type && (
+      {selectedMessage &&
+        selectedMessage.message &&
+        selectedMessage.action === 'reply' &&
+        selectedMessage.type === type && (
           <div className='flex w-full items-center justify-between rounded-t-xl bg-background/50 p-2 md:bg-[#2b2d31]'>
             <p className='bottom-16 text-sm text-gray-2'>
               Replying to{' '}
               <span className='font-semibold text-gray-2 brightness-150'>
-                {state.message && state.message.username}
+                {selectedMessage.message && selectedMessage.message.username}
               </span>
             </p>
             <button

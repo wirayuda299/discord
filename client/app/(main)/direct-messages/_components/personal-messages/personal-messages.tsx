@@ -6,13 +6,13 @@ import { Dispatch, SetStateAction, useCallback } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
-import { useSocketState } from '@/providers/socket-io';
 import { pinPersonalMessage } from '@/actions/messages';
 import { createError } from '@/utils/error';
 
 import type { Message } from '@/types/messages';
 import type { PinnedMessageType } from '@/helper/message';
 import type { Friend } from '@/helper/friends';
+import { useSocketStore } from '@/providers';
 
 const PersonalMessagesHeader = dynamic(() => import('./header'));
 const ChatItem = dynamic(
@@ -34,8 +34,10 @@ export default function PersonalMessages({
   pinnedMessages,
   setIsOpen,
 }: Props) {
-  const messages = useSocketState('personal_messages');
-  const socket = useSocketState('socket');
+  const { socket, personalMessages } = useSocketStore((state) => ({
+    socket: state.socket,
+    personalMessages: state.personal_messages,
+  }));
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
@@ -77,14 +79,14 @@ export default function PersonalMessages({
     >
       <PersonalMessagesHeader
         setIsOpen={setIsOpen}
-        messages={messages}
+        messages={personalMessages}
         friend={friend}
         pathname={pathname}
         pinnedMessages={pinnedMessages}
       />
       <UserInfo friend={friend} />
       <ul className='flex h-max flex-col gap-5 px-3 pb-5'>
-        {messages?.map((message) => (
+        {personalMessages?.map((message) => (
           <ChatItem
             // @ts-ignore
             pinMessage={(msg, userId) => handlePinMessage(msg, userId)}
@@ -92,7 +94,7 @@ export default function PersonalMessages({
             type='personal'
             key={message?.message_id}
             msg={message}
-            messages={messages}
+            messages={personalMessages}
           />
         ))}
       </ul>

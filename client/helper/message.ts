@@ -37,7 +37,6 @@ export async function getPersonalPinnedMessages(
   conversationId: string,
 ): Promise<PinnedMessageType[]> {
   try {
-    console.log({ conversationId });
     if (!conversationId) return [];
 
     const messages = await api.getData<PinnedMessageType[]>(

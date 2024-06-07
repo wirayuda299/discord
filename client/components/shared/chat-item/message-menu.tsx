@@ -18,10 +18,10 @@ import EmojiPicker from '../emoji-picker';
 import { Message } from '@/types/messages';
 
 import { discordEmojis } from '@/constants/emoji';
-import { useMessage } from '@/providers/message';
 import TopEmoji from './top-emoji';
 import { copyText } from '@/utils/copy';
 import { revalidate } from '@/utils/cache';
+import { useSelectedMessageStore } from '@/providers';
 
 type Props = {
   msg: Message;
@@ -40,7 +40,9 @@ function MessageMenu({
   reloadMessage,
   setIsOpen,
 }: Props) {
-  const { setMessage } = useMessage();
+  const setMessage = useSelectedMessageStore(
+    (state) => state.setSelectedMessage,
+  );
   const pathname = usePathname();
 
   const handleAddOrRemoveReactions = useCallback(

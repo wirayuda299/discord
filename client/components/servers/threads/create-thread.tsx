@@ -4,9 +4,9 @@ import { FormEvent, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 
 import { cn } from '@/lib/utils';
-import { useMessage } from '@/providers/message';
 import EmojiPicker from '@/components/shared/emoji-picker';
 import { formatDate } from '@/utils/date';
+import { useSelectedMessageStore } from '@/providers';
 
 export default function CreateThread({
   channelId,
@@ -15,7 +15,10 @@ export default function CreateThread({
   channelId: string;
   pathname: string;
 }) {
-  const { state, setMessage } = useMessage();
+  const { selectedMessage, setMessage } = useSelectedMessageStore((state) => ({
+    selectedMessage: state.selectedMessage,
+    setMessage: state.setSelectedMessage,
+  }));
   const { userId } = useAuth();
   const ref = useRef<HTMLInputElement>(null);
 
@@ -33,7 +36,7 @@ export default function CreateThread({
     const message = e.target.message.value;
     const { toast } = await import('sonner');
 
-    if (!state || !state.message) {
+    if (!message) {
       toast.message('Please select a message to start create thread');
       return;
     }
@@ -50,7 +53,7 @@ export default function CreateThread({
       await createThread({
         channelId,
         message,
-        msgId: state?.message?.message_id || '',
+        msgId: message?.message_id || '',
         threadName,
         userId: userId!!,
         imageAssetId: '',
@@ -69,9 +72,9 @@ export default function CreateThread({
     <aside
       className={cn(
         'ease fixed -right-full top-0 z-20 h-screen min-w-96 overflow-y-auto bg-foreground shadow-2xl transition-all duration-300',
-        state &&
-          state?.message &&
-          state.action === 'create_thread' &&
+        selectedMessage &&
+          selectedMessage &&
+          selectedMessage.action === 'create_thread' &&
           'right-0',
       )}
     >
@@ -94,15 +97,15 @@ export default function CreateThread({
           <X />
         </button>
       </header>
-      {state?.message && (
+      {selectedMessage && (
         <div className='p-3'>
           <div className='flex flex-wrap gap-2'>
             <p className='inline-flex gap-x-1 text-nowrap pt-[3px] text-xs leading-snug text-gray-600'>
-              {formatDate(state?.message.created_at)}
+              {formatDate(selectedMessage.message.created_at)}
             </p>
             <div className='flex flex-wrap items-start gap-2'>
               <p className='text-sm leading-snug text-gray-2'>
-                {state?.message.username}
+                {selectedMessage.message.username}
               </p>
 
               <p
@@ -112,24 +115,25 @@ export default function CreateThread({
                   wordBreak: 'break-all',
                 }}
               >
-                {state?.message.message}
-                {new Date(state?.message.update_at) >
-                  new Date(state?.message.created_at) && (
+                {selectedMessage.message.message}
+                {new Date(selectedMessage.message.update_at) >
+                  new Date(selectedMessage.message.created_at) && (
                   <span className='text-xs text-gray-2'>(edited)</span>
                 )}
               </p>
             </div>
           </div>
-          {state?.message.media_image && !state?.message.parent_message_id && (
-            <Image
-              src={state?.message.media_image}
-              width={200}
-              height={100}
-              alt='media'
-              className='ml-9 mt-3 aspect-auto rounded-md object-cover'
-              loading='lazy'
-            />
-          )}
+          {selectedMessage.message.media_image &&
+            !selectedMessage.message.parent_message_id && (
+              <Image
+                src={selectedMessage.message.media_image}
+                width={200}
+                height={100}
+                alt='media'
+                className='ml-9 mt-3 aspect-auto rounded-md object-cover'
+                loading='lazy'
+              />
+            )}
         </div>
       )}
       <div className='flex min-h-[calc(100%-20px)] flex-col justify-end p-3'>

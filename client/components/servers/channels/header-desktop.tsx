@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { ChevronRight, X } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 
 const ServersMembers = dynamic(() => import('@/components/servers/members'));
 const NotificationSettings = dynamic(
@@ -18,9 +19,16 @@ const PinnedMessage = dynamic(
 
 import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
-import { useServerContext } from '@/providers/servers';
-import { useUpdateServerState } from '@/hooks/useUpdateServerState';
 import SearchForm from '@/components/shared/search-form';
+import { useServerStates } from '@/providers';
+
+type Props = {
+  channelName: string;
+  pinnedMessages: PinnedMessageType[];
+  threads: AllThread[];
+  channelId: string;
+  serverId: string;
+};
 
 export default function ChannelsHeader({
   channelName,
@@ -28,15 +36,13 @@ export default function ChannelsHeader({
   threads,
   channelId,
   serverId,
-}: {
-  channelName: string;
-  pinnedMessages: PinnedMessageType[];
-  threads: AllThread[];
-  channelId: string;
-  serverId: string;
-}) {
-  const thread = useServerContext('selectedThread');
-  const updateState = useUpdateServerState();
+}: Props) {
+  const { thread, setSelectedThread } = useServerStates(
+    useShallow((state) => ({
+      thread: state.selectedThread,
+      setSelectedThread: state.setSelectedThread,
+    })),
+  );
 
   const handleDeletePinnedMessage = async (id: string) => {
     const { createError } = await import('@/utils/error');
@@ -61,7 +67,7 @@ export default function ChannelsHeader({
           alt='hashtag'
         />
         <h3
-          onClick={() => updateState({ selectedThread: null })}
+          onClick={() => setSelectedThread(null)}
           className='cursor-pointer truncate text-base font-semibold text-gray-2'
         >
           {channelName}
