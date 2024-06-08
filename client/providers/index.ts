@@ -1,10 +1,10 @@
+import type { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 
 import { Message, Thread } from '@/types/messages';
 import { Categories } from '@/types/channels';
 import { Servers } from '@/types/server';
 import { SocketStates } from '@/types/socket-states';
-import { Socket } from 'socket.io-client';
 
 type MessageStates = {
   message: Message;
@@ -43,9 +43,6 @@ const initialValues: ServerStates = {
 
 const socketStates = {
   active_users: [],
-  channel_messages: [],
-  personal_messages: [],
-  thread_messages: [],
   socket: null,
   isConnected: false,
 };
@@ -69,8 +66,6 @@ type SocketStore = SocketStates & {
   setSocket: (socket: Socket | null) => void;
   setIsConnected: (isConnected: boolean) => void;
   setActiveUsers: (users: string[]) => void;
-  setPersonalMessages: (messages: Message[]) => void;
-  setChannelMessages: (messages: Message[]) => void;
 };
 
 export const useSocketStore = create<SocketStore>((set) => ({
@@ -78,6 +73,4 @@ export const useSocketStore = create<SocketStore>((set) => ({
   setSocket: (socket) => set({ socket }),
   setIsConnected: (isConnected) => set({ isConnected }),
   setActiveUsers: (active_users) => set({ active_users }),
-  setPersonalMessages: (personal_messages) => set({ personal_messages }),
-  setChannelMessages: (channel_messages) => set({ channel_messages }),
 }));

@@ -28,9 +28,10 @@ const chatSchema = z.object({
 type Props = {
   placeholder: string;
   type: string;
+  reloadMessage: () => void;
 };
 
-export default function ChatForm({ placeholder, type }: Props) {
+export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const { userId } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -171,6 +172,7 @@ export default function ChatForm({ placeholder, type }: Props) {
         socket.emit('message', values);
       }
     }
+    reloadMessage();
     form.reset();
     if (selectedMessage) {
       resetSelectedMessage();

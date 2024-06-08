@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { createError } from '@/utils/error';
-import { reloadChannelMessages } from '@/providers/socket-io';
+
 import { useServerStates, useSocketStore } from '@/providers';
+import { Message } from '@/types/messages';
 
 const ThreadsMessages = dynamic(() => import('../threads/thread-messages'));
 const CreateThread = dynamic(() => import('../threads/create-thread'));
@@ -19,12 +20,11 @@ const ChatForm = dynamic(() => import('@/components/shared/chat-form'));
 export default function ChannelsMessages() {
   const pathname = usePathname();
   const params = useParams();
-  const thread = useServerStates((state) => state.selectedThread);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const ref = useRef<HTMLDivElement>(null);
 
-  const { channelMessages, socket } = useSocketStore((state) => ({
-    socket: state.socket,
-    channelMessages: state.channel_messages,
-  }));
+  const thread = useServerStates((state) => state.selectedThread);
+  const socket = useSocketStore((state) => state.socket);
 
   const serverId = params?.id as string;
   const channelId = params?.channel_id as string;
@@ -44,8 +44,25 @@ export default function ChannelsMessages() {
     [channelId, pathname],
   );
 
+  useEffect(() => {
+    if (!socket) return;
+
+    socket?.emit('get-channel-message', {
+      serverId,
+      channelId,
+    });
+  }, [socket, params, serverId, channelId]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket?.on('set-message', (messages) => setMessages(messages));
+  }, [socket]);
+
   return (
-    <div className='flex min-h-screen w-full grow flex-col justify-between p-3'>
+    <div
+      ref={ref}
+      className='flex min-h-screen w-full grow flex-col justify-between p-3'
+    >
       <ul className='flex h-max flex-col gap-5 py-5'>
         {thread ? (
           <ThreadsMessages
@@ -55,14 +72,17 @@ export default function ChannelsMessages() {
             thread={thread}
           />
         ) : (
-          channelMessages?.map((message) => (
+          messages?.map((message) => (
             <ChatItem
               key={message.message_id}
-              messages={channelMessages}
+              messages={messages}
               msg={message}
               type='channel'
               reloadMessage={() =>
-                reloadChannelMessages(socket, serverId, channelId)
+                socket?.emit('get-channel-message', {
+                  serverId,
+                  channelId,
+                })
               }
               pinMessage={(msg, userId) =>
                 handlePinMessage(msg.message_id, userId)
@@ -74,6 +94,17 @@ export default function ChannelsMessages() {
       <CreateThread channelId={channelId} pathname={pathname} />
       <div className='sticky bottom-0 left-0 right-0 backdrop-blur-sm'>
         <ChatForm
+          reloadMessage={() =>
+            thread
+              ? socket?.emit('thread-messages', {
+                  threadId: thread.thread_id,
+                  serverId,
+                })
+              : socket?.emit('get-channel-message', {
+                  serverId,
+                  channelId,
+                })
+          }
           placeholder='send message'
           type={thread ? 'thread' : 'channel'}
         />

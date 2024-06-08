@@ -15,5 +15,5 @@ export default function useScroll<T extends Element | null, K>(
   }, [ref]);
   useEffect(() => {
     scrollToTop();
-  }, [messages.length, scrollToTop]);
+  }, [messages, scrollToTop]);
 }

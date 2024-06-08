@@ -105,9 +105,7 @@ export class SocketGateway implements OnModuleInit {
           payload.channelId,
           payload.serverId
         );
-        process.nextTick(() => {
-          this.server.emit('set-message', messages);
-        });
+        this.server.emit('set-message', messages);
         break;
       case 'reply':
         await this.handleReplyMessage(payload);
@@ -158,9 +156,7 @@ export class SocketGateway implements OnModuleInit {
         payload.channelId,
         payload.serverId
       );
-      process.nextTick(() => {
-        this.server.emit('set-message', messages);
-      });
+      this.server.emit('set-message', messages);
     } catch (error) {
       this.logger.error('Error getting channel messages', error);
     }
@@ -174,8 +170,6 @@ export class SocketGateway implements OnModuleInit {
       serverId: string;
     }
   ) {
-    console.log({ payload });
-
     try {
       const messages = await this.threadsService.getThreadMessage(
         payload.threadId,

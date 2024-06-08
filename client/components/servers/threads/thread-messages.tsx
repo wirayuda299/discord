@@ -3,7 +3,6 @@ import { memo, useCallback, useEffect, useState } from 'react';
 
 import ChatItem from '@/components/shared/chat-item/chat-item';
 import { Message, Thread } from '@/types/messages';
-import { reloadThreadMessage } from '@/providers/socket-io';
 
 function ThreadsMessages({
   thread,
@@ -21,20 +20,26 @@ function ThreadsMessages({
   const reloadThread = useCallback(async () => {
     if (!thread) return;
 
-    reloadThreadMessage(socket, thread?.thread_id, serverId);
+    socket?.emit('thread-messages', {
+      threadId: thread.thread_id,
+      serverId,
+    });
   }, [serverId, socket, thread]);
 
   useEffect(() => {
-    if (thread) {
+    if (thread && socket) {
       reloadThread();
-      socket?.on('set-thread-messages', (messages: Message[]) => {
-        setThreadMessages(messages);
-      });
     }
     return () => {
       socket?.off('set-thread-messages');
     };
   }, [reloadThread, socket, thread]);
+
+  useEffect(() => {
+    socket?.on('set-thread-messages', (messages: Message[]) => {
+      setThreadMessages(messages);
+    });
+  }, [socket]);
 
   return (
     <>

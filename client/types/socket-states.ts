@@ -1,5 +1,4 @@
 import type { Socket } from 'socket.io-client';
-import { Message } from './messages';
 
 export type BannedMembers = {
   member_id: string;
@@ -15,10 +14,7 @@ export type BannedMembers = {
   image: string;
 };
 export type SocketStates = {
-  channel_messages: Message[];
   active_users: string[];
-  personal_messages: Message[];
-  thread_messages: Message[];
   socket: Socket | null;
   isConnected: boolean;
 };

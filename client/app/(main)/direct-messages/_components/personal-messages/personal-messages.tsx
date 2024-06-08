@@ -2,7 +2,13 @@
 
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
-import { Dispatch, SetStateAction, useCallback } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
@@ -34,12 +40,11 @@ export default function PersonalMessages({
   pinnedMessages,
   setIsOpen,
 }: Props) {
-  const { socket, personalMessages } = useSocketStore((state) => ({
-    socket: state.socket,
-    personalMessages: state.personal_messages,
-  }));
-  const searchParams = useSearchParams();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const socket = useSocketStore((state) => state.socket);
 
   const recipientId = searchParams.get('userId') as string;
   const conversationId = searchParams.get('conversationId') as string;
@@ -52,6 +57,15 @@ export default function PersonalMessages({
       userId: recipientId,
     });
   }, [socket, conversationId, recipientId]);
+
+  useEffect(() => {
+    if (!recipientId) return;
+    reloadPersonalMessage();
+  }, [recipientId, reloadPersonalMessage, socket]);
+
+  useEffect(() => {
+    socket?.on('set-personal-messages', (messages) => setMessages(messages));
+  }, [socket]);
 
   const handlePinMessage = useCallback(
     async (msg: Message & { conversation_id: string }, userId: string) => {
@@ -79,14 +93,14 @@ export default function PersonalMessages({
     >
       <PersonalMessagesHeader
         setIsOpen={setIsOpen}
-        messages={personalMessages}
+        messages={messages}
         friend={friend}
         pathname={pathname}
         pinnedMessages={pinnedMessages}
       />
       <UserInfo friend={friend} />
       <ul className='flex h-max flex-col gap-5 px-3 pb-5'>
-        {personalMessages?.map((message) => (
+        {messages?.map((message) => (
           <ChatItem
             // @ts-ignore
             pinMessage={(msg, userId) => handlePinMessage(msg, userId)}
@@ -94,12 +108,13 @@ export default function PersonalMessages({
             type='personal'
             key={message?.message_id}
             msg={message}
-            messages={personalMessages}
+            messages={messages}
           />
         ))}
       </ul>
       <div className='sticky bottom-0 left-0 right-0 p-3 backdrop-blur-sm'>
         <ChatForm
+          reloadMessage={reloadPersonalMessage}
           placeholder={`Message to ${friend?.username}`}
           type='personal'
         />
