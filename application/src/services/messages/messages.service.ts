@@ -4,7 +4,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MessageBody } from '@nestjs/websockets';
 
 import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from '../../common/utils/groupMessageByEmoji';
@@ -118,15 +117,12 @@ export class MessagesService {
   }
 
   async sendMessage(
-    @MessageBody()
-    payload: {
-      content: string;
-      is_read: boolean;
-      user_id: string;
-      channelId: string;
-      imageUrl: string;
-      imageAssetId: string;
-    }
+    content: string,
+    is_read: boolean,
+    user_id: string,
+    channelId: string,
+    imageUrl: string,
+    imageAssetId: string
   ) {
     try {
       await this.db.pool.query('BEGIN');
@@ -138,13 +134,7 @@ export class MessagesService {
           `INSERT INTO messages(content, user_id, image_url, image_asset_id, type)
            VALUES($1, $2, $3, $4, $5)
            RETURNING id`,
-          [
-            payload.content,
-            payload.user_id,
-            payload.imageUrl ?? '',
-            payload.imageAssetId ?? '',
-            'channel',
-          ]
+          [content, user_id, imageUrl ?? '', imageAssetId ?? '', 'channel']
         );
 
         const messageId = message.id;
@@ -152,7 +142,7 @@ export class MessagesService {
         await this.db.pool.query(
           `INSERT INTO channel_messages (channel_id, message_id)
        VALUES($1, $2)`,
-          [payload.channelId, messageId]
+          [channelId, messageId]
         );
 
         await this.db.pool.query('COMMIT');

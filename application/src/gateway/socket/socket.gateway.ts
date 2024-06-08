@@ -101,7 +101,14 @@ export class SocketGateway implements OnModuleInit {
     this.logger.log(payload);
     switch (payload.type) {
       case 'channel':
-        await this.messagesService.sendMessage(payload);
+        await this.messagesService.sendMessage(
+          payload.content,
+          payload.is_read,
+          payload.user_id,
+          payload.channelId,
+          payload.imageUrl,
+          payload.imageAssetId
+        );
         const messages = await this.messagesService.getMessageByChannelId(
           payload.channelId,
           payload.serverId
