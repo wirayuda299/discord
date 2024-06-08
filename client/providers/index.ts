@@ -60,9 +60,9 @@ export const useServerStates = create<ServerStoreType>((set) => ({
   ...initialValues,
   setSelectedChannel: (selectedChannel) => set(() => ({ selectedChannel })),
   setSelectedOption: (selectedOption) => set(() => ({ selectedOption })),
-  setSelectedServer: (server) => set(() => ({ selectedServer: server })),
+  setSelectedServer: (selectedServer) => set(() => ({ selectedServer })),
   setSelectedSetting: (selectedSetting) => set(() => ({ selectedSetting })),
-  setSelectedThread: (thread) => set(() => ({ selectedThread: thread })),
+  setSelectedThread: (selectedThread) => set(() => ({ selectedThread })),
 }));
 
 type SocketStore = SocketStates & {

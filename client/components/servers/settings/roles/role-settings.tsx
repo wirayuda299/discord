@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { ArrowLeft, Check, ImagePlus, Plus } from 'lucide-react';
+import { ArrowLeft, Check, ImagePlus, Plus, Trash } from 'lucide-react';
 import Image from 'next/image';
 import { useSWRConfig } from 'swr';
 import { useAuth } from '@clerk/nextjs';
@@ -25,6 +25,11 @@ import { Input } from '@/components/ui/input';
 import { colors } from '@/constants/colors';
 import useUploadFile from '@/hooks/useFileUpload';
 import { Switch } from '@/components/ui/switch';
+import { revalidate } from '@/utils/cache';
+import { createError } from '@/utils/error';
+import { updateRole } from '@/helper/roles';
+import { deleteImage, uploadFile } from '@/helper/file';
+import { createRole } from '@/actions/roles';
 
 import MemberWithRole from './memberWithRole';
 
@@ -98,12 +103,6 @@ export default function RolesSettings({
   const { handleChange, preview, files } = useUploadFile(form);
 
   const handleCreateOrUpdateRole = async (data: z.infer<typeof schema>) => {
-    const { revalidate } = await import('@/utils/cache');
-    const { createError } = await import('@/utils/error');
-    const { createRole } = await import('@/actions/roles');
-    const { deleteImage, uploadFile } = await import('@/helper/file');
-    const { updateRole } = await import('@/helper/roles');
-
     let media = null;
     if (!userId) return;
 
@@ -168,6 +167,7 @@ export default function RolesSettings({
           manage_role,
           manage_thread,
         );
+        mutate('members');
         toast.success('Role has been updated');
       }
     } catch (error) {
@@ -283,8 +283,8 @@ export default function RolesSettings({
                           their role list.
                         </FormDescription>
                         <FormControl>
-                          <div className='flex items-center gap-2'>
-                            <div className='flex size-[87px] min-w-[87px] items-center justify-center bg-gray-2 text-center text-sm text-foreground'>
+                          <div className='flex flex-wrap items-center gap-2'>
+                            <div className='flex size-[87px] min-w-[87px] max-w-[87px] items-center justify-center bg-gray-2 text-center text-sm text-foreground'>
                               <div className='text-gray-1'>
                                 Default
                                 <Check className='mx-auto text-center' />
@@ -295,7 +295,7 @@ export default function RolesSettings({
                               type='color'
                               className='size-28 min-w-28 cursor-auto !rounded-md border-none bg-transparent ring-offset-transparent focus:shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-transparent'
                             />
-                            <div className='flex flex-wrap gap-3'>
+                            <div className='flex max-w-64 flex-wrap gap-3'>
                               {colors.map((color) => (
                                 <button
                                   type='button'
@@ -306,7 +306,7 @@ export default function RolesSettings({
                                     })
                                   }
                                   key={color}
-                                  className={`size-10 rounded-md`}
+                                  className={`size-7 rounded-md`}
                                   style={{ backgroundColor: color }}
                                 ></button>
                               ))}
@@ -348,7 +348,7 @@ export default function RolesSettings({
                               )}
                               <FormLabel
                                 htmlFor='icon'
-                                className='h-9 w-32 rounded border p-2 text-center text-gray-2'
+                                className='block h-9 w-32 rounded border p-2 text-center text-gray-2'
                               >
                                 {icon || (preview && preview.icon)
                                   ? 'Change Image'

@@ -119,14 +119,14 @@ export class MembersService {
   async getMembersHasNoRole(serverId: string) {
     try {
       const members = await this.db.pool.query(
-        ` SELECT *
-        FROM members m
-        LEFT JOIN user_roles ur ON m.user_id = ur.user_id
-        join server_profile as sp on sp.server_id = $1 and sp.user_id = ur.user_id
-          WHERE ur.role_id IS NULL
-          AND m.server_id = $1`,
+        `  select * from members as m
+        left join user_roles as ur on ur.user_id = m.user_id
+        join server_profile as sp on sp.server_id= $1 and sp.user_id= m.user_id 
+        where m.server_id = $1
+        and ur.role_id is null`,
         [serverId]
       );
+
       return {
         data: members.rows,
         error: false,

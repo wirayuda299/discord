@@ -133,8 +133,6 @@ export class UserService {
 
   async searchUser(name: string, id: string) {
     try {
-      console.log(name, id);
-
       if (name) {
         const users = await this.databaseService.pool.query(
           `select * from users 

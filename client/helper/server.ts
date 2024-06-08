@@ -2,7 +2,6 @@ import { revalidatePath } from 'next/cache';
 
 import { Categories } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
-import { revalidate } from '@/utils/cache';
 import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
@@ -25,9 +24,14 @@ export async function getAllServerCreatedByCurrentUser(
 
 export async function getServerById(id: string) {
   try {
-    const server = await api.getData<Servers>(`/servers/${id}`);
-
-    return server;
+    return await api.getData<Servers>(`/servers/${id}`);
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getServerByCode(code: string) {
+  try {
+    return await api.getData<Servers>(`/servers?invite_code=${code}`);
   } catch (error) {
     throw error;
   }
@@ -58,7 +62,7 @@ export async function generateNewInviteCode(serverId: string, path: string) {
   }
 }
 
-export async function getServerMembers(serverId: string): Promise<Member[]> {
+export async function getServerMembers(serverId: string) {
   try {
     const members = await api.getData<Member[]>(
       `/members?serverId=${serverId}`,

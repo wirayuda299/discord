@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { useSWRConfig } from 'swr';
 import { useParams } from 'next/navigation';
 
+import { createError } from '@/utils/error';
+import { revalidate } from '@/utils/cache';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,14 +26,12 @@ export default function AssignRole({
 }) {
   const { mutate } = useSWRConfig();
   const params = useParams();
-  const { data, isLoading, error } = useFetch('members', () =>
+  const { data, isLoading, error } = useFetch('members-no-role', () =>
     getMemberWithoutRole(params.id as string),
   );
 
   const handleAssignRole = async (userId: string) => {
     const { assignRole } = await import('@/actions/roles');
-    const { createError } = await import('@/utils/error');
-    const { revalidate } = await import('@/utils/cache');
 
     try {
       if (!role) return;
@@ -42,6 +42,7 @@ export default function AssignRole({
     } catch (error) {
       createError(error);
     } finally {
+      mutate('members-no-role');
       mutate('roles');
       revalidate(`/server/${params.serverId}`);
       revalidate(`/server/${params.serverId}/${params.channelId}`);
@@ -51,7 +52,14 @@ export default function AssignRole({
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className='flex-center'>
+        <div className='dot'></div>
+        <div className='dot'></div>
+        <div className='dot'></div>
+      </div>
+    );
   if (error) return <p>{error.message}</p>;
 
   return (

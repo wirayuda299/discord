@@ -226,7 +226,30 @@ export class ServersService {
     }
   }
 
-  async inviteUser(inviteCode: string, userId: string, server_id: string) {
+  async getServerByItsCode(inviteCode: string) {
+    try {
+      const foundServer = await this.databaseService.pool.query(
+        `SELECT * FROM servers WHERE invite_code = $1`,
+        [inviteCode]
+      );
+
+      if (foundServer.rows.length < 1) {
+        throw new HttpException(
+          'Invite code is not valid anymore',
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      return {
+        data: foundServer.rows[0],
+        error: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async joinServer(inviteCode: string, userId: string, server_id: string) {
     try {
       if (!userId || !server_id || !inviteCode)
         throw new HttpException(
@@ -236,12 +259,11 @@ export class ServersService {
 
       const banned_members = await this.databaseService.pool.query(
         `SELECT * 
-       FROM banned_members AS bm
-       JOIN server_profile AS sp ON sp.user_id = bm.member_id 
-       WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
+          FROM banned_members AS bm
+          JOIN server_profile AS sp ON sp.user_id = bm.member_id 
+          WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
         [server_id, userId]
       );
-      console.log(banned_members);
 
       if (banned_members.rows.length >= 1) {
         throw new HttpException(
@@ -251,19 +273,9 @@ export class ServersService {
         );
       }
 
-      const isServerExists = await this.databaseService.pool.query(
-        `SELECT * FROM servers WHERE invite_code = $1`,
-        [inviteCode]
-      );
+      const isServerExists = await this.getServerByItsCode(inviteCode);
 
-      if (isServerExists.rows.length < 1) {
-        throw new HttpException(
-          'Invite code is not valid anymore',
-          HttpStatus.BAD_REQUEST
-        );
-      }
-
-      if (isServerExists.rows[0]?.owner_id === userId) {
+      if (isServerExists.data?.owner_id === userId) {
         throw new HttpException(
           'You already an admin of this server',
           HttpStatus.BAD_REQUEST

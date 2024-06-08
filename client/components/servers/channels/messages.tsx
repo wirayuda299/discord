@@ -71,13 +71,13 @@ export default function ChannelsMessages() {
           ))
         )}
       </ul>
+      <CreateThread channelId={channelId} pathname={pathname} />
       <div className='sticky bottom-0 left-0 right-0 backdrop-blur-sm'>
         <ChatForm
           placeholder='send message'
           type={thread ? 'thread' : 'channel'}
         />
       </div>
-      <CreateThread channelId={channelId} pathname={pathname} />
     </div>
   );
 }

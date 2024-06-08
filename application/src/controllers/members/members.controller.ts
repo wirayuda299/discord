@@ -40,6 +40,8 @@ export class MembersController {
 
   @Get('/without-role')
   getMemberWithNoRole(@Query('serverId') serverId: string) {
+    console.log({ serverId });
+
     return this.memberService.getMembersHasNoRole(serverId);
   }
 

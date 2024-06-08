@@ -10,6 +10,7 @@ import {
 } from '../ui/dropdown-menu';
 import ServerSettingsDesktop from '../servers/settings/desktop';
 import { Servers } from '@/types/server';
+import ServerInvitationModal from './invite-modal';
 
 export default function ServersMenu({ server }: { server: Servers }) {
   return (
@@ -34,16 +35,21 @@ export default function ServersMenu({ server }: { server: Servers }) {
           />
         </DropdownMenuItem>
         <DropdownMenuSeparator className='border-b border-b-background' />
-
-        <DropdownMenuItem className='flex items-center justify-between !text-primary/80 hover:!bg-primary hover:!text-white'>
-          <p>Invite user</p>
-          <Image
-            src={'/server/icons/user-plus.svg'}
-            width={20}
-            height={20}
-            alt='invite user'
-          />
-        </DropdownMenuItem>
+        <ServerInvitationModal
+          serverId={server.id}
+          inviteCode={server.invite_code}
+          serverName={server.name}
+        >
+          <DropdownMenuItem className='flex items-center justify-between !text-primary/80 hover:!bg-primary hover:!text-white'>
+            <p>Invite user</p>
+            <Image
+              src={'/server/icons/user-plus.svg'}
+              width={20}
+              height={20}
+              alt='invite user'
+            />
+          </DropdownMenuItem>
+        </ServerInvitationModal>
         <ServerSettingsDesktop server={server} />
 
         <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>

@@ -2,7 +2,6 @@ import { Permission } from '@/types/server';
 import { prepareHeaders } from './cookies';
 import { ApiRequest } from '@/utils/api';
 
-const serverUrl = process.env.SERVER_URL;
 const api = new ApiRequest();
 
 export interface Role {

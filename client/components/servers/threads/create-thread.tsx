@@ -2,14 +2,14 @@ import Image from 'next/image';
 import { SendHorizontal, X } from 'lucide-react';
 import { FormEvent, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { toast } from 'sonner';
+
 import { createError } from '@/utils/error';
 import { revalidate } from '@/utils/cache';
-
 import { cn } from '@/lib/utils';
 import EmojiPicker from '@/components/shared/emoji-picker';
 import { formatDate } from '@/utils/date';
 import { useSelectedMessageStore } from '@/providers';
-import { toast } from 'sonner';
 
 export default function CreateThread({
   channelId,
@@ -69,19 +69,17 @@ export default function CreateThread({
     }
   };
 
-  console.log(selectedMessage);
-
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-20 h-screen min-w-96 overflow-y-auto bg-foreground shadow-2xl transition-all duration-300',
+        'ease fixed -right-full top-0 z-20 h-screen min-w-96 bg-foreground shadow-2xl transition-all duration-300',
         selectedMessage &&
           selectedMessage &&
           selectedMessage.action === 'create_thread' &&
           'right-0',
       )}
     >
-      <header className='sticky left-0 top-0 flex h-12 w-full items-center justify-between bg-background p-3'>
+      <header className='sticky left-0 top-0 z-10 flex h-12 w-full items-center justify-between bg-background p-3'>
         <div className='flex-center gap-2'>
           <Image
             src={'/general/icons/threads.svg'}
@@ -139,25 +137,24 @@ export default function CreateThread({
             )}
         </div>
       )}
-      <div className='flex min-h-[calc(100%-20px)] flex-col justify-end p-3'>
-        <form
-          onSubmit={handleSubmit}
-          className='sticky bottom-0 left-0 flex flex-col gap-3'
-        >
-          <div className='flex size-16 items-center justify-center rounded-full bg-foreground brightness-125'>
-            <Image
-              src={'/general/icons/threads.svg'}
-              width={40}
-              height={40}
-              alt='threads'
-            />
+      <div className='flex min-h-[calc(100vh-100px)] flex-col justify-end p-3'>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-8'>
+          <div>
+            <div className='z-0 flex size-16 items-center justify-center rounded-full bg-foreground brightness-125'>
+              <Image
+                src={'/general/icons/threads.svg'}
+                width={40}
+                height={40}
+                alt='threads'
+              />
+            </div>
+            <label
+              htmlFor='thread_name'
+              className='block py-2 text-sm font-semibold uppercase text-gray-2'
+            >
+              Thread name
+            </label>
           </div>
-          <label
-            htmlFor='thread_name'
-            className='block py-2 text-sm font-semibold uppercase text-gray-2'
-          >
-            Thread name
-          </label>
           <input
             name='thread_name'
             type='text'

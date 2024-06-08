@@ -68,9 +68,15 @@ export class ServersController {
   ) {
     return this.serverService.deleteServer(serverId, sessionId);
   }
+
   @Get('/:id')
   getServerById(@Param('id') serverId: string) {
     return this.serverService.getServerById(serverId);
+  }
+
+  @Get()
+  getServerByItsCode(@Query('invite_code') code: string) {
+    return this.serverService.getServerByItsCode(code);
   }
 
   @Patch('/new-invite-code')
@@ -93,8 +99,6 @@ export class ServersController {
       showProgressBar,
     } = req.body;
 
-    console.log(req.body);
-
     return this.serverService.updateServer(
       serverId,
       currentSessionId,
@@ -108,9 +112,9 @@ export class ServersController {
     );
   }
 
-  @Post('/invite-user')
+  @Post('/join')
   inviteUser(@Req() req: Request) {
     const { inviteCode, userId, serverId } = req.body;
-    return this.serverService.inviteUser(inviteCode, userId, serverId);
+    return this.serverService.joinServer(inviteCode, userId, serverId);
   }
 }
