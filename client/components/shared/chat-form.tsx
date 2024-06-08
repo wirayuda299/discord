@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { SendHorizontal, X } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -55,22 +55,23 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   });
   const { handleChange, preview, files } = useUploadFile(form);
 
-  const deleteImage = useCallback(() => form.setValue('image', null), [form]);
+  const deleteImage = () => form.setValue('image', null);
 
   const appendEmoji = useCallback(() => {
     (emoji: string) =>
       form.setValue('message', form.getValues('message') + emoji);
   }, [form]);
 
-  const resetSelectedMessage = useCallback(() => setMessage(null), []);
+  const resetSelectedMessage = useCallback(
+    () => setMessage(null),
+    [setMessage],
+  );
 
   const isSubmitting = form.formState.isSubmitting;
   const isValid = form.formState.isValid;
   const image = form.watch('image');
 
   const onSubmit = async (data: z.infer<typeof chatSchema>) => {
-    if (!socket) return;
-
     let attachment: { publicId: string; url: string } | null = null;
 
     if (image && files && files.image) {

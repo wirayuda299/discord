@@ -98,6 +98,7 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
+    this.logger.log(payload);
     switch (payload.type) {
       case 'channel':
         await this.messagesService.sendMessage(payload);
@@ -138,9 +139,7 @@ export class SocketGateway implements OnModuleInit {
           payload.conversationId,
           payload.user_id
         );
-        process.nextTick(() => {
-          this.server.emit('set-personal-messages', message);
-        });
+        this.server.emit('set-personal-messages', message);
         break;
       default:
         this.logger.warn(`Unknown message type: ${payload.type}`);

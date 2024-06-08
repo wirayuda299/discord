@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -21,7 +21,6 @@ export default function ChannelsMessages() {
   const pathname = usePathname();
   const params = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
-  const ref = useRef<HTMLDivElement>(null);
 
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
@@ -45,24 +44,18 @@ export default function ChannelsMessages() {
   );
 
   useEffect(() => {
-    if (!socket) return;
-
     socket?.emit('get-channel-message', {
       serverId,
       channelId,
     });
-  }, [socket, params, serverId, channelId]);
+  }, [socket, serverId, channelId]);
 
   useEffect(() => {
-    if (!socket) return;
     socket?.on('set-message', (messages) => setMessages(messages));
-  }, [socket]);
+  }, [socket, setMessages]);
 
   return (
-    <div
-      ref={ref}
-      className='flex min-h-screen w-full grow flex-col justify-between p-3'
-    >
+    <div className='flex min-h-screen w-full grow flex-col justify-between p-3'>
       <ul className='flex h-max flex-col gap-5 py-5'>
         {thread ? (
           <ThreadsMessages
