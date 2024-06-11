@@ -20,6 +20,7 @@ import {
   useSocketStore,
 } from '@/providers';
 import { Input } from '../ui/input';
+import { revalidate } from '@/utils/cache';
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Please add message'),
