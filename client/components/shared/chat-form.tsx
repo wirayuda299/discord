@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback } from 'react';
 import { SendHorizontal, X } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 
 import { Form, FormControl, FormField, FormItem } from '../ui/form';
 import FileUpload from './file-upload';
@@ -36,6 +36,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const { userId } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
@@ -94,6 +95,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       });
       if (socket) {
         socket?.emit('message', values);
+        revalidate(pathname);
       }
     }
 
