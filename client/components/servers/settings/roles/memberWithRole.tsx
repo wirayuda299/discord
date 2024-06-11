@@ -31,7 +31,7 @@ export default function MemberWithRole({
     } catch (error) {
       createError(error);
     } finally {
-      mutate('user-permissions');
+      mutate('permissions');
       mutate('members');
       mutate('members-by-role');
     }

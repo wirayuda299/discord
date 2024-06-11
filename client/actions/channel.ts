@@ -9,7 +9,6 @@ export async function createChannel(
   name: string,
   serverId: string,
   type: string,
-  path: string,
   userId: string,
   serverAuthor: string,
 ) {
@@ -22,7 +21,7 @@ export async function createChannel(
       serverAuthor,
     };
     await api.update('/channels/create', body, 'POST');
-    revalidatePath(path);
+    revalidatePath(`/server/${serverId}`);
   } catch (error) {
     throw error;
   }

@@ -145,6 +145,8 @@ export default function RolesSettings({
 
       if (type === 'update' && selectedRole) {
         if (editedFields.icon && files && files.icon) {
+          console.log('File change');
+
           media = await uploadFile(files.icon);
         }
 
@@ -168,14 +170,13 @@ export default function RolesSettings({
           manage_thread,
         );
         mutate('members');
+        mutate('permissions');
         toast.success('Role has been updated');
       }
     } catch (error) {
       createError(error);
     } finally {
       mutate('roles');
-      mutate('user-permissions');
-
       revalidate(`/server/${params.id}`);
       revalidate(`/server/${params.id}/${params.channel_id}`);
     }

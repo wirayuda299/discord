@@ -14,8 +14,15 @@ import {
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import ChannelsDetailMobile from './channels/mobile';
+import { Servers } from '@/types/server';
 
-export default function ChannelItem({ category }: { category: Categories }) {
+export default function ChannelItem({
+  category,
+  server,
+}: {
+  category: Categories;
+  server: Servers;
+}) {
   const params = useParams();
 
   return (
@@ -50,7 +57,7 @@ export default function ChannelItem({ category }: { category: Categories }) {
                     'bg-foreground brightness-110',
                 )}
               >
-                <ChannelsDetailMobile channel={channel} />
+                <ChannelsDetailMobile channel={channel} server={server} />
                 <div className='hidden items-center gap-3 md:flex'>
                   <Image
                     src={`/server/icons/${

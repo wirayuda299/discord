@@ -1,5 +1,4 @@
 import { Permission } from '@/types/server';
-import { prepareHeaders } from './cookies';
 import { ApiRequest } from '@/utils/api';
 
 const api = new ApiRequest();
@@ -85,10 +84,9 @@ export async function getCurrentUserPermissions(
   serverId: string,
 ): Promise<Permission> {
   try {
-    const permission = await api.getData<Permission>(
+    return await api.getData<Permission>(
       `/roles?userId=${userId}&serverId=${serverId}`,
     );
-    return permission;
   } catch (error) {
     throw error;
   }

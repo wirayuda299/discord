@@ -8,12 +8,10 @@ function ThreadsMessages({
   thread,
   serverId,
   socket,
-  handlePinMessage,
 }: {
   thread: Thread | null;
   socket: Socket | null;
   serverId: string;
-  handlePinMessage: (msgId: string, userId: string) => Promise<void>;
 }) {
   const [threadMessages, setThreadMessages] = useState<Message[]>([]);
 
@@ -50,7 +48,6 @@ function ThreadsMessages({
           msg={message}
           type='thread'
           reloadMessage={reloadThread}
-          pinMessage={(msg, userId) => handlePinMessage(msg.message_id, userId)}
         />
       ))}
     </>

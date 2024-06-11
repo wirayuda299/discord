@@ -1,11 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
-import { toast } from 'sonner';
-
-import { createError } from '@/utils/error';
 
 import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
@@ -20,46 +17,34 @@ const ChatForm = dynamic(() => import('@/components/shared/chat-form'));
 export default function ChannelsMessages() {
   const pathname = usePathname();
   const params = useParams();
-  const [messages, setMessages] = useState<Message[]>([]);
 
+  const [messages, setMessages] = useState<Message[]>([]);
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
 
   const serverId = params?.id as string;
   const channelId = params?.channel_id as string;
 
-  const handlePinMessage = useCallback(
-    async (msgId: string, userId: string) => {
-      const { pinMessage } = await import('@/actions/messages');
-
-      try {
-        await pinMessage(channelId, msgId, userId, pathname).then(() => {
-          toast.success('Message pinned');
-        });
-      } catch (error) {
-        createError(error);
-      }
-    },
-    [channelId, pathname],
-  );
-
   useEffect(() => {
-    socket?.emit('get-channel-message', {
-      serverId,
-      channelId,
-    });
+    if (serverId && channelId) {
+      socket?.emit('get-channel-message', {
+        serverId,
+        channelId,
+      });
+    }
   }, [socket, serverId, channelId]);
 
   useEffect(() => {
     socket?.on('set-message', (messages) => setMessages(messages));
   }, [socket, setMessages]);
 
+  console.log(messages);
+
   return (
     <div className='flex min-h-screen w-full grow flex-col justify-between p-3'>
       <ul className='flex h-max flex-col gap-5 py-5'>
         {thread ? (
           <ThreadsMessages
-            handlePinMessage={handlePinMessage}
             serverId={serverId}
             socket={socket}
             thread={thread}
@@ -76,9 +61,6 @@ export default function ChannelsMessages() {
                   serverId,
                   channelId,
                 })
-              }
-              pinMessage={(msg, userId) =>
-                handlePinMessage(msg.message_id, userId)
               }
             />
           ))

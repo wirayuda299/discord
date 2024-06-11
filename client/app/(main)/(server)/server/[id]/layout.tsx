@@ -10,7 +10,6 @@ type Props = {
   params: {
     id: string;
   };
-
   children: ReactNode;
 };
 
@@ -64,7 +63,11 @@ export default async function ServerLayout({ params, children }: Props) {
         )}
         <ul className='flex w-full flex-col gap-3 self-start p-2 py-5'>
           {categories?.map((category) => (
-            <ChannelItem category={category} key={category.category_id} />
+            <ChannelItem
+              category={category}
+              key={category.category_id}
+              server={server}
+            />
           ))}
         </ul>
       </aside>

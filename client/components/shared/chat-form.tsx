@@ -206,7 +206,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         )}
       <Form {...form}>
         <form
-          className='flex-center h-16 gap-2 rounded-lg border-background bg-black p-3 md:bg-foreground md:brightness-125'
+          className='flex-center h-16 gap-2 rounded-lg border-t border-background bg-black p-3 md:bg-foreground md:brightness-125'
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FileUpload
@@ -234,7 +234,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
                     disabled={isSubmitting}
                     placeholder={placeholder}
                     autoComplete='off'
-                    className='no-scrollbar min-h-[30px] w-full max-w-[calc(100%-10px)] break-before-auto rounded-full !border-none bg-background/20 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
+                    className='no-scrollbar min-h-[30px] w-full max-w-[calc(100%-10px)] break-before-auto rounded-full !border-none bg-background/50 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
                   />
                 </FormControl>
               </FormItem>
@@ -243,12 +243,12 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
           <EmojiPicker appendEmoji={appendEmoji} />
 
           <button
+            onClick={(e) => e.stopPropagation()}
             aria-label='send'
             name='send'
             title='send'
             type='submit'
             disabled={isSubmitting || !isValid}
-            className='disabled:cursor-not-allowed disabled:opacity-60'
           >
             <SendHorizontal className='text-gray-2' />
           </button>

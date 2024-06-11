@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Copy, Ellipsis, Trash } from 'lucide-react';
 import { Dispatch, SetStateAction } from 'react';
 
+import { createError } from '@/utils/error';
 import {
   Drawer,
   DrawerClose,
@@ -40,7 +41,6 @@ export default function MessageMenuMobile({
     emoji: string,
     unifiedEmoji: string,
   ) => {
-    const { createError } = await import('@/utils/error');
     try {
       const { addOrRemoveReaction } = await import('@/actions/reactions');
       await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId!!);

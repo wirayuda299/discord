@@ -20,6 +20,8 @@ export class RolesController {
     @Query('userId') id: string,
     @Query('serverId') serverId: string
   ) {
+    console.log({ id, serverId });
+
     return this.roleService.getCurrentUserRole(id, serverId);
   }
 

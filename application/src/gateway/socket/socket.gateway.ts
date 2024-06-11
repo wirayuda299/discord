@@ -98,58 +98,60 @@ export class SocketGateway implements OnModuleInit {
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
-    this.logger.log(payload);
-    switch (payload.type) {
-      case 'channel':
-        await this.messagesService.sendMessage(
-          payload.content,
-          payload.is_read,
-          payload.user_id,
-          payload.channelId,
-          payload.imageUrl,
-          payload.imageAssetId
-        );
-        const messages = await this.messagesService.getMessageByChannelId(
-          payload.channelId,
-          payload.serverId
-        );
-        this.server.emit('set-message', messages);
-        break;
-      case 'reply':
-        await this.handleReplyMessage(payload);
-        break;
-      case 'thread':
-        await this.threadsService.sendThreadMessage(
-          payload.content,
-          payload.user_id,
-          payload.imageUrl,
-          payload.imageAssetId,
-          payload.threadId
-        );
+    try {
+      switch (payload.type) {
+        case 'channel':
+          await this.messagesService.sendMessage(
+            payload.content,
+            payload.user_id,
+            payload.channelId,
+            payload.imageUrl,
+            payload.imageAssetId
+          );
+          const messages = await this.messagesService.getMessageByChannelId(
+            payload.channelId,
+            payload.serverId
+          );
+          this.server.emit('set-message', messages);
+          break;
+        case 'reply':
+          await this.handleReplyMessage(payload);
+          break;
+        case 'thread':
+          await this.threadsService.sendThreadMessage(
+            payload.content,
+            payload.user_id,
+            payload.imageUrl,
+            payload.imageAssetId,
+            payload.threadId
+          );
 
-        const threadMessages = await this.threadsService.getThreadMessage(
-          payload.threadId,
-          payload.serverId
-        );
-        this.server.emit('set-thread-messages', threadMessages);
-        break;
-      case 'personal':
-        await this.messagesService.sendPersonalMessage(
-          payload.content,
-          payload.user_id,
-          payload.imageUrl,
-          payload.imageAssetId,
-          payload.recipientId
-        );
+          const threadMessages = await this.threadsService.getThreadMessage(
+            payload.threadId,
+            payload.serverId
+          );
+          this.server.emit('set-thread-messages', threadMessages);
+          break;
+        case 'personal':
+          await this.messagesService.sendPersonalMessage(
+            payload.content,
+            payload.user_id,
+            payload.imageUrl,
+            payload.imageAssetId,
+            payload.recipientId
+          );
 
-        const message = await this.messagesService.getPersonalMessage(
-          payload.conversationId,
-          payload.user_id
-        );
-        this.server.emit('set-personal-messages', message);
-        break;
-      default:
-        this.logger.warn(`Unknown message type: ${payload.type}`);
+          const message = await this.messagesService.getPersonalMessage(
+            payload.conversationId,
+            payload.user_id
+          );
+          this.server.emit('set-personal-messages', message);
+          break;
+        default:
+          this.logger.warn(`Unknown message type: ${payload.type}`);
+      }
+    } catch (error) {
+      this.logger.error(error);
     }
   }
 

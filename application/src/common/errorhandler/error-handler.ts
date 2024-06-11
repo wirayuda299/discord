@@ -19,12 +19,15 @@ export class ValidationFilter implements ExceptionFilter {
         error: true,
         code: exception.getStatus(),
       });
-    } else if (
-      exception instanceof ZodError ||
-      exception instanceof BadRequestException
-    ) {
+    } else if (exception instanceof ZodError) {
       return response.status(400).json({
-        messages: exception.message,
+        messages: exception.errors[0].message,
+        error: true,
+        code: 400,
+      });
+    } else if (exception instanceof BadRequestException) {
+      return response.status(exception.getStatus()).json({
+        messages: exception.getResponse(),
         error: true,
         code: 400,
       });

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 import {
   Sheet,
@@ -9,7 +10,6 @@ import {
 } from '../ui/sheet';
 import useFetch from '@/hooks/useFetch';
 import { getServerMembers } from '@/helper/server';
-import Link from 'next/link';
 
 export default function ServersMembers({ serverId }: { serverId: string }) {
   const { data, isLoading, error } = useFetch('members', () =>
@@ -21,8 +21,6 @@ export default function ServersMembers({ serverId }: { serverId: string }) {
       <div className='h-9 w-9 animate-pulse bg-foreground brightness-105'></div>
     );
   if (error) return <p>{error.message}</p>;
-
-  // console.info(data);
 
   return (
     <Sheet>

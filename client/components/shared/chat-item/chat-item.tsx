@@ -7,6 +7,10 @@ import { Message } from '@/types/messages';
 import { formatMessageTimestamp } from '@/utils/date';
 import { foundMessage } from '@/utils/messages';
 import { useServerStates } from '@/providers';
+import { pinMessage, pinPersonalMessage } from '@/actions/messages';
+import { createError } from '@/utils/error';
+import { usePathname, useSearchParams, useParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 const MessageContent = dynamic(() => import('./MessageContent'));
 const RepliedMessage = dynamic(() => import('./RepliedMessage'));
@@ -19,7 +23,6 @@ type Props = {
   messages: Message[];
   type: string;
   reloadMessage: () => void;
-  pinMessage: (msg: Message, userId: string) => void;
 };
 
 export default function ChatItem({
@@ -27,9 +30,12 @@ export default function ChatItem({
   messages,
   type,
   reloadMessage,
-  pinMessage,
 }: Props) {
   const { userId } = useAuth();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = useParams();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const setSelectedThread = useServerStates((state) => state.setSelectedThread);
 
@@ -41,6 +47,30 @@ export default function ChatItem({
     () => foundMessage(allMessages, msg),
     [allMessages, msg],
   );
+
+  const handlePinMessage = async () => {
+    try {
+      if (type === 'channel') {
+        await pinMessage(
+          params.channel_id as string,
+          msg.message_id,
+          userId!!,
+          pathname,
+        ).then(() => {
+          toast.success('Message pinned');
+        });
+      } else {
+        await pinPersonalMessage(
+          searchParams.get('conversationId') as string,
+          msg.message_id,
+          userId!!,
+          pathname,
+        );
+      }
+    } catch (error) {
+      createError(error);
+    }
+  };
 
   return (
     <>
@@ -77,14 +107,13 @@ export default function ChatItem({
 
         <MessageMenu
           msg={msg}
-          pinMessage={pinMessage}
           reloadMessage={reloadMessage}
           setIsOpen={setIsOpen}
           type={type}
           userId={userId!!}
         />
         <MessageMenuMobile
-          pinMessage={pinMessage}
+          pinMessage={handlePinMessage}
           setIsOpen={setIsOpen}
           type={type}
           msg={msg}

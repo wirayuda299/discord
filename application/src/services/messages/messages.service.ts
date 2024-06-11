@@ -118,24 +118,23 @@ export class MessagesService {
 
   async sendMessage(
     content: string,
-    is_read: boolean,
     user_id: string,
     channelId: string,
     imageUrl: string,
     imageAssetId: string
   ) {
     try {
-      await this.db.pool.query('BEGIN');
-
       try {
+        await this.db.pool.query('BEGIN');
         const {
           rows: [message],
         } = await this.db.pool.query(
           `INSERT INTO messages(content, user_id, image_url, image_asset_id, type)
            VALUES($1, $2, $3, $4, $5)
-           RETURNING id`,
+           RETURNING id;`,
           [content, user_id, imageUrl ?? '', imageAssetId ?? '', 'channel']
         );
+        console.log(message);
 
         const messageId = message.id;
 
@@ -284,46 +283,35 @@ export class MessagesService {
 
   async pinMessage(messageId: string, channel_id: string, pinnedBy: string) {
     try {
-      const channelExists = await this.db.pool.query(
-        `SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1)`,
-        [channel_id]
-      );
-
       const messageExists = await this.db.pool.query(
         `SELECT EXISTS(SELECT 1 FROM messages WHERE id = $1)`,
         [messageId]
       );
 
-      if (!channelExists.rows[0].exists || !messageExists.rows[0].exists) {
-        throw new HttpException(
-          "Message or channel doesn't exists",
-          HttpStatus.NOT_FOUND
-        );
+      if (!messageExists.rows[0].exists) {
+        throw new HttpException("Message doesn't exists", HttpStatus.NOT_FOUND);
       }
       const isAlreadyPinned = await this.db.pool.query(
-        `select * from channel_pinned_messages
-        where message_id = $1`,
+        `select exists(select * from channel_pinned_messages
+        where message_id = $1)`,
         [messageId]
       );
 
-      if (isAlreadyPinned.rows.length >= 1) {
-        throw new HttpException(
-          'Message already pinned',
-          HttpStatus.BAD_REQUEST
-        );
-      } else {
-        await this.db.pool.query(
-          `INSERT INTO channel_pinned_messages(message_id, channel_id, pinned_by) 
-          VALUES($1,$2, $3)`,
-          [messageId, channel_id, pinnedBy]
-        );
-        return {
-          message: 'Message pinned',
-          error: false,
-        };
+      if (isAlreadyPinned.rows[0].exists) {
+        throw new HttpException('Message already pinned', 400);
       }
-    } catch (error) {
-      throw error;
+
+      await this.db.pool.query(
+        `INSERT INTO channel_pinned_messages(message_id, channel_id, pinned_by) 
+            VALUES($1,$2, $3)`,
+        [messageId, channel_id, pinnedBy]
+      );
+      return {
+        message: 'Message pinned',
+        error: false,
+      };
+    } catch (e) {
+      throw e;
     }
   }
 

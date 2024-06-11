@@ -42,13 +42,12 @@ export default function AssignRole({
     } catch (error) {
       createError(error);
     } finally {
-      mutate('members-no-role');
       mutate('roles');
       revalidate(`/server/${params.serverId}`);
       revalidate(`/server/${params.serverId}/${params.channelId}`);
       mutate('members');
       mutate('members-by-role');
-      mutate('user-permissions');
+      mutate('permissions');
     }
   };
 

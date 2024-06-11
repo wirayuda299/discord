@@ -6,7 +6,7 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --no-cache",
     "format": "prettier --write . --config .prettierrc --ignore-path .gitignore"
   },
   "dependencies": {

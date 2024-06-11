@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { type Dispatch, type SetStateAction, memo, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { Copy, Ellipsis, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 
 import {
   DropdownMenu,
@@ -22,6 +23,8 @@ import TopEmoji from './top-emoji';
 import { copyText } from '@/utils/copy';
 import { revalidate } from '@/utils/cache';
 import { useSelectedMessageStore } from '@/providers';
+import { createError } from '@/utils/error';
+import { pinMessage, pinPersonalMessage } from '@/actions/messages';
 
 type Props = {
   msg: Message;
@@ -29,25 +32,18 @@ type Props = {
   type: string;
   reloadMessage: () => void;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  pinMessage: (msg: Message, userId: string) => void;
 };
 
-function MessageMenu({
-  type,
-  pinMessage,
-  msg,
-  userId,
-  reloadMessage,
-  setIsOpen,
-}: Props) {
+function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
   const setMessage = useSelectedMessageStore(
     (state) => state.setSelectedMessage,
   );
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = useParams();
 
   const handleAddOrRemoveReactions = useCallback(
     async (messageId: string, emoji: string, unifiedEmoji: string) => {
-      const { createError } = await import('@/utils/error');
       const { addOrRemoveReaction } = await import('@/actions/reactions');
       try {
         await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId!!);
@@ -58,6 +54,34 @@ function MessageMenu({
     },
     [reloadMessage, userId],
   );
+
+  const handlePinMessage = async () => {
+    try {
+      if (type === 'channel') {
+        await pinMessage(
+          params.channel_id as string,
+          msg.message_id,
+          userId,
+          pathname,
+        ).then(() => {
+          toast.success('Message pinned');
+        });
+      } else {
+        await pinPersonalMessage(
+          searchParams.get('conversationId') as string,
+          msg.message_id,
+          userId,
+          pathname,
+        ).then(() => {
+          toast.success('Message pinned');
+        });
+      }
+    } catch (error) {
+      console.log(error);
+
+      createError(error);
+    }
+  };
 
   return (
     <div className='absolute right-0 top-0 hidden gap-4 bg-foreground p-1 opacity-0 shadow-xl group-hover:opacity-100 md:flex'>
@@ -160,7 +184,7 @@ function MessageMenu({
           )}
 
           <DropdownMenuItem
-            onClick={() => pinMessage(msg, userId!!)}
+            onClick={handlePinMessage}
             className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
           >
             <span> Pin message</span>

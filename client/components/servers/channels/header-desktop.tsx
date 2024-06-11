@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { ChevronRight, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 
-const ServersMembers = dynamic(() => import('@/components/servers/members'));
 const NotificationSettings = dynamic(
   () => import('@/components/servers/notification-settings'),
 );
@@ -22,6 +21,7 @@ import { AllThread } from '@/helper/threads';
 import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
 import { createError } from '@/utils/error';
+import ServersMembers from '../members';
 
 type Props = {
   channelName: string;
