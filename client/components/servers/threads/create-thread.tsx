@@ -72,14 +72,14 @@ export default function CreateThread({
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-20 h-screen min-w-96 bg-foreground shadow-2xl transition-all duration-300',
+        'ease fixed -right-full top-0 z-20 h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
         selectedMessage &&
           selectedMessage &&
           selectedMessage.action === 'create_thread' &&
-          'right-0',
+          'right-0 opacity-100',
       )}
     >
-      <header className='sticky left-0 top-0 z-10 flex h-12 w-full items-center justify-between bg-background p-3'>
+      <header className='sticky left-0 top-0 z-10 flex h-12 w-full items-center justify-between border-b border-foreground bg-black p-3 md:border-none md:bg-background'>
         <div className='flex-center gap-2'>
           <Image
             src={'/general/icons/threads.svg'}
@@ -162,9 +162,9 @@ export default function CreateThread({
             autoComplete='off'
             placeholder='Thread name'
             autoFocus={false}
-            className='w-full rounded bg-background p-2 placeholder:text-xs focus-visible:outline-none'
+            className='w-full rounded bg-background/50 p-2 placeholder:text-xs focus-visible:outline-none md:bg-background'
           />
-          <div className='flex-center gap-2 bg-foreground p-3 brightness-125'>
+          <div className='flex-center gap-2 rounded bg-foreground/35 p-3 brightness-125 md:bg-foreground'>
             <input
               ref={ref}
               type='text'

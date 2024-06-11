@@ -19,6 +19,7 @@ import {
   useServerStates,
   useSocketStore,
 } from '@/providers';
+import { Input } from '../ui/input';
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Please add message'),
@@ -225,16 +226,14 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
             render={({ field }) => (
               <FormItem className='w-full'>
                 <FormControl className='w-full'>
-                  <Textarea
-                    rows={1}
-                    cols={1}
+                  <Input
                     {...field}
                     autoFocus
                     aria-disabled={isSubmitting}
                     disabled={isSubmitting}
                     placeholder={placeholder}
                     autoComplete='off'
-                    className='no-scrollbar min-h-[30px] w-full max-w-[calc(100%-10px)] break-before-auto rounded-full !border-none bg-background/50 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
+                    className='no-scrollbar min-h-[30px] w-full max-w-[calc(100%-10px)] resize-y break-before-auto rounded-full !border-none bg-background/50 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
                   />
                 </FormControl>
               </FormItem>

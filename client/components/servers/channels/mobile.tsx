@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ChevronRight, MoveLeft, Search } from 'lucide-react';
+import { ChevronRight, Cog, MoveLeft, Search } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -44,8 +44,7 @@ export default function ChannelsDetailMobile({
     getServerMembers(server.id),
   );
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>{error.message}</p>;
+  if (isLoading || error) return null;
 
   return (
     <Sheet
@@ -76,23 +75,20 @@ export default function ChannelsDetailMobile({
               <MoveLeft />
             </DialogClose>
             <div className='flex items-center gap-1'>
-              <p className='text-xl font-semibold capitalize'>
-                {channel.channel_name}
-              </p>
+              <p className='text-xl font-semibold'># {channel.channel_name}</p>
               <Drawer>
                 <DrawerTrigger>
                   <ChevronRight size={18} />
                 </DrawerTrigger>
                 <DrawerContent className='bg-black p-3 text-white'>
-                  <DrawerHeader className='flex flex-col items-center justify-center'>
+                  <DrawerHeader className='flex items-center justify-center'>
                     <Image
-                      className='size-20 rounded-full object-cover'
-                      src={server.logo}
-                      width={70}
-                      height={70}
+                      src={'/server/icons/hashtag.svg'}
+                      width={20}
+                      height={20}
                       alt='logo'
                     />
-                    <DrawerTitle>{server.name}</DrawerTitle>
+                    <DrawerTitle>{channel.channel_name}</DrawerTitle>
                   </DrawerHeader>
 
                   <div className='flex items-center justify-center gap-3'>
@@ -101,12 +97,15 @@ export default function ChannelsDetailMobile({
                     </button>
                     <button className='size-12 rounded-full bg-foreground/50'>
                       <Image
-                        src={'/general/icons/pin.svg'}
+                        src={'/general/icons/threads.svg'}
                         width={20}
                         height={20}
-                        alt='pin'
+                        alt='thread'
                         className='mx-auto'
                       />
+                    </button>
+                    <button className='size-12 rounded-full bg-foreground/50'>
+                      <Cog className='mx-auto' />
                     </button>
                   </div>
 

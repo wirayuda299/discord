@@ -25,7 +25,7 @@ export default function TopEmoji({
           onClick={() =>
             handleAddOrRemoveReactions(msg.message_id, emoji.emoji, emoji.code)
           }
-          className='size-10 rounded-full bg-background/50 text-2xl transition-colors hover:bg-background'
+          className='size-12 rounded-full bg-background/50 text-2xl transition-colors hover:bg-background'
           key={emoji.code}
         >
           {emoji.emoji}

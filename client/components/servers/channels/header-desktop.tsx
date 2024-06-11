@@ -61,9 +61,9 @@ export default function ChannelsHeader({
     <header className='flex-center sticky top-0 z-10 h-[49px] min-w-full justify-between border-b border-background bg-foreground p-2'>
       <div className='flex-center gap-2'>
         <Image
-          src={'/server/icons/hashtag-1.svg'}
-          width={30}
-          height={30}
+          src={'/server/icons/hashtag.svg'}
+          width={20}
+          height={20}
           alt='hashtag'
         />
         <h3

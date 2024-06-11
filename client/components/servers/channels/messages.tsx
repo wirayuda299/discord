@@ -6,6 +6,7 @@ import { useParams, usePathname } from 'next/navigation';
 
 import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
+import PulseLoader from '@/components/shared/pulse-loader';
 
 const ThreadsMessages = dynamic(() => import('../threads/thread-messages'));
 const CreateThread = dynamic(() => import('../threads/create-thread'));
@@ -17,6 +18,7 @@ const ChatForm = dynamic(() => import('@/components/shared/chat-form'));
 export default function ChannelsMessages() {
   const pathname = usePathname();
   const params = useParams();
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const thread = useServerStates((state) => state.selectedThread);
@@ -27,6 +29,7 @@ export default function ChannelsMessages() {
 
   useEffect(() => {
     if (serverId && channelId) {
+      setLoading(true);
       socket?.emit('get-channel-message', {
         serverId,
         channelId,
@@ -35,39 +38,43 @@ export default function ChannelsMessages() {
   }, [socket, serverId, channelId]);
 
   useEffect(() => {
+    setLoading(true);
     socket?.on('set-message', (messages) => setMessages(messages));
-  }, [socket, setMessages]);
-
-  console.log(messages);
+    setLoading(false);
+  }, [socket]);
 
   return (
-    <div className='flex min-h-screen w-full grow flex-col justify-between p-3'>
-      <ul className='flex h-max flex-col gap-5 py-5'>
-        {thread ? (
-          <ThreadsMessages
-            serverId={serverId}
-            socket={socket}
-            thread={thread}
-          />
-        ) : (
-          messages?.map((message) => (
-            <ChatItem
-              key={message.message_id}
-              messages={messages}
-              msg={message}
-              type='channel'
-              reloadMessage={() =>
-                socket?.emit('get-channel-message', {
-                  serverId,
-                  channelId,
-                })
-              }
+    <div className='flex min-h-screen w-full flex-col justify-between p-3'>
+      {loading ? (
+        <PulseLoader />
+      ) : (
+        <ul className='flex h-max flex-col gap-5 py-5'>
+          {thread ? (
+            <ThreadsMessages
+              serverId={serverId}
+              socket={socket}
+              thread={thread}
             />
-          ))
-        )}
-      </ul>
+          ) : (
+            messages?.map((message) => (
+              <ChatItem
+                key={message.message_id}
+                messages={messages}
+                msg={message}
+                type='channel'
+                reloadMessage={() =>
+                  socket?.emit('get-channel-message', {
+                    serverId,
+                    channelId,
+                  })
+                }
+              />
+            ))
+          )}
+        </ul>
+      )}
       <CreateThread channelId={channelId} pathname={pathname} />
-      <div className='sticky bottom-0 left-0 right-0 backdrop-blur-sm'>
+      <div className='sticky !bottom-0 left-0 right-0 backdrop-blur-sm'>
         <ChatForm
           reloadMessage={() =>
             thread
@@ -80,7 +87,7 @@ export default function ChannelsMessages() {
                   channelId,
                 })
           }
-          placeholder='send message'
+          placeholder='Send message...'
           type={thread ? 'thread' : 'channel'}
         />
       </div>

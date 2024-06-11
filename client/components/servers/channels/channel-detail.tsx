@@ -23,7 +23,7 @@ export default async function ChannelsDetail({
   ]);
 
   return (
-    <div className='hidden h-screen w-full grow overflow-y-auto md:block'>
+    <div className='relative hidden h-screen w-full grow overflow-y-auto md:block'>
       <ChannelsHeader
         channelId={channelId}
         serverId={serverId}

@@ -78,7 +78,7 @@ export default function ChatItem({
         {msg?.shouldAddLabel && (
           <div className='flex w-full items-center gap-2 pb-5'>
             <div className='h-px w-full bg-gray-1'></div>
-            <p className='min-w-min text-nowrap text-sm text-gray-2'>
+            <p className='min-w-min !text-nowrap text-sm text-gray-2'>
               {formatMessageTimestamp(msg.created_at)}
             </p>
             <div className='h-px w-full bg-gray-1'></div>
