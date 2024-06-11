@@ -99,7 +99,7 @@ export default function PersonalMessages({
         pinnedMessages={pinnedMessages}
       />
       <UserInfo friend={friend} />
-      <ul className='flex h-max flex-col gap-5 px-3 pb-5'>
+      <ul className='flex h-full min-h-dvh flex-col gap-5 px-3 pb-5 md:min-h-screen'>
         {messages?.map((message) => (
           <ChatItem
             // @ts-ignore

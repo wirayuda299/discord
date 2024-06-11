@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Dispatch, SetStateAction, Suspense, memo } from 'react';
+import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -12,7 +13,6 @@ import { Friend } from '@/helper/friends';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Inbox from '@/components/shared/inbox';
 import { Message } from '@/types/messages';
-import { useRouter } from 'next/navigation';
 
 const HeaderMobile = dynamic(() => import('./header-mobile'));
 const SearchForm = dynamic(() => import('@/components/shared/search-form'));
