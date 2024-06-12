@@ -10,7 +10,6 @@ import { useParams, usePathname, useSearchParams } from 'next/navigation';
 
 import { Form, FormControl, FormField, FormItem } from '../ui/form';
 import FileUpload from './file-upload';
-import { Textarea } from '../ui/textarea';
 import { messageData } from '@/utils/messages';
 import EmojiPicker from './emoji-picker';
 import useUploadFile from '@/hooks/useFileUpload';

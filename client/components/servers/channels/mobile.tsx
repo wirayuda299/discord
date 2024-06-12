@@ -68,7 +68,7 @@ export default function ChannelsDetailMobile({
           {channel.channel_name}
         </div>
       </SheetTrigger>
-      <SheetContent className='left-0 !min-w-full overflow-y-auto bg-black p-0 text-white md:hidden'>
+      <SheetContent className='left-0 !min-w-full bg-black px-0 pb-5 pt-0 text-white md:hidden'>
         <SheetHeader className='sticky top-0 z-10 h-16 gap-1 border-b border-foreground bg-black p-5'>
           <div className='flex items-center gap-3'>
             <DialogClose>

@@ -57,6 +57,7 @@ export default function ChannelsHeader({
       createError(error);
     }
   };
+
   return (
     <header className='flex-center sticky top-0 z-10 h-[49px] min-w-full justify-between border-b border-background bg-foreground p-2'>
       <div className='flex-center gap-2'>
@@ -67,7 +68,7 @@ export default function ChannelsHeader({
           alt='hashtag'
         />
         <h3
-          onClick={() => setSelectedThread(null)}
+          onClick={thread ? () => setSelectedThread(null) : undefined}
           className='cursor-pointer truncate text-base font-semibold text-gray-2'
         >
           {channelName}
@@ -87,7 +88,7 @@ export default function ChannelsHeader({
           </div>
         )}
       </div>
-      <div className='flex-center gap-3'>
+      <div className='flex-center gap-3 overflow-x-auto'>
         <ThreadList threads={threads} />
         <NotificationSettings />
         <PinnedMessage pinnedMessages={pinnedMessages} type='channel'>

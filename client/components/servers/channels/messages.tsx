@@ -43,12 +43,14 @@ export default function ChannelsMessages() {
     setLoading(false);
   }, [socket]);
 
+  console.log(messages);
+
   return (
-    <div className='flex min-h-screen w-full flex-col justify-between p-3'>
+    <div className='p-3'>
       {loading ? (
         <PulseLoader />
       ) : (
-        <ul className='flex h-max flex-col gap-5 py-5'>
+        <ul className='flex h-full max-h-screen min-h-screen flex-col gap-5 overflow-y-auto py-5'>
           {thread ? (
             <ThreadsMessages
               serverId={serverId}

@@ -87,7 +87,7 @@ export default function PersonalMessages({
   return (
     <main
       className={cn(
-        'h-dvh w-full grow overflow-y-auto text-white md:h-screen',
+        'h-dvh max-h-screen min-h-min w-full overflow-y-auto text-white md:h-screen',
         styles,
       )}
     >
@@ -99,7 +99,7 @@ export default function PersonalMessages({
         pinnedMessages={pinnedMessages}
       />
       <UserInfo friend={friend} />
-      <ul className='flex h-full min-h-dvh flex-col gap-5 px-3 pb-5 md:min-h-screen'>
+      <ul className='flex min-h-dvh flex-col gap-5 px-3 md:min-h-screen'>
         {messages?.map((message) => (
           <ChatItem
             // @ts-ignore
