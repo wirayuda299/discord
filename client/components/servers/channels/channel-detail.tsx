@@ -47,7 +47,7 @@ export default function ChannelsDetail(props: Props) {
 
   return (
     <>
-      <div className='hidden max-h-screen min-h-screen w-full md:block'>
+      <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
         <ChannelsHeader {...props} />
         <ChannelsMessages
           loading={loading}
