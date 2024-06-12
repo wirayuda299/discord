@@ -98,7 +98,7 @@ export default function PersonalMessages({
         pathname={pathname}
         pinnedMessages={pinnedMessages}
       />
-      <div className='max-h-screen min-h-dvh md:min-h-screen'>
+      <div className='max-h-dvh min-h-dvh md:max-h-screen md:min-h-screen'>
         <UserInfo friend={friend} />
         <ul className='flex min-h-min flex-col gap-5 px-3'>
           {messages?.map((message) => (
