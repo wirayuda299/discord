@@ -1,6 +1,5 @@
 'use client';
 
-import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import {
   Dispatch,
@@ -12,8 +11,6 @@ import {
 import { usePathname, useSearchParams } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
-import { pinPersonalMessage } from '@/actions/messages';
-import { createError } from '@/utils/error';
 
 import type { Message } from '@/types/messages';
 import type { PinnedMessageType } from '@/helper/message';
@@ -67,27 +64,12 @@ export default function PersonalMessages({
     socket?.on('set-personal-messages', (messages) => setMessages(messages));
   }, [socket]);
 
-  const handlePinMessage = useCallback(
-    async (msg: Message & { conversation_id: string }, userId: string) => {
-      try {
-        await pinPersonalMessage(
-          msg?.conversation_id,
-          msg?.message_id,
-          userId,
-          pathname,
-        ).then(() => toast.success('Message pinned'));
-      } catch (error) {
-        createError(error);
-      }
-    },
-    [pathname],
-  );
   if (!recipientId) return null;
 
   return (
     <main
       className={cn(
-        'flex h-dvh max-h-screen min-h-screen w-full flex-col overflow-y-auto text-white md:h-screen',
+        'flex max-h-dvh min-h-dvh w-full flex-col overflow-y-auto text-white md:h-screen md:max-h-screen md:min-h-screen',
         styles,
       )}
     >
@@ -104,8 +86,6 @@ export default function PersonalMessages({
         <ul className='flex min-h-min flex-col gap-5 px-3'>
           {messages?.map((message) => (
             <ChatItem
-              // @ts-ignore
-              pinMessage={(msg, userId) => handlePinMessage(msg, userId)}
               reloadMessage={reloadPersonalMessage}
               type='personal'
               key={message?.message_id}
