@@ -87,18 +87,19 @@ export default function PersonalMessages({
   return (
     <main
       className={cn(
-        'flex h-dvh max-h-screen min-h-screen w-full flex-col justify-between overflow-y-auto text-white md:h-screen',
+        'flex h-dvh max-h-screen min-h-screen w-full flex-col overflow-y-auto text-white md:h-screen',
         styles,
       )}
     >
-      <PersonalMessagesHeader
-        setIsOpen={setIsOpen}
-        messages={messages}
-        friend={friend}
-        pathname={pathname}
-        pinnedMessages={pinnedMessages}
-      />
       <div className='max-h-dvh min-h-dvh md:max-h-screen md:min-h-screen'>
+        <PersonalMessagesHeader
+          setIsOpen={setIsOpen}
+          messages={messages}
+          friend={friend}
+          pathname={pathname}
+          pinnedMessages={pinnedMessages}
+        />
+
         <UserInfo friend={friend} />
         <ul className='flex min-h-min flex-col gap-5 px-3'>
           {messages?.map((message) => (
