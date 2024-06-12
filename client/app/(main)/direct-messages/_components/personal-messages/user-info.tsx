@@ -23,7 +23,7 @@ export default function UserInfo({ friend }: { friend: Friend }) {
         <p className='text-sm text-secondary'>
           This is beginning of your direct messages with {friend?.username}
         </p>
-        <div className='flex-center flex-wrap gap-4 pt-5'>
+        <div className='flex flex-col items-start gap-4 pt-5 min-[450px]:flex-row'>
           <div className='flex-center gap-2'>
             <Image
               className='size-5 rounded-full object-cover'
