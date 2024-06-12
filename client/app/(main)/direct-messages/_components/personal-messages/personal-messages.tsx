@@ -73,28 +73,26 @@ export default function PersonalMessages({
         styles,
       )}
     >
-      <div className='max-h-dvh min-h-dvh md:max-h-screen md:min-h-screen'>
-        <PersonalMessagesHeader
-          setIsOpen={setIsOpen}
-          messages={messages}
-          friend={friend}
-          pathname={pathname}
-          pinnedMessages={pinnedMessages}
-        />
+      <PersonalMessagesHeader
+        setIsOpen={setIsOpen}
+        messages={messages}
+        friend={friend}
+        pathname={pathname}
+        pinnedMessages={pinnedMessages}
+      />
 
-        <UserInfo friend={friend} />
-        <ul className='flex min-h-min flex-col gap-5 px-3'>
-          {messages?.map((message) => (
-            <ChatItem
-              reloadMessage={reloadPersonalMessage}
-              type='personal'
-              key={message?.message_id}
-              msg={message}
-              messages={messages}
-            />
-          ))}
-        </ul>
-      </div>
+      <UserInfo friend={friend} />
+      <ul className='flex min-h-min flex-col gap-5 px-3'>
+        {messages?.map((message) => (
+          <ChatItem
+            reloadMessage={reloadPersonalMessage}
+            type='personal'
+            key={message?.message_id}
+            msg={message}
+            messages={messages}
+          />
+        ))}
+      </ul>
       <div className='sticky bottom-0 left-0 right-0 p-1 backdrop-blur-sm md:p-3'>
         <ChatForm
           reloadMessage={reloadPersonalMessage}
