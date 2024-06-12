@@ -69,9 +69,9 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     [setMessage],
   );
 
+  const image = form.watch('image');
   const isSubmitting = form.formState.isSubmitting;
   const isValid = form.formState.isValid;
-  const image = form.watch('image');
 
   const onSubmit = async (data: z.infer<typeof chatSchema>) => {
     let attachment: { publicId: string; url: string } | null = null;
@@ -189,7 +189,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         selectedMessage.message &&
         selectedMessage.action === 'reply' &&
         selectedMessage.type === type && (
-          <div className='flex w-full items-center justify-between rounded-t-xl bg-background/50 p-2 md:bg-[#2b2d31]'>
+          <div className='flex w-full items-center justify-between rounded-t-xl bg-background/50 md:bg-[#2b2d31] md:p-2'>
             <p className='bottom-16 text-sm text-gray-2'>
               Replying to{' '}
               <span className='font-semibold text-gray-2 brightness-150'>
@@ -209,10 +209,11 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         )}
       <Form {...form}>
         <form
-          className='flex-center h-16 gap-2 rounded-lg border-t border-background bg-black p-3 md:bg-foreground md:brightness-125'
+          className='flex-center h-16 gap-1 rounded-lg border-t border-background bg-black md:gap-2 md:bg-foreground md:p-3 md:brightness-125'
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FileUpload
+            key={preview && preview.image}
             deleteImage={deleteImage}
             form={form}
             preview={preview}
@@ -235,7 +236,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
                     disabled={isSubmitting}
                     placeholder={placeholder}
                     autoComplete='off'
-                    className='no-scrollbar min-h-[30px] w-full max-w-[calc(100%-10px)] resize-y break-before-auto rounded-full !border-none bg-background/50 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
+                    className='no-scrollbar h-8 w-full break-before-auto rounded-full !border-none bg-background/50 px-3 pt-2 text-base font-light text-white caret-white outline-none brightness-110 placeholder:text-sm focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse md:bg-transparent'
                   />
                 </FormControl>
               </FormItem>

@@ -8,13 +8,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '../ui/sheet';
-import useFetch from '@/hooks/useFetch';
-import { getServerMembers } from '@/helper/server';
+import useServerMembers from '@/hooks/useServerMember';
 
 export default function ServersMembers({ serverId }: { serverId: string }) {
-  const { data, isLoading, error } = useFetch('members', () =>
-    getServerMembers(serverId),
-  );
+  const { data, error, isLoading } = useServerMembers(serverId);
 
   if (isLoading)
     return (

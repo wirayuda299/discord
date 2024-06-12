@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function UserInfo({ friend }: { friend: Friend }) {
   return (
-    <section className='flex min-h-min flex-col gap-4 p-5'>
+    <section className='flex flex-col gap-4 p-5'>
       <Image
         priority
         fetchPriority='high'

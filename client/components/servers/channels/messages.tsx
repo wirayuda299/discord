@@ -1,12 +1,9 @@
-'use client';
-
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
+import type { Socket } from 'socket.io-client';
 
-import { useServerStates, useSocketStore } from '@/providers';
-import { Message } from '@/types/messages';
 import PulseLoader from '@/components/shared/pulse-loader';
+import { Message, Thread } from '@/types/messages';
 
 const ThreadsMessages = dynamic(() => import('../threads/thread-messages'));
 const CreateThread = dynamic(() => import('../threads/create-thread'));
@@ -15,35 +12,22 @@ const ChatItem = dynamic(
 );
 const ChatForm = dynamic(() => import('@/components/shared/chat-form'));
 
-export default function ChannelsMessages() {
+export default function ChannelsMessages({
+  loading,
+  socket,
+  messages,
+  thread,
+}: {
+  loading: boolean;
+  socket: Socket | null;
+  messages: Message[];
+  thread: Thread | null;
+}) {
   const pathname = usePathname();
   const params = useParams();
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const [messages, setMessages] = useState<Message[]>([]);
-  const thread = useServerStates((state) => state.selectedThread);
-  const socket = useSocketStore((state) => state.socket);
 
   const serverId = params?.id as string;
   const channelId = params?.channel_id as string;
-
-  useEffect(() => {
-    if (serverId && channelId) {
-      setLoading(true);
-      socket?.emit('get-channel-message', {
-        serverId,
-        channelId,
-      });
-    }
-  }, [socket, serverId, channelId]);
-
-  useEffect(() => {
-    setLoading(true);
-    socket?.on('set-message', (messages) => setMessages(messages));
-    setLoading(false);
-  }, [socket]);
-
-  console.log(messages);
 
   return (
     <div className='p-3'>

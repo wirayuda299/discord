@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Categories } from '@/types/channels';
 
@@ -13,8 +14,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
-import ChannelsDetailMobile from './channels/mobile';
 import { Servers } from '@/types/server';
+import { useServerStates } from '@/providers';
 
 export default function ChannelItem({
   category,
@@ -24,6 +25,19 @@ export default function ChannelItem({
   server: Servers;
 }) {
   const params = useParams();
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const setSelectedChannel = useServerStates(
+    (state) => state.setSelectedChannel,
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
     <li key={category.category_id}>
@@ -40,12 +54,14 @@ export default function ChannelItem({
           <AccordionContent>
             {category?.channels.map((channel) => (
               <Link
-                aria-label={'server'}
+                aria-label={'reset'}
+                onClick={
+                  windowWidth >= 768
+                    ? undefined
+                    : () => setSelectedChannel(channel)
+                }
                 href={{
-                  pathname: `/server/${encodeURIComponent(
-                    params.id as string,
-                  )}/${encodeURIComponent(channel.channel_id)}`,
-
+                  pathname: `/server/${server.id as string}/${channel.channel_id}`,
                   search: `channel_type=${
                     channel.channel_type
                   }&channel_name=${encodeURIComponent(channel.channel_name)}`,
@@ -57,8 +73,7 @@ export default function ChannelItem({
                     'bg-foreground brightness-110',
                 )}
               >
-                <ChannelsDetailMobile channel={channel} server={server} />
-                <div className='hidden items-center gap-3 md:flex'>
+                <div className='flex items-center gap-3'>
                   <Image
                     src={`/server/icons/${
                       channel.channel_type === 'text'

@@ -87,7 +87,7 @@ export default function PersonalMessages({
   return (
     <main
       className={cn(
-        'h-dvh max-h-screen min-h-min w-full overflow-y-auto text-white md:h-screen',
+        'flex h-dvh max-h-screen min-h-screen w-full flex-col justify-between overflow-y-auto text-white md:h-screen',
         styles,
       )}
     >
@@ -98,21 +98,23 @@ export default function PersonalMessages({
         pathname={pathname}
         pinnedMessages={pinnedMessages}
       />
-      <UserInfo friend={friend} />
-      <ul className='flex min-h-dvh flex-col gap-5 px-3 md:min-h-screen'>
-        {messages?.map((message) => (
-          <ChatItem
-            // @ts-ignore
-            pinMessage={(msg, userId) => handlePinMessage(msg, userId)}
-            reloadMessage={reloadPersonalMessage}
-            type='personal'
-            key={message?.message_id}
-            msg={message}
-            messages={messages}
-          />
-        ))}
-      </ul>
-      <div className='sticky bottom-0 left-0 right-0 p-3 backdrop-blur-sm'>
+      <div className='max-h-screen min-h-dvh md:min-h-screen'>
+        <UserInfo friend={friend} />
+        <ul className='flex min-h-min flex-col gap-5 px-3'>
+          {messages?.map((message) => (
+            <ChatItem
+              // @ts-ignore
+              pinMessage={(msg, userId) => handlePinMessage(msg, userId)}
+              reloadMessage={reloadPersonalMessage}
+              type='personal'
+              key={message?.message_id}
+              msg={message}
+              messages={messages}
+            />
+          ))}
+        </ul>
+      </div>
+      <div className='sticky bottom-0 left-0 right-0 p-1 backdrop-blur-sm md:p-3'>
         <ChatForm
           reloadMessage={reloadPersonalMessage}
           placeholder={`Message to ${friend?.username}`}

@@ -22,32 +22,35 @@ function FileUpload({
 }: Props) {
   return (
     <div className='relative'>
-      {image && preview && preview.image && (
-        <div className='absolute -top-32 w-max'>
-          <Image
-            className='aspect-square rounded-md object-cover'
-            priority
-            fetchPriority='high'
-            src={(preview && preview?.image)!}
-            width={100}
-            height={100}
-            alt='image'
-          />
-          {!isSubmitting && (
-            <button
-              aria-label='delete attachment'
-              name='delete attachment'
-              title='delete attachment'
-              type='button'
-              onClick={deleteImage}
-              className='absolute -right-4 -top-3 min-h-5 min-w-5 rounded-full border bg-white p-1'
-            >
-              <X className='text-sm text-red-600' size={18} />
-            </button>
-          )}
-        </div>
-      )}
+      <div className='absolute -top-32 w-max'>
+        {image && preview && preview?.image && (
+          <>
+            <Image
+              className='aspect-square rounded-md object-cover'
+              src={preview.image}
+              width={100}
+              height={100}
+              alt='image'
+            />
+            {!isSubmitting && (
+              <button
+                aria-label='delete attachment'
+                name='delete attachment'
+                title='delete attachment'
+                type='button'
+                onClick={deleteImage}
+                className='absolute -right-4 -top-3 min-h-5 min-w-5 rounded-full border bg-white p-1'
+              >
+                <X className='text-sm text-red-600' size={18} />
+              </button>
+            )}
+          </>
+        )}
+      </div>
       <label
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
         aria-disabled={isSubmitting}
         title='Upload image'
         htmlFor='image-upload'
@@ -56,7 +59,9 @@ function FileUpload({
         <Plus className='text-base text-gray-2 md:text-lg md:text-foreground' />
       </label>
       <input
-        onChange={(e) => handleChange(e, 'image')}
+        onChange={(e) => {
+          handleChange(e, 'image');
+        }}
         aria-disabled={isSubmitting}
         disabled={isSubmitting}
         type='file'

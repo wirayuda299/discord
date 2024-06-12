@@ -24,7 +24,9 @@ export default function useUploadFile<T extends FieldValues>(
           [field]: file,
         }));
 
-        form.setValue(field, file as PathValue<T, Path<T>>);
+        form.setValue(field, file as PathValue<T, Path<T>>, {
+          shouldDirty: true,
+        });
       }
     },
     [form],
