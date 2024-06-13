@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback } from 'react';
 import { SendHorizontal, X } from 'lucide-react';
-import { useAuth } from '@clerk/nextjs';
 import { useParams, usePathname, useSearchParams } from 'next/navigation';
 
 import { Form, FormControl, FormField, FormItem } from '../ui/form';
@@ -184,6 +183,10 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
       resetSelectedMessage();
     }
   };
+  const shouldShowFileUpload =
+    type === 'personal' ||
+    (server && server.owner_id === userId) ||
+    (permission && permission.attach_file);
 
   if (loading || errors) return null;
 
@@ -216,20 +219,18 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
           className='flex-center h-16 gap-1 rounded-lg border-t border-background bg-black md:gap-2 md:bg-foreground md:p-3 md:brightness-125'
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          {type !== 'personal' &&
-            (server?.owner_id === userId ||
-              (permission && permission.attach_file)) && (
-              <FileUpload
-                key={preview && preview.image}
-                deleteImage={deleteImage}
-                form={form}
-                preview={preview}
-                handleChange={handleChange}
-                // @ts-ignore
-                image={image}
-                isSubmitting={isSubmitting}
-              />
-            )}
+          {shouldShowFileUpload && (
+            <FileUpload
+              key={preview && preview.image}
+              deleteImage={deleteImage}
+              form={form}
+              preview={preview}
+              handleChange={handleChange}
+              // @ts-ignore
+              image={image}
+              isSubmitting={isSubmitting}
+            />
+          )}
 
           <FormField
             name={'message'}

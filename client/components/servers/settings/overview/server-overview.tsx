@@ -153,9 +153,9 @@ export default function ServerOverview({ server }: { server: Servers }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleUpdateServer)}
-        className='h-full max-h-screen overflow-y-auto p-7'
+        className='h-full max-h-dvh overflow-y-auto p-7 md:max-h-screen'
       >
-        <h2 className='pb-5 text-lg font-semibold text-white'>
+        <h2 className='hidden pb-5 text-lg font-semibold text-white md:block'>
           Server overview
         </h2>
         <div className='grid grid-cols-2 gap-5 border-b border-background pb-6 max-xl:grid-cols-1'>
@@ -163,7 +163,7 @@ export default function ServerOverview({ server }: { server: Servers }) {
             control={form.control}
             name='logo'
             render={() => (
-              <FormItem className='flex gap-10'>
+              <FormItem className='flex gap-5 md:gap-10'>
                 <FormLabel
                   htmlFor='icon'
                   className='group relative flex size-32 min-w-32 cursor-pointer place-content-center place-items-center rounded-full shadow-2xl'
@@ -333,7 +333,7 @@ export default function ServerOverview({ server }: { server: Servers }) {
 
         <div
           className={cn(
-            'sticky -bottom-full left-0 right-0 mt-10 flex w-full items-center justify-between rounded-sm bg-black p-2 transition-all duration-300 ease-in-out',
+            'sticky -bottom-full left-0 right-0 mt-10 flex w-full flex-col items-center justify-between gap-2 rounded-sm bg-black p-2 transition-all duration-300 ease-in-out md:flex-row',
             isChanged
               ? 'bottom-0 mt-0 opacity-100'
               : '-bottom-full mt-10 opacity-0',

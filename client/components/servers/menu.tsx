@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
 import {
   DropdownMenu,
@@ -10,13 +11,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import ServerSettingsDesktop from '../servers/settings/desktop';
 import { Servers } from '@/types/server';
 import ServerInvitationModal from './invite-modal';
 import CreateChannelDialog from './channels/create-channel/dialog';
 import { usePermissionsContext } from '@/providers/permissions';
+const ServerSettingsDesktop = dynamic(
+  () => import('../servers/settings/desktop'),
+  { ssr: false },
+);
+const ServerSettingsMobile = dynamic(
+  () => import('../servers/settings/mobile'),
+  { ssr: false },
+);
 
 export default function ServersMenu({ server }: { server: Servers }) {
+  const windowWidth = window.innerWidth;
   const { permission, errors, loading, userId } = usePermissionsContext();
   if (loading)
     return (
@@ -62,8 +71,11 @@ export default function ServersMenu({ server }: { server: Servers }) {
             />
           </DropdownMenuItem>
         </ServerInvitationModal>
-        {userId && server.owner_id === userId && (
+        {userId && server.owner_id === userId && windowWidth >= 768 && (
           <ServerSettingsDesktop server={server} />
+        )}
+        {userId && server.owner_id === userId && windowWidth < 768 && (
+          <ServerSettingsMobile server={server} />
         )}
 
         {(userId && server.owner_id === userId) ||

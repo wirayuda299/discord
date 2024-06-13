@@ -45,7 +45,7 @@ export default function PermissionsProvider({
   } = useFetch(
     'permissions',
     () => getCurrentUserPermissions(userId ? userId : '', params.id as string),
-    true,
+    false,
   );
 
   const loading = serverLoading || isLoading;

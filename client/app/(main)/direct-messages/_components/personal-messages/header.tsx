@@ -35,7 +35,7 @@ function PersonalMessagesHeader({
   const router = useRouter();
 
   return (
-    <header className='flex-center sticky top-0 z-10 h-20 w-full justify-between gap-3 border-b border-background bg-black p-3 md:bg-foreground'>
+    <header className='flex-center sticky top-0 z-10 h-16 w-full justify-between gap-3 border-b border-background bg-black px-3 md:bg-foreground'>
       <div className='flex-center w-full gap-3'>
         <Image
           className='size-8 rounded-full object-cover'
