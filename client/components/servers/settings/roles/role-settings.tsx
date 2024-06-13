@@ -186,7 +186,7 @@ export default function RolesSettings({
   };
 
   return (
-    <div className='flex h-full w-full py-7'>
+    <div className='flex h-full w-full md:py-7'>
       <aside className='sticky top-0 hidden min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block'>
         <header className='flex-center w-full justify-between'>
           <Button

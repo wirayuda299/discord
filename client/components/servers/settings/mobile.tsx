@@ -1,5 +1,6 @@
-import { ArrowLeft, ChevronRight, Plus } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
 import Image from 'next/image';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 
 import { Servers } from '@/types/server';
 import ServerOverview from './overview/server-overview';
@@ -14,6 +15,7 @@ import Roles from './roles/roles';
 import ServerBanList from './bans';
 
 export default function ServerSettingsMobile({ server }: { server: Servers }) {
+  const { userId } = useAuth();
   return (
     <div className='h-full w-full text-white'>
       <div className='mx-auto'>
@@ -129,6 +131,19 @@ export default function ServerSettingsMobile({ server }: { server: Servers }) {
             />
           </SheetContent>
         </Sheet>
+
+        {userId && userId !== server.owner_id && (
+          <div className='group flex items-center justify-between !text-red-600 hover:!bg-red-600 hover:!text-white'>
+            <p>Leave server</p>
+            <Image
+              className='group-hover:brightness-0 group-hover:invert'
+              src={'/server/icons/leave.svg'}
+              width={20}
+              height={20}
+              alt='leave server'
+            />
+          </div>
+        )}
       </ul>
     </div>
   );

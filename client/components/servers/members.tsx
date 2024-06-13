@@ -1,14 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { X } from 'lucide-react';
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '../ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import useServerMembers from '@/hooks/useServerMember';
 
 export default function ServersMembers({
@@ -22,7 +17,7 @@ export default function ServersMembers({
 
   if (isLoading)
     return (
-      <div className='h-9 w-9 animate-pulse bg-foreground brightness-105'></div>
+      <div className='h-9 w-full animate-pulse bg-foreground/35 brightness-105 md:w-9 md:bg-foreground'></div>
     );
   if (error) return <p>{error.message}</p>;
 
@@ -37,9 +32,12 @@ export default function ServersMembers({
         {children}
       </SheetTrigger>
       <SheetContent className='w-full border-foreground bg-black text-white shadow-2xl md:bg-foreground'>
-        <SheetHeader className='pb-5'>
-          <SheetTitle className='text-left text-white'>Members</SheetTitle>
-        </SheetHeader>
+        <div className='!flex items-center justify-between pb-5'>
+          <h2 className='text-left text-white'>Members</h2>
+          <SheetClose className='block'>
+            <X />
+          </SheetClose>
+        </div>
         <ul className='flex flex-col gap-3'>
           {data?.map((member) => (
             <li

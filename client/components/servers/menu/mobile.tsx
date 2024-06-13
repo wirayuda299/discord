@@ -5,7 +5,6 @@ import { Bell, ChevronRight, Cog, UserPlus2 } from 'lucide-react';
 
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTrigger,
