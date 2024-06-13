@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import {
   Sheet,
@@ -10,7 +11,13 @@ import {
 } from '../ui/sheet';
 import useServerMembers from '@/hooks/useServerMember';
 
-export default function ServersMembers({ serverId }: { serverId: string }) {
+export default function ServersMembers({
+  serverId,
+  children,
+}: {
+  serverId: string;
+  children: ReactNode;
+}) {
   const { data, error, isLoading } = useServerMembers(serverId);
 
   if (isLoading)
@@ -22,21 +29,16 @@ export default function ServersMembers({ serverId }: { serverId: string }) {
   return (
     <Sheet>
       <SheetTrigger
+        asChild
         aria-label='show members'
         name='show members'
         title='show members'
       >
-        <Image
-          className='min-w-6'
-          src={'/server/icons/member.svg'}
-          width={24}
-          height={24}
-          alt='member'
-        />
+        {children}
       </SheetTrigger>
-      <SheetContent className='border-foreground bg-foreground text-white shadow-2xl'>
+      <SheetContent className='w-full border-foreground bg-black text-white shadow-2xl md:bg-foreground'>
         <SheetHeader className='pb-5'>
-          <SheetTitle className='text-white'>Members</SheetTitle>
+          <SheetTitle className='text-left text-white'>Members</SheetTitle>
         </SheetHeader>
         <ul className='flex flex-col gap-3'>
           {data?.map((member) => (

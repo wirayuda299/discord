@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
-import dynamic from 'next/dynamic';
 
 import {
   DropdownMenu,
@@ -10,23 +9,18 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { Servers } from '@/types/server';
-import ServerInvitationModal from './invite-modal';
-import CreateChannelDialog from './channels/create-channel/dialog';
+import ServerInvitationModal from '../invite-modal';
+import CreateChannelDialog from '../channels/create-channel/dialog';
 import { usePermissionsContext } from '@/providers/permissions';
-const ServerSettingsDesktop = dynamic(
-  () => import('../servers/settings/desktop'),
-  { ssr: false },
-);
-const ServerSettingsMobile = dynamic(
-  () => import('../servers/settings/mobile'),
-  { ssr: false },
-);
+import ServerSettingsDesktop from '../settings/desktop';
 
-export default function ServersMenu({ server }: { server: Servers }) {
+export default function ServersMenuDesktop({ server }: { server: Servers }) {
   const windowWidth = window.innerWidth;
   const { permission, errors, loading, userId } = usePermissionsContext();
+  if (windowWidth < 768) return null;
+
   if (loading)
     return (
       <div className='h-12 w-full animate-pulse rounded-md bg-foreground brightness-110'></div>
@@ -40,7 +34,7 @@ export default function ServersMenu({ server }: { server: Servers }) {
         name='menu'
         aria-label='menu'
         title='menu'
-        className='flex-center z-10 w-full justify-between border-b border-b-background !bg-transparent p-3 text-white backdrop-blur-sm'
+        className='z-10 hidden w-full items-center justify-between border-b border-b-background !bg-transparent p-3 text-white backdrop-blur-sm md:flex'
       >
         <span className='truncate'>{server.name || 'Server name'}</span>
         <ChevronDown size={18} className='text-gray-1' />
@@ -71,11 +65,8 @@ export default function ServersMenu({ server }: { server: Servers }) {
             />
           </DropdownMenuItem>
         </ServerInvitationModal>
-        {userId && server.owner_id === userId && windowWidth >= 768 && (
+        {userId && server.owner_id === userId && (
           <ServerSettingsDesktop server={server} />
-        )}
-        {userId && server.owner_id === userId && windowWidth < 768 && (
-          <ServerSettingsMobile server={server} />
         )}
 
         {(userId && server.owner_id === userId) ||

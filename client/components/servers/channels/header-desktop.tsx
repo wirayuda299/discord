@@ -131,7 +131,15 @@ export default function ChannelsHeader({
             ))}
           </ul>
         </PinnedMessage>
-        <ServersMembers serverId={serverId} />
+        <ServersMembers serverId={serverId}>
+          <Image
+            className='min-w-6'
+            src={'/server/icons/member.svg'}
+            width={24}
+            height={24}
+            alt='member'
+          />
+        </ServersMembers>
         <SearchForm />
         <Inbox>Channel inbox</Inbox>
         <Image

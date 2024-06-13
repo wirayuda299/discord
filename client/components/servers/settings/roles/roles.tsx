@@ -18,7 +18,7 @@ import useFetch from '@/hooks/useFetch';
 import PulseLoader from '@/components/shared/pulse-loader';
 const RoleSettings = dynamic(() => import('./role-settings'));
 
-export default function RolesDesktop({
+export default function Roles({
   serverAuthor,
   serverId,
 }: {
@@ -62,8 +62,10 @@ export default function RolesDesktop({
           type={type}
         />
       ) : (
-        <div className='p-7'>
-          <h2 className='pb-5 text-lg font-semibold text-white'>Roles</h2>
+        <div className='p-3 md:p-7'>
+          <h2 className='hidden pb-5 text-lg font-semibold text-white md:block'>
+            Roles
+          </h2>
           <p className='text-sm text-gray-2'>
             Use roles to group your server members and assign permissions.
           </p>

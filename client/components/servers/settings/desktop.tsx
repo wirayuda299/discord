@@ -15,7 +15,7 @@ import {
 import { getServerSettings } from '@/constants/servers-settings';
 import { Servers } from '@/types/server';
 const ServerOverview = dynamic(() => import('./overview/server-overview'));
-const RolesDesktop = dynamic(() => import('./roles/roles-desktop'));
+const Roles = dynamic(() => import('./roles/roles'));
 const EmojiUpload = dynamic(() => import('./emoji-upload'));
 const StickerUpload = dynamic(() => import('./sticker-upload'));
 const ServerBanList = dynamic(() => import('./bans'));
@@ -78,10 +78,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
               <ServerOverview server={server} />
             )}
             {selectedSetting === 'roles' && (
-              <RolesDesktop
-                serverAuthor={server.owner_id}
-                serverId={server.id}
-              />
+              <Roles serverAuthor={server.owner_id} serverId={server.id} />
             )}
             {selectedSetting === 'emoji' && <EmojiUpload />}
             {selectedSetting === 'stickers' && <StickerUpload />}

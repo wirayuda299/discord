@@ -95,7 +95,7 @@ export default function CreateChannelForm({
                   maxLength={30}
                   autoComplete='off'
                   placeholder='# new-channel'
-                  className='bg-foreground text-white caret-white ring-offset-background focus:border-none focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0'
+                  className='bg-foreground/35 text-white caret-white ring-offset-background focus:border-none focus-visible:border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 md:bg-foreground'
                   required
                   {...field}
                 />

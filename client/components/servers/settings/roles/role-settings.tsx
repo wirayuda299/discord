@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { ArrowLeft, Check, ImagePlus, Plus, Trash } from 'lucide-react';
+import { ArrowLeft, Check, ImagePlus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useSWRConfig } from 'swr';
 import { useAuth } from '@clerk/nextjs';
@@ -72,6 +72,7 @@ export default function RolesSettings({
   const { userId } = useAuth();
   const { mutate } = useSWRConfig();
   const params = useParams();
+  const windowWidth = window.innerWidth;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -141,6 +142,10 @@ export default function RolesSettings({
           serverAuthor,
         );
         toast.success('Role has been created');
+        if (windowWidth < 768) {
+          selectType(null);
+          selectRole(null);
+        }
       }
 
       if (type === 'update' && selectedRole) {
@@ -182,7 +187,7 @@ export default function RolesSettings({
 
   return (
     <div className='flex h-full w-full py-7'>
-      <aside className='sticky top-0 min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background'>
+      <aside className='sticky top-0 hidden min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block'>
         <header className='flex-center w-full justify-between'>
           <Button
             onClick={() => {
@@ -221,12 +226,23 @@ export default function RolesSettings({
           ))}
         </ul>
       </aside>
-      <div className='w-full overflow-y-auto px-4 pt-1'>
-        <h4 className='text-lg font-medium uppercase text-gray-2'>
-          {type === 'create'
-            ? 'Create role'
-            : `Edit Role -- ${selectedRole?.name}`}
-        </h4>
+      <div className='w-full overflow-y-auto px-2 pt-1 md:px-4'>
+        <div className='flex-center justify-between'>
+          <h4 className='text-lg font-medium uppercase text-gray-2'>
+            {type === 'create'
+              ? 'Create role'
+              : `Edit Role -- ${selectedRole?.name}`}
+          </h4>
+          <Button
+            onClick={() => {
+              selectRole(null);
+              selectType(null);
+            }}
+            className='inline-flex gap-1 !bg-transparent uppercase text-gray-2 md:hidden'
+          >
+            Back
+          </Button>
+        </div>
         <ul className='flex-center w-full gap-5 border-b border-b-background py-5'>
           {tabs?.map((tab) => (
             <li
@@ -566,7 +582,7 @@ export default function RolesSettings({
                 className={cn(
                   'sticky -bottom-full left-0 right-0 mt-10 flex w-full items-center justify-between rounded-sm bg-black p-2 transition-all duration-300 ease-in-out',
                   isEdited
-                    ? 'bottom-0 mt-0 opacity-100'
+                    ? 'bottom-10 mt-0 opacity-100 md:bottom-0'
                     : '-bottom-full mt-10 opacity-0',
                 )}
               >

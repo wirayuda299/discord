@@ -153,7 +153,7 @@ export default function ServerOverview({ server }: { server: Servers }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleUpdateServer)}
-        className='h-full max-h-dvh overflow-y-auto p-7 md:max-h-screen'
+        className='max-h-screen overflow-y-auto p-4 md:p-7'
       >
         <h2 className='hidden pb-5 text-lg font-semibold text-white md:block'>
           Server overview
@@ -335,8 +335,8 @@ export default function ServerOverview({ server }: { server: Servers }) {
           className={cn(
             'sticky -bottom-full left-0 right-0 mt-10 flex w-full flex-col items-center justify-between gap-2 rounded-sm bg-black p-2 transition-all duration-300 ease-in-out md:flex-row',
             isChanged
-              ? 'bottom-0 mt-0 opacity-100'
-              : '-bottom-full mt-10 opacity-0',
+              ? 'bottom-10 opacity-100 md:bottom-0'
+              : '-bottom-full opacity-0',
           )}
         >
           <p className='text-sm font-medium text-gray-2'>
