@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import { type Dispatch, type SetStateAction, memo, useCallback } from 'react';
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import type { ReadonlyURLSearchParams } from 'next/navigation';
 import { Copy, Ellipsis, Trash } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
 
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { revalidate } from '@/utils/cache';
 import { useSelectedMessageStore } from '@/providers';
 import { createError } from '@/utils/error';
 import { pinMessage, pinPersonalMessage } from '@/actions/messages';
+import { usePermissionsContext } from '@/providers/permissions';
 
 type Props = {
   msg: Message;
@@ -32,21 +34,32 @@ type Props = {
   type: string;
   reloadMessage: () => void;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  pathname: string;
+  searchParams: ReadonlyURLSearchParams;
+  params: Params;
 };
 
-function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
+function MessageMenu(props: Props) {
+  const {
+    type,
+    msg,
+    userId,
+    reloadMessage,
+    setIsOpen,
+    params,
+    pathname,
+    searchParams,
+  } = props;
   const setMessage = useSelectedMessageStore(
     (state) => state.setSelectedMessage,
   );
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const params = useParams();
+  const { loading, errors, server, permission } = usePermissionsContext();
 
   const handleAddOrRemoveReactions = useCallback(
     async (messageId: string, emoji: string, unifiedEmoji: string) => {
       const { addOrRemoveReaction } = await import('@/actions/reactions');
       try {
-        await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId!!);
+        await addOrRemoveReaction(messageId, emoji, unifiedEmoji, userId);
         reloadMessage();
       } catch (error) {
         createError(error);
@@ -59,7 +72,7 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
     try {
       if (type === 'channel') {
         await pinMessage(
-          params.channel_id as string,
+          params.channel_id,
           msg.message_id,
           userId,
           pathname,
@@ -77,11 +90,17 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
         });
       }
     } catch (error) {
-      console.log(error);
-
       createError(error);
     }
   };
+
+  if (loading || errors) return null;
+
+  const canCreateThread =
+    (server && server.owner_id === userId) ||
+    (permission && permission.manage_thread);
+  const canPinMessage =
+    server?.owner_id === userId || (permission && permission.manage_message);
 
   return (
     <div className='absolute right-0 top-0 hidden gap-4 bg-foreground p-1 opacity-0 shadow-xl group-hover:opacity-100 md:flex'>
@@ -102,7 +121,7 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
           onClick={() => setIsOpen(true)}
         >
           <Image
-            src={'/general/icons/pencil.svg'}
+            src='/general/icons/pencil.svg'
             width={20}
             height={20}
             alt='pencil'
@@ -113,16 +132,10 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
           aria-label='reply'
           name='reply'
           title='reply'
-          onClick={() =>
-            setMessage({
-              message: msg,
-              action: 'reply',
-              type,
-            })
-          }
+          onClick={() => setMessage({ message: msg, action: 'reply', type })}
         >
           <Image
-            src={'/general/icons/reply.svg'}
+            src='/general/icons/reply.svg'
             width={20}
             height={20}
             alt='reply'
@@ -130,11 +143,11 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
         </button>
       )}
 
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger aria-label='menu' name='menu' title='menu'>
           <Ellipsis />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className='space-y-2 border-none bg-[#111214] p-3'>
+        <DropdownMenuContent className='space-y-1 border-none bg-[#111214] p-3'>
           <TopEmoji
             handleAddOrRemoveReactions={handleAddOrRemoveReactions}
             msg={msg}
@@ -168,14 +181,15 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
+
           {msg.author === userId && (
             <DropdownMenuItem
               onClick={() => setIsOpen(true)}
               className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
             >
-              <span> Edit message</span>
+              <span>Edit message</span>
               <Image
-                src={'/general/icons/pencil.svg'}
+                src='/general/icons/pencil.svg'
                 width={20}
                 height={20}
                 alt='pencil'
@@ -183,32 +197,35 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
             </DropdownMenuItem>
           )}
 
-          <DropdownMenuItem
-            onClick={handlePinMessage}
-            className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
-          >
-            <span> Pin message</span>
-            <Image
-              src={'/general/icons/pin.svg'}
-              width={20}
-              height={20}
-              alt='pin'
-            />
-          </DropdownMenuItem>
+          {type !== 'personal' && canPinMessage && (
+            <DropdownMenuItem
+              onClick={handlePinMessage}
+              className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
+            >
+              <span>Pin message</span>
+              <Image
+                src='/general/icons/pin.svg'
+                width={20}
+                height={20}
+                alt='pin'
+              />
+            </DropdownMenuItem>
+          )}
 
           <DropdownMenuItem
             onClick={() => setMessage({ message: msg, action: 'reply', type })}
             className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
           >
-            <span> Reply</span>
+            <span>Reply</span>
             <Image
-              src={'/general/icons/reply.svg'}
+              src='/general/icons/reply.svg'
               width={20}
               height={20}
               alt='reply'
             />
           </DropdownMenuItem>
-          {type !== 'personal' && (
+
+          {type !== 'personal' && canCreateThread && (
             <DropdownMenuItem
               aria-label='create thread'
               title='create thread'
@@ -217,9 +234,9 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
               }
               className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
             >
-              <span> Create Thread</span>
+              <span>Create Thread</span>
               <Image
-                src={'/general/icons/threads.svg'}
+                src='/general/icons/threads.svg'
                 width={20}
                 height={20}
                 alt='threads'
@@ -233,9 +250,10 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
             onClick={() => copyText(msg.message, 'Message copied')}
             className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
           >
-            <span> Copy Message</span>
+            <span>Copy Message</span>
             <Copy size={18} className='text-[#949ba4]' />
           </DropdownMenuItem>
+
           {msg.author === userId && (
             <DropdownMenuItem
               aria-label='delete message'
@@ -248,7 +266,7 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
               }}
               className='flex-center cursor-pointer justify-between !bg-transparent text-xs !text-red-600'
             >
-              <span> Delete Message</span>
+              <span>Delete Message</span>
               <Trash size={18} className='text-red-600' />
             </DropdownMenuItem>
           )}
@@ -261,11 +279,12 @@ function MessageMenu({ type, msg, userId, reloadMessage, setIsOpen }: Props) {
             onClick={() => copyText(msg.message_id, 'Message ID copied')}
             className='flex-center justify-between !bg-transparent text-xs !text-white hover:!bg-primary'
           >
-            <span> Copy message ID</span>
+            <span>Copy message ID</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
 }
+
 export default memo(MessageMenu);

@@ -20,6 +20,7 @@ import {
 } from '@/providers';
 import { Input } from '../ui/input';
 import { revalidate } from '@/utils/cache';
+import { usePermissionsContext } from '@/providers/permissions';
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Please add message'),
@@ -33,10 +34,11 @@ type Props = {
 };
 
 export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
-  const { userId } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { permission, errors, loading, userId, server } =
+    usePermissionsContext();
 
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
@@ -183,6 +185,8 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     }
   };
 
+  if (loading || errors) return null;
+
   return (
     <>
       {selectedMessage &&
@@ -212,16 +216,20 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
           className='flex-center h-16 gap-1 rounded-lg border-t border-background bg-black md:gap-2 md:bg-foreground md:p-3 md:brightness-125'
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <FileUpload
-            key={preview && preview.image}
-            deleteImage={deleteImage}
-            form={form}
-            preview={preview}
-            handleChange={handleChange}
-            // @ts-ignore
-            image={image}
-            isSubmitting={isSubmitting}
-          />
+          {type !== 'personal' &&
+            (server?.owner_id === userId ||
+              (permission && permission.attach_file)) && (
+              <FileUpload
+                key={preview && preview.image}
+                deleteImage={deleteImage}
+                form={form}
+                preview={preview}
+                handleChange={handleChange}
+                // @ts-ignore
+                image={image}
+                isSubmitting={isSubmitting}
+              />
+            )}
 
           <FormField
             name={'message'}

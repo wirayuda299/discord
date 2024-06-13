@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 
 import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
-import ChannelDetailMobile from './mobile';
 import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
+import ChannelsHeader from './header-desktop';
 
 const ChannelsMessages = dynamic(() => import('./messages'));
-const ChannelsHeader = dynamic(() => import('./header-desktop'));
+const ChannelDetailMobile = dynamic(() => import('./mobile'));
 
 type Props = {
   channelName: string;

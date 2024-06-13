@@ -1,7 +1,9 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useAuth } from '@clerk/nextjs';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { usePathname, useSearchParams, useParams } from 'next/navigation';
 
 import { Message } from '@/types/messages';
 import { formatMessageTimestamp } from '@/utils/date';
@@ -9,8 +11,6 @@ import { foundMessage } from '@/utils/messages';
 import { useServerStates } from '@/providers';
 import { pinMessage, pinPersonalMessage } from '@/actions/messages';
 import { createError } from '@/utils/error';
-import { usePathname, useSearchParams, useParams } from 'next/navigation';
-import { toast } from 'sonner';
 
 const MessageContent = dynamic(() => import('./MessageContent'));
 const RepliedMessage = dynamic(() => import('./RepliedMessage'));
@@ -25,12 +25,7 @@ type Props = {
   reloadMessage: () => void;
 };
 
-export default function ChatItem({
-  msg,
-  messages,
-  type,
-  reloadMessage,
-}: Props) {
+function ChatItem(props: Props) {
   const { userId } = useAuth();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,21 +34,21 @@ export default function ChatItem({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const setSelectedThread = useServerStates((state) => state.setSelectedThread);
 
-  const allMessages = useMemo(() => messages, [messages]);
+  const allMessages = useMemo(() => props.messages, [props.messages]);
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
   const repliedMessage = useMemo(
-    () => foundMessage(allMessages, msg),
-    [allMessages, msg],
+    () => foundMessage(allMessages, props.msg),
+    [allMessages, props.msg],
   );
 
   const handlePinMessage = async () => {
     try {
-      if (type === 'channel') {
+      if (props.type === 'channel') {
         await pinMessage(
           params.channel_id as string,
-          msg.message_id,
+          props.msg.message_id,
           userId!!,
           pathname,
         ).then(() => {
@@ -62,7 +57,7 @@ export default function ChatItem({
       } else {
         await pinPersonalMessage(
           searchParams.get('conversationId') as string,
-          msg.message_id,
+          props.msg.message_id,
           userId!!,
           pathname,
         );
@@ -75,55 +70,54 @@ export default function ChatItem({
   return (
     <>
       <li className='w-full'>
-        {msg?.shouldAddLabel && (
+        {props.msg?.shouldAddLabel && (
           <div className='flex w-full items-center gap-2 pb-5'>
             <div className='h-px w-full bg-gray-1'></div>
             <p className='min-w-min !text-nowrap text-sm text-gray-2'>
-              {formatMessageTimestamp(msg.created_at)}
+              {formatMessageTimestamp(props.msg.created_at)}
             </p>
             <div className='h-px w-full bg-gray-1'></div>
           </div>
         )}
       </li>
       <li
-        id={msg.parent_message_id || msg.message_id}
+        id={props.msg.parent_message_id || props.msg.message_id}
         className='group !relative w-full rounded p-2 text-gray-2 hover:bg-foreground hover:bg-foreground/25 md:hover:brightness-125'
       >
-        {msg.parent_message_id && (
-          <RepliedMessage msg={msg} repliedMessage={repliedMessage} />
+        {props.msg.parent_message_id && (
+          <RepliedMessage msg={props.msg} repliedMessage={repliedMessage} />
         )}
         {isOpen ? (
           <EditMessageForm
-            reloadMessage={reloadMessage}
+            reloadMessage={props.reloadMessage}
+            messageId={props.msg.message_id}
+            message={props.msg.message}
+            messageAuthor={props.msg.author}
             currentUser={userId!!}
             handleClose={handleClose}
-            message={msg.message}
-            messageAuthor={msg.author}
-            messageId={msg.message_id}
           />
         ) : (
-          <MessageContent msg={msg} />
+          <MessageContent msg={props.msg} />
         )}
 
         <MessageMenu
-          msg={msg}
-          reloadMessage={reloadMessage}
+          params={params}
+          pathname={pathname}
+          searchParams={searchParams}
           setIsOpen={setIsOpen}
-          type={type}
+          {...props}
           userId={userId!!}
         />
         <MessageMenuMobile
           pinMessage={handlePinMessage}
           setIsOpen={setIsOpen}
-          type={type}
-          msg={msg}
-          reloadMessage={reloadMessage}
+          {...props}
           userId={userId!!}
         />
 
-        {msg.media_image && !msg.parent_message_id && (
+        {props.msg.media_image && !props.msg.parent_message_id && (
           <Image
-            src={msg?.media_image}
+            src={props.msg?.media_image}
             width={200}
             height={100}
             alt='media'
@@ -133,7 +127,7 @@ export default function ChatItem({
         )}
 
         <ul className='flex flex-col gap-2 pt-2'>
-          {(msg.threads || []).map((thread) => (
+          {(props.msg.threads || []).map((thread) => (
             <li
               onClick={() => setSelectedThread(thread)}
               key={thread.thread_id}
@@ -155,7 +149,7 @@ export default function ChatItem({
         </ul>
 
         <div className='flex-center flex-wrap gap-2 pt-2'>
-          {msg.reactions.map((reaction) => (
+          {props.msg.reactions.map((reaction) => (
             <p
               className='rounded-md border border-blue-500 bg-blue-600/15 px-2'
               key={reaction.unified_emoji}
@@ -168,3 +162,5 @@ export default function ChatItem({
     </>
   );
 }
+
+export default memo(ChatItem);

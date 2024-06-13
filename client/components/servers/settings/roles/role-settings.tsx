@@ -145,8 +145,6 @@ export default function RolesSettings({
 
       if (type === 'update' && selectedRole) {
         if (editedFields.icon && files && files.icon) {
-          console.log('File change');
-
           media = await uploadFile(files.icon);
         }
 

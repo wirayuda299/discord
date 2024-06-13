@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
-import { useAuth } from '@clerk/nextjs';
 
 import {
   DropdownMenu,
@@ -14,28 +13,17 @@ import {
 import ServerSettingsDesktop from '../servers/settings/desktop';
 import { Servers } from '@/types/server';
 import ServerInvitationModal from './invite-modal';
-import useFetch from '@/hooks/useFetch';
-import { getCurrentUserPermissions } from '@/helper/roles';
 import CreateChannelDialog from './channels/create-channel/dialog';
+import { usePermissionsContext } from '@/providers/permissions';
 
 export default function ServersMenu({ server }: { server: Servers }) {
-  const { userId } = useAuth();
-  const {
-    data: permission,
-    isLoading,
-    error,
-  } = useFetch(
-    'permissions',
-    () => getCurrentUserPermissions(userId ? userId : '', server.id),
-    true,
-  );
-
-  if (isLoading)
+  const { permission, errors, loading, userId } = usePermissionsContext();
+  if (loading)
     return (
       <div className='h-12 w-full animate-pulse rounded-md bg-foreground brightness-110'></div>
     );
 
-  if (error) return <p>{error.message}</p>;
+  if (errors) return <p>{errors.message}</p>;
 
   return (
     <DropdownMenu>
@@ -85,7 +73,7 @@ export default function ServersMenu({ server }: { server: Servers }) {
             serverId={server.id}
             type={'text'}
           >
-            <div className='group flex items-center justify-between rounded px-2 py-2 text-sm !text-gray-2 hover:!bg-primary hover:!text-white'>
+            <div className='group flex cursor-pointer items-center justify-between rounded px-2 py-2 text-sm !text-gray-2 hover:!bg-primary hover:!text-white'>
               Create channel
               <div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
                 <Plus size={20} className='text-gray-1' />
@@ -96,7 +84,7 @@ export default function ServersMenu({ server }: { server: Servers }) {
 
         {(userId && server.owner_id === userId) ||
         (permission && permission.manage_role) ? (
-          <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
+          <DropdownMenuItem className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
             <p>Create role</p>
             <Image
               src={'/server/icons/guards.svg'}
@@ -107,7 +95,7 @@ export default function ServersMenu({ server }: { server: Servers }) {
           </DropdownMenuItem>
         ) : null}
 
-        <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
+        <DropdownMenuItem className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
           <p>Edit server profile</p>
           <Image
             src={'/server/icons/pencil.svg'}
