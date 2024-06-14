@@ -34,7 +34,7 @@ export default async function ServerLayout({ params, children }: Props) {
             }
           >
             <ServersMenuDesktop server={server} />
-            <ServerMenuMobile server={server} />
+            <ServerMenuMobile server={server} categories={categories} />
           </Suspense>
           {server.banner && server.settings.show_banner_background && (
             <div className='relative min-h-40 min-w-full'>

@@ -70,6 +70,9 @@
   .flex-center {
     @apply flex items-center;
   }
+  .text-nowrap {
+    text-wrap: nowrap;
+  }
 }
 
 ::-webkit-scrollbar {
