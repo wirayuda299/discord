@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 import { Categories } from '@/types/channels';
 
@@ -16,6 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Servers } from '@/types/server';
 import { useServerStates } from '@/providers';
+import useWindowResize from '@/hooks/useWindowResize';
 
 export default function ChannelItem({
   category,
@@ -25,19 +25,11 @@ export default function ChannelItem({
   server: Servers;
 }) {
   const params = useParams();
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const setSelectedChannel = useServerStates(
     (state) => state.setSelectedChannel,
   );
 
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  const { windowWidth } = useWindowResize();
 
   return (
     <li key={category.category_id}>

@@ -35,7 +35,10 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
   const settings = useMemo(() => getServerSettings(server.name), [server.name]);
   return (
     <Dialog>
-      <DialogTrigger className='flex w-full items-center justify-between rounded px-2 py-2 !text-gray-2 hover:!bg-primary hover:!text-white'>
+      <DialogTrigger
+        onClick={() => setSelectedSetting('overview')}
+        className='flex w-full items-center justify-between rounded px-2 py-2 !text-gray-2 hover:!bg-primary hover:!text-white'
+      >
         <span className='text-sm'>Server settings</span>
         <Cog size={20} />
       </DialogTrigger>

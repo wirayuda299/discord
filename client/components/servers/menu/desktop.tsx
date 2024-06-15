@@ -15,10 +15,14 @@ import ServerInvitationModal from '../invite-modal';
 import CreateChannelDialog from '../channels/create-channel/dialog';
 import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
+import { useServerStates } from '@/providers';
+import UserSettingsDesktop from '../settings/user-settings/desktop';
+import useWindowResize from '@/hooks/useWindowResize';
 
 export default function ServersMenuDesktop({ server }: { server: Servers }) {
-  const windowWidth = window.innerWidth;
   const { permission, errors, loading, userId } = usePermissionsContext();
+
+  const { windowWidth } = useWindowResize();
   if (windowWidth < 768) return null;
 
   if (loading)
@@ -98,15 +102,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
           </DropdownMenuItem>
         ) : null}
 
-        <DropdownMenuItem className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
-          <p>Edit server profile</p>
-          <Image
-            src={'/server/icons/pencil.svg'}
-            width={20}
-            height={20}
-            alt='invite user'
-          />
-        </DropdownMenuItem>
+        <UserSettingsDesktop />
         <DropdownMenuSeparator className='border-b border-b-background' />
 
         {userId && userId !== server.owner_id && (
