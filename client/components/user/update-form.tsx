@@ -216,7 +216,9 @@ export default function UserUpdateForm({
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
                     <>
+                      {/* @ts-ignore */}
                       <Input
+                        // @ts-ignore
                         {...field}
                         placeholder='Add bio'
                         autoComplete='off'
