@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 
 const schema = z.object({
   username: z.string().min(4),
-  bio: z.string().default('').optional(),
+  bio: z.string().default('').nullable(),
   avatar: z.string(),
 });
 
