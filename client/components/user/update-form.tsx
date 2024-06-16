@@ -62,7 +62,6 @@ export default function UserUpdateForm({
 
   const formValues = form.watch();
   const isChanged = form.formState.isDirty;
-  const isValid = form.formState.isValid;
 
   const resetForm = useCallback(() => {
     if (selectedOption === 'user') {
@@ -290,7 +289,7 @@ export default function UserUpdateForm({
                 Reset
               </Button>
               <Button
-                disabled={!isChanged || isSubmitting || !isValid}
+                disabled={!isChanged || isSubmitting}
                 className='rounded bg-green-700 text-sm hover:bg-green-800'
               >
                 {isSubmitting ? 'Updating...' : 'Save changes'}
