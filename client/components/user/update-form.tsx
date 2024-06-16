@@ -21,7 +21,6 @@ import useUploadFile from '@/hooks/useFileUpload';
 import { deleteImage, uploadFile } from '@/helper/file';
 import { User } from '@/types/user';
 import { ServerProfile } from '@/types/server';
-import { getCookies } from '@/helper/cookies';
 import { updateServerProfile } from '@/helper/server';
 import UserInfo from './user-info';
 import { createError } from '@/utils/error';
@@ -29,7 +28,7 @@ import { cn } from '@/lib/utils';
 
 const schema = z.object({
   username: z.string().min(4),
-  bio: z.string().min(0).optional(),
+  bio: z.string().default('').optional(),
   avatar: z.string(),
 });
 
