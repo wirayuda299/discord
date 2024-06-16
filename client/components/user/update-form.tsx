@@ -112,13 +112,13 @@ export default function UserUpdateForm({
     try {
       if (selectedOption === 'user') {
         if (files && files.avatar) {
-          await Promise.all([
+          const [, , file] = await Promise.all([
             user.image_asset_id
               ? deleteImage(user?.image_asset_id)
               : Promise.resolve(),
             currentUser?.setProfileImage({ file: files.avatar }),
+            uploadFile(files?.avatar),
           ]);
-          const file = await uploadFile(files?.avatar);
           await updateUser(
             data.username,
             data.bio ?? '',

@@ -2,7 +2,10 @@ import { prepareHeaders } from './cookies';
 
 const serverUrl = process.env.SERVER_URL;
 
-export async function uploadFile(file: File) {
+export async function uploadFile(file: File): Promise<{
+  publicId: string;
+  url: string;
+}> {
   try {
     const formData = new FormData();
     formData.append('file', file);
