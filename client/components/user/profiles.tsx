@@ -38,7 +38,7 @@ export default function UserProfile() {
     return <PulseLoader />;
 
   return (
-    <div className='h-full w-full p-5'>
+    <div className=' w-full p-5'>
       <h2 className='text-base font-semibold text-white'>Profiles</h2>
       <ul
         className={cn(
