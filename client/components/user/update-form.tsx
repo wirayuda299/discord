@@ -150,7 +150,7 @@ export default function UserUpdateForm({
           files.avatar
         ) {
           const [, file] = await Promise.all([
-           serverProfile.avatar_asset_id
+            serverProfile.avatar_asset_id
               ? deleteImage(serverProfile?.avatar_asset_id!!)
               : Promise.resolve(),
             uploadFile(files.avatar),
@@ -186,9 +186,9 @@ export default function UserUpdateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='w-fulll h-full'>
         <div className='grid w-full h-full gap-5 space-y-3 py-5 md:grid-cols-1 lg:grid-cols-2'>
-          <div className='h-full'>
+          <div>
             <FormField
               control={form.control}
               name='username'

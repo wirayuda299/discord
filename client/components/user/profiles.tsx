@@ -19,6 +19,7 @@ export default function UserProfile() {
     selectedOption: state.selectedOption,
   }));
 
+
   const {
     data: user,
     isLoading: userLoading,
