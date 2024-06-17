@@ -107,7 +107,7 @@ export default function ServerMenuMobile({
             </Drawer>
           </div>
         </DrawerHeader>
-        <div className='mt-3 flex flex-col gap-2 divide-y divide-background rounded-lg bg-foreground/35 p-2'>
+        <div className='mt-3 flex flex-col gap-5 divide-y divide-background rounded-lg bg-foreground/35 p-2'>
           {(server.owner_id === userId ||
             (permission && permission.manage_channel)) && (
             <Drawer>
@@ -160,7 +160,7 @@ export default function ServerMenuMobile({
             <DrawerTrigger className='pt-1 text-left text-sm'>
               Edit Server Profile
             </DrawerTrigger>
-            <DrawerContent className=' md:hidden h-full overflow-y-auto bg-black p-0'>
+            <DrawerContent className=' md:hidden top-0 h-max overflow-y-auto bg-black p-0'>
               <UserProfile/>
             </DrawerContent>
           </Drawer>
