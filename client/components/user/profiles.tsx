@@ -99,7 +99,7 @@ export default function UserProfile() {
         </div>
       )}
       <UserUpdateForm
-        user={user}
+        user={user!}
         serverProfile={serverProfile}
         selectedOption={selectedOption}
       />
