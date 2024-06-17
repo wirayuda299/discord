@@ -42,7 +42,7 @@ export default function UserProfile() {
   console.log(selectedOption)
 
   return (
-    <div className='h-full w-full p-5'>
+    <div className='h-full w-full overflow-y-auto p-5'>
       <h2 className='text-base font-semibold text-white'>Profiles</h2>
       <ul
         className={cn(
