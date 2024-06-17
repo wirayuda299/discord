@@ -21,7 +21,7 @@ export async function updateUser(
         image,
         imageAssetId,
       },
-      'PATCH',
+      'PUT'
     );
   } catch (error) {
     throw error;

@@ -466,16 +466,12 @@ export class ServersService {
       await this.databaseService.pool.query(
         `
         UPDATE server_profile AS sp
-SET 
-  username = $1,
-  avatar = $2,
-  avatar_asset_id = $3,
-  bio = $4
-WHERE 
-  sp.server_id = $5 
-  AND sp.user_id = $6;
-
-      `,
+        SET 
+         username = $1,
+         avatar = $2,
+         avatar_asset_id = $3,
+         bio = $4
+         WHERE sp.server_id = $5 AND sp.user_id = $6`,
         [username, avatar, avatarAssetId, bio, serverId, userId]
       );
 

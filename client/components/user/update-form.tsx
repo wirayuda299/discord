@@ -150,7 +150,7 @@ export default function UserUpdateForm({
           files.avatar
         ) {
           const [, file] = await Promise.all([
-            serverProfile.avatar_asset_id
+           serverProfile.avatar_asset_id
               ? deleteImage(serverProfile?.avatar_asset_id!!)
               : Promise.resolve(),
             uploadFile(files.avatar),
