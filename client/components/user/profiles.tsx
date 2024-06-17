@@ -100,7 +100,7 @@ export default function UserProfile() {
       )}
       <UserUpdateForm
         user={user!}
-        serverProfile={serverProfile}
+        serverProfile={serverProfile!}
         selectedOption={selectedOption}
       />
     </div>
