@@ -187,7 +187,7 @@ export default function UserUpdateForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className='grid w-full gap-5 space-y-3 py-5 md:grid-cols-1 lg:grid-cols-2'>
+        <div className='grid w-full h-full gap-5 space-y-3 py-5 md:grid-cols-1 lg:grid-cols-2'>
           <div>
             <FormField
               control={form.control}
