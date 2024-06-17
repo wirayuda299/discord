@@ -99,7 +99,6 @@ export class SocketGateway implements OnModuleInit {
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() payload: PayloadTypes) {
     try {
-      this.logger.log(payload)
       switch (payload.type) {
         case 'channel':
           await this.messagesService.sendMessage(

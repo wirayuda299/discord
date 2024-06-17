@@ -134,7 +134,7 @@ export class MessagesService {
            RETURNING id`,
           [content, user_id, imageUrl ?? '', imageAssetId ?? '', 'channel']
         );
-
+        console.log({ message })
         const messageId = message.id;
 
         await this.db.pool.query(
