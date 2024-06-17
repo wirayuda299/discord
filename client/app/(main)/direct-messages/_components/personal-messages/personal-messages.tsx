@@ -80,7 +80,7 @@ export default function PersonalMessages({
       />
 
       <UserInfo friend={friend} />
-      <ul className='flex min-h-min flex-col gap-5 px-3'>
+      <ul className='flex min-h-dvh md:min-h-screen flex-col gap-5 px-3'>
         {messages?.map((message) => (
           <ChatItem
             reloadMessage={reloadPersonalMessage}
