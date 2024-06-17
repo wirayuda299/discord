@@ -26,7 +26,7 @@ export default async function ServerLayout({ params, children }: Props) {
   return (
     <PermissionsProvider>
       <main className='flex w-full'>
-        <aside className='sticky left-0 top-0 flex h-dvh w-full min-w-64 max-w-64 flex-col place-items-center border-r border-foreground bg-black md:h-screen md:border-none md:bg-background/50'>
+        <aside className='sticky left-0 top-0 flex h-dvh w-full overflow-y-auto min-w-64 max-w-64 flex-col place-items-center border-r border-foreground bg-black md:h-screen md:border-none md:bg-background/50'>
           <Suspense
             key={params.id}
             fallback={

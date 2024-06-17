@@ -54,7 +54,7 @@ export default function ServerSettingsMobile({
                 </SheetClose>
               </li>
             </SheetTrigger>
-            <SheetContent className='left-0 h-full w-full border-none bg-black p-0'>
+            <SheetContent className='left-0 right-0 h-full min-w-full border-none bg-black p-0'>
               <header className='flex-center h-14 w-full gap-2 border-b border-foreground px-2 text-white'>
                 <SheetClose>
                   <ArrowLeft />
@@ -81,36 +81,36 @@ export default function ServerSettingsMobile({
         </ServersMembers>
         {(server.owner_id === userId ||
           (permission && permission.manage_role)) && (
-          <Sheet modal={false}>
-            <SheetTrigger asChild>
-              <li className='flex-center w-full justify-between pt-2'>
-                <div className='flex-center gap-3'>
-                  <Image
-                    src={'/server/icons/guards.svg'}
-                    width={20}
-                    height={20}
-                    alt='roles'
-                  />
-                  <p className='text-sm font-semibold capitalize'>Roles</p>
+            <Sheet modal={false}>
+              <SheetTrigger asChild>
+                <li className='flex-center w-full justify-between pt-2'>
+                  <div className='flex-center gap-3'>
+                    <Image
+                      src={'/server/icons/guards.svg'}
+                      width={20}
+                      height={20}
+                      alt='roles'
+                    />
+                    <p className='text-sm font-semibold capitalize'>Roles</p>
+                  </div>
+                  <SheetClose>
+                    <ChevronRight />
+                  </SheetClose>
+                </li>
+              </SheetTrigger>
+              <SheetContent className='left-0 h-full w-full border-none bg-black p-0'>
+                <header className='flex-center h-14 w-full gap-2 border-b border-foreground px-2 text-white'>
+                  <SheetClose>
+                    <ArrowLeft />
+                  </SheetClose>
+                  <h3 className='font-semibold'>Server Roles</h3>
+                </header>
+                <div className='h-dvh overflow-y-auto'>
+                  <Roles serverAuthor={server.owner_id} serverId={server.id} />
                 </div>
-                <SheetClose>
-                  <ChevronRight />
-                </SheetClose>
-              </li>
-            </SheetTrigger>
-            <SheetContent className='left-0 h-full w-full border-none bg-black p-0'>
-              <header className='flex-center h-14 w-full gap-2 border-b border-foreground px-2 text-white'>
-                <SheetClose>
-                  <ArrowLeft />
-                </SheetClose>
-                <h3 className='font-semibold'>Server Roles</h3>
-              </header>
-              <div className='h-dvh overflow-y-auto'>
-                <Roles serverAuthor={server.owner_id} serverId={server.id} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
+              </SheetContent>
+            </Sheet>
+          )}
         {server.owner_id === userId && (
           <Sheet modal={false}>
             <SheetTrigger asChild>

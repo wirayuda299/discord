@@ -153,7 +153,7 @@ export default function ServerOverview({ server }: { server: Servers }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleUpdateServer)}
-        className='max-h-screen overflow-y-auto p-4 md:p-7'
+        className='max-h-screen w-full overflow-y-auto p-4 md:p-7'
       >
         <h2 className='hidden pb-5 text-lg font-semibold text-white md:block'>
           Server overview

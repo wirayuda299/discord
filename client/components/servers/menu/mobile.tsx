@@ -17,7 +17,6 @@ import { usePermissionsContext } from '@/providers/permissions';
 import { Categories } from '@/types/channels';
 import ServerInvitationModal from '../invite-modal';
 import UserProfile from '@/components/user/profiles'
-import PulseLoader from '@/components/shared/pulse-loader'
 
 
 export default function ServerMenuMobile({
@@ -46,7 +45,7 @@ export default function ServerMenuMobile({
         <span className='truncate'>{server.name || 'Server name'}</span>
         <ChevronRight size={18} className='pt-[3px] text-gray-1' />
       </DrawerTrigger>
-      <DrawerContent className='border-t border-foreground bg-black p-3 text-white'>
+      <DrawerContent className='border-t border-foreground bg-black max-h-dvh p-3 text-white'>
         <DrawerHeader className='p-0'>
           <Image
             src={server.logo}
@@ -110,21 +109,21 @@ export default function ServerMenuMobile({
         <div className='mt-3 flex flex-col gap-5 divide-y divide-background rounded-lg bg-foreground/35 p-2'>
           {(server.owner_id === userId ||
             (permission && permission.manage_channel)) && (
-            <Drawer>
-              <DrawerTrigger className='text-left text-sm'>
-                Create Channel
-              </DrawerTrigger>
-              <DrawerContent className='top-0 h-screen bg-black p-2'>
-                <CreateChannelForm
-                  serverAuthor={server.owner_id}
-                  serverId={server.id}
-                  type='text'
-                />
-              </DrawerContent>
-            </Drawer>
-          )}
+              <Drawer>
+                <DrawerTrigger className='text-left text-sm'>
+                  Create Channel
+                </DrawerTrigger>
+                <DrawerContent className='top-0 h-screen bg-black p-2'>
+                  <CreateChannelForm
+                    serverAuthor={server.owner_id}
+                    serverId={server.id}
+                    type='text'
+                  />
+                </DrawerContent>
+              </Drawer>
+            )}
           <Drawer>
-            <DrawerTrigger className='pt-1 text-left text-sm'>
+            <DrawerTrigger className='pt-2 text-left text-sm'>
               Browse Channel
             </DrawerTrigger>
             <DrawerContent className='top-0 flex h-screen flex-col bg-black p-2'>
@@ -139,11 +138,10 @@ export default function ServerMenuMobile({
                     >
                       <div className='flex items-center gap-3'>
                         <Image
-                          src={`/server/icons/${
-                            channel.channel_type === 'text'
-                              ? 'hashtag.svg'
-                              : 'audio.svg'
-                          }`}
+                          src={`/server/icons/${channel.channel_type === 'text'
+                            ? 'hashtag.svg'
+                            : 'audio.svg'
+                            }`}
                           width={18}
                           height={18}
                           alt='audio'
@@ -157,11 +155,11 @@ export default function ServerMenuMobile({
             </DrawerContent>
           </Drawer>
           <Drawer>
-            <DrawerTrigger className='pt-1 text-left text-sm'>
+            <DrawerTrigger className='pt-2 text-left text-sm'>
               Edit Server Profile
             </DrawerTrigger>
-            <DrawerContent className=' md:hidden top-0 h-full overflow-y-auto bg-black p-0'>
-              <UserProfile/>
+            <DrawerContent className=' md:hidden top-0 h-full max-h-dvh overflow-y-auto bg-black p-0'>
+              <UserProfile />
             </DrawerContent>
           </Drawer>
 

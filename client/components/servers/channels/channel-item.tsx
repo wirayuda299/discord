@@ -54,24 +54,22 @@ export default function ChannelItem({
                 }
                 href={{
                   pathname: `/server/${server.id as string}/${channel.channel_id}`,
-                  search: `channel_type=${
-                    channel.channel_type
-                  }&channel_name=${encodeURIComponent(channel.channel_name)}`,
+                  search: `channel_type=${channel.channel_type
+                    }&channel_name=${encodeURIComponent(channel.channel_name)}`,
                 }}
                 key={channel.channel_id}
                 className={cn(
-                  'flex-center cursor-pointer gap-2 rounded p-2 pl-5 text-base hover:bg-foreground hover:text-white hover:brightness-105',
+                  'flex-center cursor-pointer gap-2 rounded p-2 pl-5 text-base hover:bg-background/50 md:hover:bg-foreground hover:text-white hover:brightness-105',
                   params.channel_id === channel.channel_id &&
-                    'bg-foreground brightness-110',
+                  'bg-foreground brightness-110',
                 )}
               >
                 <div className='flex items-center gap-3'>
                   <Image
-                    src={`/server/icons/${
-                      channel.channel_type === 'text'
+                    src={`/server/icons/${channel.channel_type === 'text'
                         ? 'hashtag.svg'
                         : 'audio.svg'
-                    }`}
+                      }`}
                     width={18}
                     height={18}
                     alt='audio'
