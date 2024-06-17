@@ -31,7 +31,7 @@ export default function ServerMenuMobile({
 
   const { permission, loading, errors } = usePermissionsContext();
 
-  if (loading) return <PulseLoader/>;
+  if (loading) return <div className='w-full h-12 bg-background/50 animate-pulse md:hidden rounded'></div>
 
   if (errors) return <p>{errors.message}</p>;
 

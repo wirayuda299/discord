@@ -23,7 +23,7 @@ export default function UserAccount() {
   } = useFetch('user', async () => getUserById(userId!!));
 
   const handleClick = () => {
-    setSelectedSetting('profiles');
+    setSelectedSetting('profile');
     setSelectedUserOption('user');
   };
   if (userLoading) return <PulseLoader />;
@@ -88,7 +88,7 @@ export default function UserAccount() {
             </Button>
           </div>
         </li>
-        <div className='p-3'>
+        <div className='p-5'>
           <h5 className='text-sm font-normal text-gray-2'>Account removal</h5>
           <p className='py-1 text-xs text-gray-2'>
             Disabling your account means you can recover it at any time after
