@@ -17,14 +17,16 @@ export default function UserInfo({
   styles?: string;
 }) {
   return (
-    <div className={cn('h-max w-full rounded-lg bg-[#1E1F22]', styles)}>
-      <div className='h-20 w-full rounded-t-md bg-black'></div>
+    <div className={cn('h-max w-full rounded-lg border-foreground border bg-[#1E1F22]', styles)}>
+      
+      <div className='md:h-20 h-24 w-full rounded-lg md:rounded-t-md bg-black'></div>
       <div className='flex items-center justify-between px-5'>
         {selectedOption === 'user' ? (
           <Image
             className='aspect-auto min-h-[90px] w-[90px] min-w-[90px] -translate-y-5 rounded-full border-4 border-background object-cover'
             src={avatar}
             width={90}
+            priority
             height={90}
             alt='user'
           />

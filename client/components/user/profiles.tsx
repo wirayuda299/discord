@@ -26,7 +26,7 @@ export default function UserProfile() {
     error: userError,
   } = useFetch('user', () => getUserById(userId!!));
 
-  const { data: serverProfile, isLoading } = useFetch('server-profile', () =>
+  const { data: serverProfile, isLoading, error } = useFetch('server-profile', () =>
     getServerProfile(params.id as string, userId!!),
   );
 
@@ -34,8 +34,12 @@ export default function UserProfile() {
     setSelectedOption(option);
   }
 
-  if (!user || userLoading || userError || isLoading || !serverProfile)
-    return <PulseLoader />;
+  if (userLoading || isLoading)
+    return <PulseLoader />
+
+  if(userError || error) return null
+
+  console.log(selectedOption)
 
   return (
     <div className='h-full w-full p-5'>
@@ -43,7 +47,7 @@ export default function UserProfile() {
       <ul
         className={cn(
           'before:ease relative mt-5 flex items-center gap-10 border-b border-b-foreground pb-2 before:absolute before:bottom-0 before:h-0.5 before:w-28 before:rounded-full before:bg-primary before:transition-all before:duration-300 before:content-[""]',
-          selectedOption === 'user' ? 'before:left-0' : 'before:left-[126px]',
+          selectedOption === 'user' ? 'before:left-0' : 'before:left-[123px] md:before:left-[126px]',
         )}
       >
         <li
