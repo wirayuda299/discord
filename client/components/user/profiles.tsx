@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { Loader2 } from 'lucide-react';
 
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
@@ -37,7 +36,7 @@ export default function UserProfile() {
   if (userLoading || isLoading)
     return <PulseLoader />
 
-  if(userError || error) return null
+  if (userError || error) return null
 
   console.log(selectedOption)
 

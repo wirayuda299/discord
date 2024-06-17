@@ -160,7 +160,7 @@ export default function ServerMenuMobile({
             <DrawerTrigger className='pt-1 text-left text-sm'>
               Edit Server Profile
             </DrawerTrigger>
-            <DrawerContent className=' md:hidden top-0 h-max overflow-y-auto bg-black p-0'>
+            <DrawerContent className=' md:hidden top-0 h-full overflow-y-auto bg-black p-0'>
               <UserProfile/>
             </DrawerContent>
           </Drawer>
