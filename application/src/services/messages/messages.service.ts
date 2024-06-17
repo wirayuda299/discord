@@ -17,7 +17,7 @@ export class MessagesService {
     private db: DatabaseService,
     private roleService: RolesService,
     private reactionService: ReactionsService
-  ) {}
+  ) { }
 
   addLabelsToMessages(messages: Message[]) {
     let currentMonth: number | null = null;
@@ -131,10 +131,9 @@ export class MessagesService {
         } = await this.db.pool.query(
           `INSERT INTO messages(content, user_id, image_url, image_asset_id, type)
            VALUES($1, $2, $3, $4, $5)
-           RETURNING id;`,
+           RETURNING id`,
           [content, user_id, imageUrl ?? '', imageAssetId ?? '', 'channel']
         );
-        console.log(message);
 
         const messageId = message.id;
 
