@@ -33,11 +33,10 @@ export default function ChannelDetailMobile({
       <header className='flex-center h-12 justify-between border-b border-foreground px-3'>
         <div className='flex-center gap-1'>
           <Image
-            src={`/server/icons/${
-              selectedChannel.channel_type === 'text'
+            src={`/server/icons/${selectedChannel.channel_type === 'text'
                 ? 'hashtag.svg'
                 : 'audio.svg'
-            }`}
+              }`}
             className='aspect-auto object-contain'
             width={18}
             height={18}
@@ -47,6 +46,7 @@ export default function ChannelDetailMobile({
             {selectedChannel.channel_name}
           </p>
           <ChannelInfoMobile
+            messages={messages}
             channelName={selectedChannel.channel_name}
             serverId={serverId}
           />

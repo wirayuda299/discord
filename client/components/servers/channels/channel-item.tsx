@@ -61,14 +61,14 @@ export default function ChannelItem({
                 className={cn(
                   'flex-center cursor-pointer gap-2 rounded p-2 pl-5 text-base hover:bg-background/50 md:hover:bg-foreground hover:text-white hover:brightness-105',
                   params.channel_id === channel.channel_id &&
-                  'bg-foreground brightness-110',
+                  'md:bg-foreground bg-background/50 md:brightness-110',
                 )}
               >
                 <div className='flex items-center gap-3'>
                   <Image
                     src={`/server/icons/${channel.channel_type === 'text'
-                        ? 'hashtag.svg'
-                        : 'audio.svg'
+                      ? 'hashtag.svg'
+                      : 'audio.svg'
                       }`}
                     width={18}
                     height={18}
