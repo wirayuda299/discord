@@ -17,7 +17,7 @@ import { usePermissionsContext } from '@/providers/permissions';
 import { Categories } from '@/types/channels';
 import ServerInvitationModal from '../invite-modal';
 import UserProfile from '@/components/user/profiles'
-
+import PulseLoader from '@/components/shared/pulse-loader'
 
 
 export default function ServerMenuMobile({
@@ -31,7 +31,7 @@ export default function ServerMenuMobile({
 
   const { permission, loading, errors } = usePermissionsContext();
 
-  if (loading) return null;
+  if (loading) return <PulseLoader/>;
 
   if (errors) return <p>{errors.message}</p>;
 
