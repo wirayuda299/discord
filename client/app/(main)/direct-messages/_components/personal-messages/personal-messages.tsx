@@ -9,9 +9,7 @@ import {
   useState,
 } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-
 import { cn } from '@/lib/utils';
-
 import type { Message } from '@/types/messages';
 import type { PinnedMessageType } from '@/helper/message';
 import type { Friend } from '@/helper/friends';

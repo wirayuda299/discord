@@ -75,6 +75,8 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
   const isValid = form.formState.isValid;
 
   const onSubmit = async (data: z.infer<typeof chatSchema>) => {
+    if (!userId) return
+
     let attachment: { publicId: string; url: string } | null = null;
 
     if (image && files && files.image) {
