@@ -40,7 +40,7 @@ export default function UserSettingsDesktop() {
       </DialogTrigger>
       <DialogContent className='hidden max-h-screen min-w-full items-center justify-center border-none p-0 md:flex'>
         <div className='flex h-full max-h-screen w-full'>
-          <aside className='flex h-screen min-w-[390px] grow flex-col items-end overflow-y-auto bg-[#2b2d31] p-3 max-lg:min-w-72'>
+          <aside className='flex h-screen min-w-[350px] grow flex-col items-end overflow-y-auto bg-[#2b2d31] p-3 max-lg:min-w-60'>
             <ul className='flex flex-col'>
               {user_settings?.map((setting, i) => (
                 <li key={setting.label}>
@@ -71,7 +71,7 @@ export default function UserSettingsDesktop() {
               </li>
             </ul>
           </aside>
-          <section className='col-span-3 w-full overflow-y-auto bg-[#313338]'>
+          <section className='col-span-3 w-full overflow-y-auto bg-[#313338] p-3'>
             {selectedSetting === 'my account' && <UserAccount />}
             {selectedSetting === 'profiles' && <UserProfile />}
           </section>

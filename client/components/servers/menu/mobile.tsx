@@ -16,6 +16,9 @@ import CreateChannelForm from '../channels/create-channel/form';
 import { usePermissionsContext } from '@/providers/permissions';
 import { Categories } from '@/types/channels';
 import ServerInvitationModal from '../invite-modal';
+import UserProfile from '@/components/user/profiles'
+
+
 
 export default function ServerMenuMobile({
   server,
@@ -157,8 +160,8 @@ export default function ServerMenuMobile({
             <DrawerTrigger className='pt-1 text-left text-sm'>
               Edit Server Profile
             </DrawerTrigger>
-            <DrawerContent className='top-0 h-screen bg-black p-2'>
-              Server profile
+            <DrawerContent className='top-0 md:hidden min-h-min bg-black p-0'>
+              <UserProfile/>
             </DrawerContent>
           </Drawer>
 

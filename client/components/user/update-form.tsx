@@ -200,7 +200,7 @@ export default function UserUpdateForm({
                       <Input
                         {...field}
                         autoComplete='off'
-                        className='w-full rounded border-none bg-background p-3 text-gray-2 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
+                        className='w-full rounded border-none bg-background/50 md:bg-background p-3 text-gray-2 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
                       />
                       <div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
                     </>
@@ -222,7 +222,7 @@ export default function UserUpdateForm({
                         {...field}
                         placeholder='Add bio'
                         autoComplete='off'
-                        className='w-full rounded border-none bg-background p-3 text-gray-2 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
+                        className='w-full rounded border-none bg-background/50 md:bg-background p-3 text-gray-2 shadow-none placeholder:text-sm placeholder:capitalize placeholder:text-gray-2 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
                       />
                       <div className='mt-7 h-px w-full rounded-full bg-gray-1'></div>
                     </>
@@ -236,7 +236,7 @@ export default function UserUpdateForm({
               render={() => (
                 <FormItem className='border-b border-b-foreground'>
                   <>
-                    <FormLabel className='pb-2'>Avatar</FormLabel>
+                    <FormLabel className='py-2 block'>Avatar</FormLabel>
                     <div>
                       <Label
                         htmlFor='avatar'

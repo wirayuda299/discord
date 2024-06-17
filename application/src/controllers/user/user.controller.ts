@@ -16,7 +16,7 @@ import { UserService } from '../../services/user/user.service';
 @Controller('/api/v1/user')
 export class UserController {
   constructor(private userService: UserService) {}
-private logger= new Logger()
+  private logger= new Logger()
 
 
   @Put('/update')
