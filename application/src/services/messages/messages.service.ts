@@ -431,6 +431,7 @@ export class MessagesService {
     image_asset_id: string = '',
     recipientId: string
   ) {
+    console.log({ content, userId, image_url, image_asset_id, recipientId })
     try {
       await this.db.pool.query(`BEGIN`);
 
