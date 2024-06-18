@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
@@ -11,14 +12,15 @@ import { useServerStates } from '@/providers';
 import useFetch from '@/hooks/useFetch';
 import PulseLoader from '../shared/pulse-loader';
 
+
 export default function UserProfile() {
   const params = useParams();
   const { userId } = useAuth();
-  const { setSelectedOption, selectedOption } = useServerStates((state) => ({
+  const { setSelectedOption, selectedOption } = useServerStates(useShallow((state) => ({
     setSelectedOption: state.setSelectedOption,
-    selectedOption: state.selectedOption,
-  }));
+    selectedOption: state.selectedOption
 
+  })))
 
   const {
     data: user,
@@ -39,10 +41,9 @@ export default function UserProfile() {
 
   if (userError || error) return null
 
-  console.log(selectedOption)
 
   return (
-    <div className='h-full w-full overflow-y-auto p-5'>
+    <div className='h-full w-full p-5'>
       <h2 className='text-base font-semibold text-white'>Profiles</h2>
       <ul
         className={cn(

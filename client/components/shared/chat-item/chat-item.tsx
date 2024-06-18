@@ -11,12 +11,13 @@ import { foundMessage } from '@/utils/messages';
 import { useServerStates } from '@/providers';
 import { pinMessage, pinPersonalMessage } from '@/actions/messages';
 import { createError } from '@/utils/error';
+import useWindowResize from '@/hooks/useWindowResize';
 
 const MessageContent = dynamic(() => import('./MessageContent'));
 const RepliedMessage = dynamic(() => import('./RepliedMessage'));
-const EditMessageForm = dynamic(() => import('./edit-message'));
-const MessageMenu = dynamic(() => import('./message-menu'));
-const MessageMenuMobile = dynamic(() => import('./message-menu-mobile'));
+const EditMessageForm = dynamic(() => import('./edit-message'), { ssr: false });
+const MessageMenu = dynamic(() => import('./message-menu'), { ssr: false });
+const MessageMenuMobile = dynamic(() => import('./message-menu-mobile'), { ssr: false });
 
 type Props = {
   msg: Message;
@@ -42,6 +43,8 @@ function ChatItem(props: Props) {
     () => foundMessage(allMessages, props.msg),
     [allMessages, props.msg],
   );
+
+  const { windowWidth } = useWindowResize()
 
   const handlePinMessage = async () => {
     try {
@@ -99,21 +102,26 @@ function ChatItem(props: Props) {
         ) : (
           <MessageContent msg={props.msg} />
         )}
+        {windowWidth >= 768 ? (
+          <MessageMenu
+            params={params}
+            pathname={pathname}
+            searchParams={searchParams}
+            setIsOpen={setIsOpen}
+            {...props}
+            userId={userId!!}
+          />
 
-        <MessageMenu
-          params={params}
-          pathname={pathname}
-          searchParams={searchParams}
-          setIsOpen={setIsOpen}
-          {...props}
-          userId={userId!!}
-        />
-        <MessageMenuMobile
-          pinMessage={handlePinMessage}
-          setIsOpen={setIsOpen}
-          {...props}
-          userId={userId!!}
-        />
+        ) : (
+          <MessageMenuMobile
+            pinMessage={handlePinMessage}
+            setIsOpen={setIsOpen}
+            {...props}
+            userId={userId!!}
+          />
+
+
+        )}
 
         {props.msg.media_image && !props.msg.parent_message_id && (
           <Image
