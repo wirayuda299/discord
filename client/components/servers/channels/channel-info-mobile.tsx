@@ -35,7 +35,7 @@ export default function ChannelInfoMobile({
   )
   const pins = []
 
-  const links = useMemo(() => Array.from(linksSet), [messages])
+  const links = useMemo(() => Array.from(linksSet), [linksSet])
 
   const { data, isLoading, error } = useServerMembers(serverId);
 

@@ -9,14 +9,16 @@ import { revalidate } from '@/utils/cache';
 import { cn } from '@/lib/utils';
 import EmojiPicker from '@/components/shared/emoji-picker';
 import { formatDate } from '@/utils/date';
-import { useSelectedMessageStore } from '@/providers';
+import { useSelectedMessageStore, useSocketStore } from '@/providers';
 
 export default function CreateThread({
   channelId,
   pathname,
+  reloadChannelMessage
 }: {
   channelId: string;
   pathname: string;
+  reloadChannelMessage: () => void
 }) {
   const { userId } = useAuth();
   const ref = useRef<HTMLInputElement>(null);
@@ -25,6 +27,8 @@ export default function CreateThread({
     selectedMessage: state.selectedMessage,
     setMessage: state.setSelectedMessage,
   }));
+
+  const socket = useSocketStore(state => state.socket)
 
   const appendEmoji = useCallback((emoji: string) => {
     if (ref.current) {
@@ -63,6 +67,7 @@ export default function CreateThread({
         toast.success('Thread has been created');
         revalidate(pathname);
         setMessage(null);
+        reloadChannelMessage()
       });
     } catch (error) {
       createError(error);

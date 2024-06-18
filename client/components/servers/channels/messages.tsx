@@ -18,7 +18,7 @@ export default function ChannelsMessages({
   messages,
   thread,
 }: {
-  socket: Socket | null;
+  socket: Socket | null
   messages: Message[];
   thread: Thread | null;
 }) {
@@ -30,7 +30,6 @@ export default function ChannelsMessages({
 
 
   const reloadChannelMessage = useCallback(() => {
-    console.log("reload channel messages")
     socket?.emit('get-channel-message', {
       serverId,
       channelId,
@@ -59,7 +58,7 @@ export default function ChannelsMessages({
           ))
         )}
       </ul>
-      <CreateThread channelId={channelId} pathname={pathname} />
+      <CreateThread channelId={channelId} pathname={pathname} reloadChannelMessage={reloadChannelMessage} />
       <div className='sticky !bottom-0 left-0 right-0 backdrop-blur-sm'>
         <ChatForm
           reloadMessage={() =>

@@ -51,7 +51,9 @@ export default function ChannelsDetail(props: Props) {
         <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
           <ChannelsHeader {...props} />
           <ChannelsMessages
+
             messages={messages}
+            // @ts-ignore
             socket={socket}
             thread={thread}
           />
