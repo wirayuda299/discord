@@ -27,7 +27,6 @@ export default function ChannelsDetail(props: Props) {
   const socket = useSocketStore((state) => state.socket);
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const { windowWidth } = useWindowResize()
 
   useEffect(() => {
@@ -38,14 +37,12 @@ export default function ChannelsDetail(props: Props) {
       });
     }
     return () => {
-      socket?.off('get-channel-messages');
+      socket?.off('get-channel-message');
     };
   }, [socket, props.serverId, props.channelId]);
 
   useEffect(() => {
-    setLoading(true);
     socket?.on('set-message', (messages) => setMessages(messages));
-    setLoading(false);
   }, [socket]);
 
   return (
@@ -54,7 +51,6 @@ export default function ChannelsDetail(props: Props) {
         <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
           <ChannelsHeader {...props} />
           <ChannelsMessages
-            loading={loading}
             messages={messages}
             socket={socket}
             thread={thread}
@@ -64,7 +60,6 @@ export default function ChannelsDetail(props: Props) {
         <Suspense fallback={<PulseLoader />} key={props.channelId}>
           <ChannelDetailMobile
             serverId={props.serverId}
-            loading={loading}
             messages={messages}
             socket={socket}
             thread={thread}

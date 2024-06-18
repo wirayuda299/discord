@@ -10,13 +10,11 @@ import { Message, Thread } from '@/types/messages';
 
 export default function ChannelDetailMobile({
   serverId,
-  loading,
   socket,
   messages,
   thread,
 }: {
   serverId: string;
-  loading: boolean;
   socket: Socket | null;
   messages: Message[];
   thread: Thread | null;
@@ -63,7 +61,6 @@ export default function ChannelDetailMobile({
         </Link>
       </header>
       <ChannelsMessages
-        loading={loading}
         messages={messages}
         socket={socket}
         thread={thread}

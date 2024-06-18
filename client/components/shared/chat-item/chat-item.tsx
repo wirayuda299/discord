@@ -104,11 +104,13 @@ function ChatItem(props: Props) {
         )}
         {windowWidth >= 768 ? (
           <MessageMenu
-            params={params}
+            type={props.type}
+            msg={props.msg}
             pathname={pathname}
+            params={params}
             searchParams={searchParams}
             setIsOpen={setIsOpen}
-            {...props}
+            reloadMessage={props.reloadMessage}
             userId={userId!!}
           />
 

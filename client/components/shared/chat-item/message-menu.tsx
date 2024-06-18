@@ -260,9 +260,12 @@ function MessageMenu(props: Props) {
               title='delete message'
               onClick={async () => {
                 const { deleteMessage } = await import('@/helper/message');
-                deleteMessage(msg.message_id, msg.media_image_asset_id);
-                reloadMessage();
-                revalidate(pathname);
+                deleteMessage(msg.message_id, msg.media_image_asset_id).then(() => {
+                  revalidate(pathname)
+                  reloadMessage();
+
+                });
+
               }}
               className='flex-center cursor-pointer justify-between !bg-transparent text-xs !text-red-600'
             >
