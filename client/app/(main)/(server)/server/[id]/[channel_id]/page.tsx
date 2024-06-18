@@ -18,6 +18,7 @@ export default async function ChannelId({ searchParams, params }: Props) {
     getAllThreads(params.channel_id, params.id),
     getPinnedMessages(params.channel_id, params.id),
   ]);
+
   return (
     <ChannelsDetail
       threads={allThreads}

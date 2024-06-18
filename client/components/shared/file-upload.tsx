@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { type ChangeEvent, memo } from 'react';
 import { Plus, X } from 'lucide-react';
 
+import { Label } from '@/components/ui/label'
 type Props = {
   image: string;
   isSubmitting: boolean;
@@ -22,7 +23,7 @@ function FileUpload({
 }: Props) {
   return (
     <div className='relative'>
-      {(image) && (preview && preview?.image) && (
+      {(image && preview && preview?.image) && (
         <div className='absolute z-50 -top-32 w-max'>
           <>
             <Image
@@ -48,7 +49,7 @@ function FileUpload({
 
         </div>
       )}
-      <label
+      <Label
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -58,7 +59,7 @@ function FileUpload({
         className='flex size-7 min-h-7 min-w-7 cursor-pointer items-center justify-center rounded-full bg-background/50 disabled:cursor-not-allowed md:h-7 md:min-h-7 md:min-w-7 md:bg-gray-2 md:p-1'
       >
         <Plus className='text-base text-gray-2 md:text-lg md:text-foreground' />
-      </label>
+      </Label>
       <input
         onChange={(e) => {
           handleChange(e, 'image');

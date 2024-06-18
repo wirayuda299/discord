@@ -50,6 +50,7 @@ export default function ChannelItem({
                 onClick={
                   windowWidth < 768 ? () => setSelectedChannel(channel) : undefined
                 }
+                scroll={false}
                 href={{
                   pathname: `/server/${server.id as string}/${channel.channel_id}`,
                   search: `channel_type=${channel.channel_type

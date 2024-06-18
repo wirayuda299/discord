@@ -221,7 +221,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
         )}
       <Form {...form}>
         <form
-          className='flex-center h-16 gap-1 rounded-lg border-t border-background bg-black md:gap-2 md:bg-foreground md:p-3 md:brightness-125'
+          className='flex-center h-16 gap-1 rounded-lg border-t border-background bg-black md:gap-2 md:bg-foreground md:p-3 md:brightness-125 '
           onSubmit={form.handleSubmit(onSubmit)}
         >
           {shouldShowFileUpload && (

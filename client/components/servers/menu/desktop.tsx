@@ -15,7 +15,6 @@ import ServerInvitationModal from '../invite-modal';
 import CreateChannelDialog from '../channels/create-channel/dialog';
 import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
-import { useServerStates } from '@/providers';
 import UserSettingsDesktop from '../settings/user-settings/desktop';
 import useWindowResize from '@/hooks/useWindowResize';
 
@@ -74,7 +73,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
         )}
 
         {(userId && server.owner_id === userId) ||
-        (permission && permission.manage_channel) ? (
+          (permission && permission.manage_channel) ? (
           <CreateChannelDialog
             serverAuthor={server.owner_id}
             serverId={server.id}
@@ -90,7 +89,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
         ) : null}
 
         {(userId && server.owner_id === userId) ||
-        (permission && permission.manage_role) ? (
+          (permission && permission.manage_role) ? (
           <DropdownMenuItem className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
             <p>Create role</p>
             <Image

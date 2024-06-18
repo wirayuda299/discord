@@ -41,6 +41,7 @@ export default async function ServerLayout({ params, children }: Props) {
               <Image
                 src={server.banner}
                 priority
+                sizes='500px'
                 className='w-full object-cover'
                 fill
                 alt='server logo'

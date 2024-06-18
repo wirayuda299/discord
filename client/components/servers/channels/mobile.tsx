@@ -29,7 +29,7 @@ export default function ChannelDetailMobile({
   if (!selectedChannel) return null;
 
   return (
-    <div className='fixed left-0 top-0 h-dvh  w-full overflow-y-auto bg-black'>
+    <div className='fixed left-0 top-0 h-dvh  w-full overflow-y-auto bg-black no-scrollbar'>
       <header className='flex-center h-12 sticky bg-black z-20 top-0 justify-between border-b border-foreground px-3'>
         <div className='flex items-center gap-1'>
           <Image
