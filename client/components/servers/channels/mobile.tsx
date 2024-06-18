@@ -29,13 +29,13 @@ export default function ChannelDetailMobile({
   if (!selectedChannel) return null;
 
   return (
-    <div className='fixed left-0 top-0 h-screen w-full bg-black'>
-      <header className='flex-center h-12 justify-between border-b border-foreground px-3'>
-        <div className='flex-center gap-1'>
+    <div className='fixed left-0 top-0 h-dvh  w-full overflow-y-auto bg-black'>
+      <header className='flex-center h-12 sticky bg-black z-20 top-0 justify-between border-b border-foreground px-3'>
+        <div className='flex items-center gap-1'>
           <Image
             src={`/server/icons/${selectedChannel.channel_type === 'text'
-                ? 'hashtag.svg'
-                : 'audio.svg'
+              ? 'hashtag.svg'
+              : 'audio.svg'
               }`}
             className='aspect-auto object-contain'
             width={18}

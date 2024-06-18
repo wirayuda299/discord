@@ -8,6 +8,7 @@ import { SendHorizontal, X } from 'lucide-react';
 import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs'
 
+
 import { Form, FormControl, FormField, FormItem } from '../ui/form';
 import FileUpload from './file-upload';
 import { messageData } from '@/utils/messages';
@@ -192,6 +193,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
     (permission && permission.attach_file);
 
   if (loading || errors) return null;
+
 
   return (
     <>

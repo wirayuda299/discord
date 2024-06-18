@@ -69,14 +69,16 @@ export default function CreateThread({
     }
   };
 
+  if (!selectedMessage) return null
+
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-20 h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
+        'ease fixed -right-full top-0 z-50 h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
         selectedMessage &&
-          selectedMessage &&
-          selectedMessage.action === 'create_thread' &&
-          'right-0 opacity-100',
+        selectedMessage &&
+        selectedMessage.action === 'create_thread' &&
+        'right-0 opacity-100',
       )}
     >
       <header className='sticky left-0 top-0 z-10 flex h-12 w-full items-center justify-between border-b border-foreground bg-black p-3 md:border-none md:bg-background'>
@@ -119,8 +121,8 @@ export default function CreateThread({
                 {selectedMessage.message.message}
                 {new Date(selectedMessage.message.update_at) >
                   new Date(selectedMessage.message.created_at) && (
-                  <span className='text-xs text-gray-2'>(edited)</span>
-                )}
+                    <span className='text-xs text-gray-2'>(edited)</span>
+                  )}
               </p>
             </div>
           </div>

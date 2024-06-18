@@ -91,7 +91,7 @@ export default function PersonalMessages({
           />
         ))}
       </ul>
-      <div className='sticky bottom-0 left-0 right-0 p-1 backdrop-blur-sm md:p-3'>
+      <div className='sticky !bottom-0 left-0 right-0 p-1 backdrop-blur-sm md:p-3'>
         <ChatForm
           reloadMessage={reloadPersonalMessage}
           placeholder={`Message to ${friend?.username}`}

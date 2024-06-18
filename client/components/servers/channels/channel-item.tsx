@@ -48,9 +48,7 @@ export default function ChannelItem({
               <Link
                 aria-label={'reset'}
                 onClick={
-                  windowWidth >= 768
-                    ? undefined
-                    : () => setSelectedChannel(channel)
+                  windowWidth < 768 ? () => setSelectedChannel(channel) : undefined
                 }
                 href={{
                   pathname: `/server/${server.id as string}/${channel.channel_id}`,

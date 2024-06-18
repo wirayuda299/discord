@@ -30,11 +30,11 @@ export default function ChannelsMessages({
   const channelId = params?.channel_id as string;
 
   return (
-    <div className='p-3'>
+    <div className='px-2 pb-10 min-h-dvh max-h-dvh md:min-h-screen md:max-h-screen '>
       {loading ? (
         <PulseLoader />
       ) : (
-        <ul className='flex h-full max-h-screen min-h-screen flex-col gap-5 overflow-y-auto py-5'>
+        <ul className='flex min-h-dvh md:min-h-screen flex-col gap-5'>
           {thread ? (
             <ThreadsMessages
               serverId={serverId}
@@ -65,13 +65,13 @@ export default function ChannelsMessages({
           reloadMessage={() =>
             thread
               ? socket?.emit('thread-messages', {
-                  threadId: thread.thread_id,
-                  serverId,
-                })
+                threadId: thread.thread_id,
+                serverId,
+              })
               : socket?.emit('get-channel-message', {
-                  serverId,
-                  channelId,
-                })
+                serverId,
+                channelId,
+              })
           }
           placeholder='Send message...'
           type={thread ? 'thread' : 'channel'}

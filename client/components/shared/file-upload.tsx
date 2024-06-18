@@ -22,12 +22,12 @@ function FileUpload({
 }: Props) {
   return (
     <div className='relative'>
-      <div className='absolute -top-32 w-max'>
-        {image && preview && preview?.image && (
+      {(image) && (preview && preview?.image) && (
+        <div className='absolute z-50 -top-32 w-max'>
           <>
             <Image
               className='aspect-square rounded-md object-cover'
-              src={preview.image}
+              src={preview?.image}
               width={100}
               height={100}
               alt='image'
@@ -45,8 +45,9 @@ function FileUpload({
               </button>
             )}
           </>
-        )}
-      </div>
+
+        </div>
+      )}
       <label
         onClick={(e) => {
           e.stopPropagation();

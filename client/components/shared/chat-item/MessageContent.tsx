@@ -48,8 +48,8 @@ function MessageContent({ msg }: { msg: Message }) {
             {msg.username}
           </p>
         </div>
-        <div className='flex items-center gap-2'>
-          {msg.role && msg.role.icon && (
+        {msg.role && msg.role.icon && (
+          <div className='flex items-center gap-2'>
             <Image
               src={msg.role.icon}
               width={20}
@@ -57,8 +57,8 @@ function MessageContent({ msg }: { msg: Message }) {
               alt='role icon'
               className='size-5 min-w-5 rounded-full object-cover'
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <p className='text-wrap break-all text-base group-hover:text-white'>
         {highlightLinks(msg.message)}{' '}
