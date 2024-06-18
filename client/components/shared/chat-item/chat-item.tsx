@@ -149,7 +149,7 @@ function ChatItem(props: Props) {
           </ul>
         )}
 
-        {props.msg.reactions.length <= 1 && (
+        {props.msg.reactions.length >= 1 && (
           <div className='flex-center flex-wrap gap-2 pt-2'>
             {props.msg.reactions.map((reaction) => (
               <p
