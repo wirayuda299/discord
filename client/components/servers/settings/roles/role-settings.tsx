@@ -1,4 +1,3 @@
-'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -44,6 +43,7 @@ type Props = {
   roles: Role[];
   selectRole: (role: Role | null) => void;
   selectType: (type: 'create' | 'update' | null) => void;
+  styles?: string
 };
 
 const schema = z.object({
@@ -68,6 +68,7 @@ export default function RolesSettings({
   roles,
   selectRole,
   selectType,
+  styles
 }: Props) {
   const { userId } = useAuth();
   const { mutate } = useSWRConfig();
@@ -187,7 +188,7 @@ export default function RolesSettings({
 
   return (
     <div className='flex h-full w-full md:py-7'>
-      <aside className='sticky top-0 hidden min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block'>
+      <aside className={cn(' top-0 min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block', styles)}>
         <header className='flex-center w-full justify-between'>
           <Button
             onClick={() => {
@@ -206,15 +207,15 @@ export default function RolesSettings({
           </Button>
         </header>
 
-        <ul className='flex w-full flex-col gap-3 pl-9 pr-4'>
+        <ul className={cn('flex w-full flex-col gap-3 pl-9 pr-4', styles)}>
           {roles.map((role) => (
             <li
               onClick={() => selectRole(role)}
-              key={role.name}
+              key={role.id}
               className={cn(
                 'flex cursor-pointer items-center gap-2 rounded py-2 text-sm font-medium capitalize text-gray-2 hover:bg-foreground hover:brightness-110',
                 selectedRole?.name === role.name &&
-                  'bg-foreground brightness-110',
+                'bg-foreground brightness-110',
               )}
             >
               <div

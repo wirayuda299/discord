@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { Categories } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
 import { ApiRequest } from '@/utils/api';
+import { createError } from '@/utils/error';
 
 const api = new ApiRequest();
 
@@ -203,4 +204,24 @@ export async function isMemberOrAdmin(
   } catch (error) {
     throw error;
   }
+}
+
+
+export async function updateChannel(
+  channelId: string,
+  userId: string,
+  serverId: string,
+  name: string,
+  serverAuthor: string,
+  topic: string = '') {
+
+  try {
+    return await api.update('/channels/update', {
+      name, topic, userId, serverId, serverAuthor, channelId
+    }, "PUT")
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+
 }

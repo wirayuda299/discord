@@ -17,6 +17,8 @@ import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
 import UserSettingsDesktop from '../settings/user-settings/desktop';
 import useWindowResize from '@/hooks/useWindowResize';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import Roles from '../settings/roles/roles';
 
 export default function ServersMenuDesktop({ server }: { server: Servers }) {
   const { permission, errors, loading, userId } = usePermissionsContext();
@@ -42,7 +44,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
         <span className='truncate'>{server.name || 'Server name'}</span>
         <ChevronDown size={18} className='text-gray-1' />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-full min-w-[250px] space-y-1 !border-none bg-[#111214]'>
+      <DropdownMenuContent className='w-full min-w-[250px] space-y-1 px-2 !border-none bg-[#111214]'>
         <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
           <p>Server boost</p>
           <Image
@@ -90,15 +92,21 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
 
         {(userId && server.owner_id === userId) ||
           (permission && permission.manage_role) ? (
-          <DropdownMenuItem className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
-            <p>Create role</p>
-            <Image
-              src={'/server/icons/guards.svg'}
-              width={20}
-              height={20}
-              alt='guards'
-            />
-          </DropdownMenuItem>
+
+          <Dialog>
+            <DialogTrigger className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white w-full rounded-sm px-2 py-2 text-sm'>
+              <p>Create role</p>
+              <Image
+                src={'/server/icons/guards.svg'}
+                width={20}
+                height={20}
+                alt='guards'
+              />
+            </DialogTrigger>
+            <DialogContent className='w-full p-0 border-none max-h-[500px] h-full overflow-hidden'>
+              <Roles serverId={server.id} serverAuthor={server.owner_id} styles='!hidden' />
+            </DialogContent>
+          </Dialog>
         ) : null}
 
         <UserSettingsDesktop />

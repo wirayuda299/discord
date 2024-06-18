@@ -38,10 +38,11 @@ export default function ChannelsHeader({
   channelId,
   serverId,
 }: Props) {
-  const { thread, setSelectedThread } = useServerStates(
+  const { thread, setSelectedThread, selectedChannel } = useServerStates(
     useShallow((state) => ({
       thread: state.selectedThread,
       setSelectedThread: state.setSelectedThread,
+      selectedChannel: state.selectedChannel
     })),
   );
 
@@ -73,7 +74,7 @@ export default function ChannelsHeader({
         >
           {channelName}
         </h3>
-        {thread && (
+        {thread ? (
           <div className='flex-center gap-2'>
             <ChevronRight size={10} />
             <Image
@@ -86,6 +87,8 @@ export default function ChannelsHeader({
               {thread.thread_name}
             </h3>
           </div>
+        ) : (
+          <p className='text-xs truncate'>{selectedChannel?.topic}</p>
         )}
       </div>
       <div className='flex-center gap-3 overflow-x-auto'>

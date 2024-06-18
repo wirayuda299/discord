@@ -7,6 +7,7 @@ import {
   createParamDecorator,
   ExecutionContext,
   Query,
+  Put,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ChannelsService } from 'src/services/channels/channels.service';
@@ -20,7 +21,7 @@ export const Cookies = createParamDecorator(
 
 @Controller('/api/v1/channels')
 export class ChannelsController {
-  constructor(private channelService: ChannelsService) {}
+  constructor(private channelService: ChannelsService) { }
 
   @Get('/list')
   getAllChannel(@Query('serverId') id: string) {
@@ -42,5 +43,11 @@ export class ChannelsController {
       userId,
       serverAuthor
     );
+  }
+
+  @Put('/update')
+  updateChannel(@Req() req: Request) {
+    const { name, topic, userId, serverId, serverAuthor, channelId } = req.body
+    return this.channelService.updateChannel(serverId, channelId, userId, serverAuthor, name, topic)
   }
 }

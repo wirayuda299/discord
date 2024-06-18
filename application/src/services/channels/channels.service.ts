@@ -8,7 +8,7 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class ChannelsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   private groupChannel(channels: any[]) {
     const grouped = channels.reduce((acc, channel) => {
@@ -31,7 +31,7 @@ export class ChannelsService {
     );
   }
 
-  async isAllowedToCreateChannel(serverId: string, userId: string) {
+  async isAllowedToManageChannel(serverId: string, userId: string) {
     const isallowed = await this.db.pool.query(
       `SELECT p.manage_channel
         FROM permissions p
@@ -82,7 +82,7 @@ export class ChannelsService {
     serverAuthor: string
   ) {
     try {
-      const isallowed = await this.isAllowedToCreateChannel(server_id, userId);
+      const isallowed = await this.isAllowedToManageChannel(server_id, userId);
 
       if (isallowed.length < 1 && userId !== serverAuthor) {
         throw new HttpException(
@@ -128,6 +128,49 @@ export class ChannelsService {
     }
   }
 
+  async updateChannel(
+    serverId: string,
+    channelId: string,
+    userId: string,
+    serverAuthor: string,
+    name: string,
+    topic: string = '') {
+
+    try {
+      const isAllowedToUpdateChannel = await this.isAllowedToManageChannel(serverId, userId)
+
+      if (isAllowedToUpdateChannel.length < 1 && userId !== serverAuthor) {
+        throw new HttpException(
+          'You are not allowed to update channel',
+          HttpStatus.FORBIDDEN
+        );
+      }
+
+      const isChannelExists = await this.db.pool.query('SELECT EXISTS(select * from channels where id = $1 and server_id = $2)', [channelId, serverId])
+
+      if (!isChannelExists.rows[0].exists) {
+        throw new NotFoundException("Channel doesnt exists")
+      }
+
+      await this.db.pool.query(`update channels 
+        set name =  $1,
+         topic = $2 
+          where id = $3`, [name, topic, channelId])
+
+      return {
+        message: 'Channel updated',
+        error: false
+      }
+
+    } catch (e) {
+      throw e
+
+    }
+
+  }
+
+
+
   async getAllChannelsInServer(serverId: string) {
     try {
       const channelsQuery = await this.db.pool.query(
@@ -136,6 +179,7 @@ export class ChannelsService {
           c.name AS channel_name,
           c.type AS channel_type,
           cat.id AS category_id,
+          c.topic as topic,
           cat.name AS category_name
           FROM channels c
           JOIN channels_category cc ON c.id = cc.channel_id

@@ -21,9 +21,11 @@ const RoleSettings = dynamic(() => import('./role-settings'));
 export default function Roles({
   serverAuthor,
   serverId,
+  styles
 }: {
   serverAuthor: string;
   serverId: string;
+  styles?: string
 }) {
   const { data, isLoading, error } = useFetch('roles', () =>
     getAllRoles(serverId),
@@ -49,9 +51,10 @@ export default function Roles({
   if (error) return <p>{error.message}</p>;
 
   return (
-    <>
+    <div className='w-full min-h-fit-content max-h-screen overflow-y-auto'>
       {type === 'create' || type === 'update' || selectedRole ? (
         <RoleSettings
+          styles={styles}
           selectType={selectType}
           roles={data || []}
           selectRole={selectRole}
@@ -62,7 +65,7 @@ export default function Roles({
           type={type}
         />
       ) : (
-        <div className='p-3 md:p-7'>
+        <div className='p-3 md:p-7 w-full h-full'>
           <h2 className='hidden pb-5 text-lg font-semibold text-white md:block'>
             Roles
           </h2>
@@ -108,7 +111,7 @@ export default function Roles({
             </Button>
           </div>
 
-          <Table>
+          <Table className='w-full'>
             <TableCaption>A list of role that been created.</TableCaption>
             <TableHeader className='!bg-transparent'>
               <TableRow className='border-gray-2/15 !bg-transparent'>
@@ -150,6 +153,6 @@ export default function Roles({
           </Table>
         </div>
       )}
-    </>
+    </div>
   );
 }

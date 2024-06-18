@@ -5,4 +5,5 @@ export type Categories = {
   channel_id: string;
   channel_name: string;
   channel_type: string;
+  topic: string
 };

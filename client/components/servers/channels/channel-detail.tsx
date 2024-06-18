@@ -49,9 +49,15 @@ export default function ChannelsDetail(props: Props) {
     <>
       {windowWidth >= 768 ? (
         <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
-          <ChannelsHeader {...props} />
-          <ChannelsMessages
+          <ChannelsHeader
+            channelId={props.channelId}
+            serverId={props.serverId}
+            channelName={props.channelName}
+            threads={props.threads}
+            pinnedMessages={props.pinnedMessages}
 
+          />
+          <ChannelsMessages
             messages={messages}
             // @ts-ignore
             socket={socket}
@@ -61,6 +67,7 @@ export default function ChannelsDetail(props: Props) {
       ) : (
         <Suspense fallback={<PulseLoader />} key={props.channelId}>
           <ChannelDetailMobile
+            channelId={props.channelId}
             serverId={props.serverId}
             messages={messages}
             socket={socket}
