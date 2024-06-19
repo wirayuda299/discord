@@ -78,7 +78,7 @@ export default function CreateThread({
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-50 h-dvh md:h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
+        'ease fixed -right-full top-0 z-50 max-h-dvh min-h-dvh  md:max-h-screen md:min-h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
         selectedMessage &&
         selectedMessage &&
         selectedMessage.action === 'create_thread' &&
