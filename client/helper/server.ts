@@ -229,7 +229,6 @@ export async function updateChannel(
 export async function deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, pathname: string, type: string) {
 
   try {
-    console.log(channelId)
 
     await api.update('/channels/delete', {
       serverId,
@@ -241,8 +240,7 @@ export async function deleteChannel(serverId: string, userId: string, channelId:
     revalidate(pathname)
 
   } catch (e) {
-    console.log(e)
-    createError(e)
+    throw e
   }
 
 }
