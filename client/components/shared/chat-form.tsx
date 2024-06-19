@@ -1,4 +1,3 @@
-'use client';
 
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -194,6 +193,7 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
 
   if (loading || errors) return null;
 
+  console.log(form.getValues())
 
   return (
     <>

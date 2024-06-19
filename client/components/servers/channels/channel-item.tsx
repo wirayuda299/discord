@@ -68,7 +68,7 @@ export default function ChannelItem({
                   }}
                   key={channel.channel_id}
                   className={cn(
-                    'flex-center gap-2 text-base ',
+                    'flex-center gap-2 text-base w-full',
                     params.channel_id === channel.channel_id &&
                     'md:bg-foreground bg-background/50 md:brightness-110',
                   )}

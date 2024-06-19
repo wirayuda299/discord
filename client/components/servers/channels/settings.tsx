@@ -12,6 +12,7 @@ import { useAuth } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { revalidate } from "@/utils/cache";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 
 
 const schema = z.object({
@@ -92,6 +93,25 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
 
           )}
         />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="w-full rounded !bg-red-500" type="button">Delete channel</Button>
+          </DialogTrigger>
+          <DialogContent className="border-gray-1 bg-black rounded-lg text-white">
+            <DialogHeader>
+              Are you sure want to delete this channel?
+            </DialogHeader>
+            <DialogDescription className='text-center text-gray-2 text-sm'>
+              This action cannot be undone. Deleting the channel will permanently remove all its content, including messages and files. Please confirm if you wish to proceed.
+            </DialogDescription>
+            <div className="flex-center gap-2">
+              <DialogClose className="w-full">
+                Cancel
+              </DialogClose>
+              <Button className="w-full !bg-red-600">Delete</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
         <Button disabled={isSubmitting} className="w-full rounded">{isSubmitting ? "Updating channel..." : "Save Changes"}</Button>
       </form>
     </Form>
