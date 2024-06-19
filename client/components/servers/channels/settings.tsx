@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 
@@ -24,6 +24,8 @@ const schema = z.object({
 
 export default function ChannelSetting({ selectedChannel, serverId, serverAuthor, reset }: { selectedChannel: Categories | null, serverId: string, serverAuthor: string, reset: () => void }) {
   const { userId } = useAuth()
+  const params = useParams()
+  const router = useRouter()
   const pathname = usePathname()
   const form = useForm({
     resolver: zodResolver(schema),
@@ -53,6 +55,8 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
 
 
   }
+
+  console.log(pathname)
 
   return (
     <Form {...form}>
@@ -109,7 +113,15 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
               <DialogClose className="w-full">
                 Cancel
               </DialogClose>
-              <Button className="w-full !bg-red-600" onClick={() => deleteChannel(serverId, userId!, selectedChannel?.channel_id!, serverAuthor, pathname, selectedChannel?.channel_type!)}>Delete</Button>
+              <Button className="w-full !bg-red-600" onClick={() => {
+                deleteChannel(serverId, userId!, selectedChannel?.channel_id!, serverAuthor, pathname, selectedChannel?.channel_type!).then(() => {
+                  if (params.channel_id) {
+                    router.push(params.id as string)
+                  }
+
+                })
+
+              }}>Delete</Button>
             </div>
           </DialogContent>
         </Dialog>
