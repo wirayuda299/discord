@@ -4,6 +4,7 @@ import { Categories } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
 import { ApiRequest } from '@/utils/api';
 import { createError } from '@/utils/error';
+import { revalidate } from '@/utils/cache';
 
 const api = new ApiRequest();
 
@@ -220,8 +221,28 @@ export async function updateChannel(
       name, topic, userId, serverId, serverAuthor, channelId
     }, "PUT")
   } catch (e) {
-    console.log(e)
     throw e
+  }
+}
+
+
+export async function deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, pathname: string, type: string) {
+
+  try {
+    console.log(channelId)
+
+    await api.update('/channels/delete', {
+      serverId,
+      userId,
+      channelId,
+      serverAuthor,
+      type
+    }, "DELETE")
+    revalidate(pathname)
+
+  } catch (e) {
+    console.log(e)
+    createError(e)
   }
 
 }

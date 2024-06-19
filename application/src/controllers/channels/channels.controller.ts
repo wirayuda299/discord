@@ -4,20 +4,12 @@ import {
   Param,
   Post,
   Req,
-  createParamDecorator,
-  ExecutionContext,
   Query,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ChannelsService } from 'src/services/channels/channels.service';
-
-export const Cookies = createParamDecorator(
-  (data: string, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    return data ? request.cookies?.[data] : request.cookies;
-  }
-);
 
 @Controller('/api/v1/channels')
 export class ChannelsController {
@@ -49,5 +41,11 @@ export class ChannelsController {
   updateChannel(@Req() req: Request) {
     const { name, topic, userId, serverId, serverAuthor, channelId } = req.body
     return this.channelService.updateChannel(serverId, channelId, userId, serverAuthor, name, topic)
+  }
+
+  @Delete('/delete')
+  deleteChannel(@Req() req: Request) {
+    const { serverId, userId, channelId, serverAuthor, type } = req.body
+    return this.channelService.deleteChannel(serverId, userId, channelId, serverAuthor, type)
   }
 }

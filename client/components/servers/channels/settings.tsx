@@ -1,16 +1,17 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Categories } from "@/types/channels";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { createError } from "@/utils/error";
-import { updateChannel } from "@/helper/server";
-import { useAuth } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
-import { toast } from "sonner";
+import { deleteChannel, updateChannel } from "@/helper/server";
 import { revalidate } from "@/utils/cache";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 
@@ -108,7 +109,7 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
               <DialogClose className="w-full">
                 Cancel
               </DialogClose>
-              <Button className="w-full !bg-red-600">Delete</Button>
+              <Button className="w-full !bg-red-600" onClick={() => deleteChannel(serverId, userId!, selectedChannel?.channel_id!, serverAuthor, pathname, selectedChannel?.channel_type!)}>Delete</Button>
             </div>
           </DialogContent>
         </Dialog>
