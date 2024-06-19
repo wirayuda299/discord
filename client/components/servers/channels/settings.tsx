@@ -15,7 +15,7 @@ import { revalidate } from "@/utils/cache";
 
 
 const schema = z.object({
-  name: z.string().min(4),
+  name: z.string().min(4).max(50),
   topic: z.string()
 
 })
@@ -31,8 +31,9 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
     }
   })
 
+  const isSubmitting = form.formState.isSubmitting
+
   const handleUpdateChannel = async (data: z.infer<typeof schema>) => {
-    console.log(data)
     if (!selectedChannel || !userId || !data.name) return
 
     try {
@@ -64,7 +65,7 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
                 <Input
                   autoFocus={false}
                   {...field}
-                  maxLength={40}
+                  maxLength={50}
                   placeholder="Channel name"
                   autoComplete='off'
                   className='flex min-h-[30px] w-full max-w-full break-before-auto items-center !border-none bg-background px-3 pt-2 text-sm text-white caret-white outline-none focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse' />
@@ -91,7 +92,7 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
 
           )}
         />
-        <Button className="w-full rounded">Save changes</Button>
+        <Button disabled={isSubmitting} className="w-full rounded">{isSubmitting ? "Updating channel..." : "Save Changes"}</Button>
       </form>
     </Form>
 
