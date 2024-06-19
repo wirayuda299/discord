@@ -515,7 +515,7 @@ export class MessagesService {
 
     for await (const reply of replies.rows) {
       reply.conversation_id = conversationId;
-      const replyReactions = await await this.reactionService.getReactions(
+      const replyReactions = await this.reactionService.getReactions(
         reply.message_id
       );
       reply.reactions = replyReactions;
@@ -553,7 +553,7 @@ export class MessagesService {
       );
 
       for await (const message of baseMessages.rows) {
-        const reactions = await await this.reactionService.getReactions(
+        const reactions = await this.reactionService.getReactions(
           message.message_id
         );
         message.reactions = reactions;

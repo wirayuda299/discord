@@ -193,7 +193,6 @@ export default function ChatForm({ placeholder, type, reloadMessage }: Props) {
 
   if (loading || errors) return null;
 
-  console.log(form.getValues())
 
   return (
     <>

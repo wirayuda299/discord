@@ -6,10 +6,15 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { ImagehandlerService } from '../imagehandler/imagehandler.service';
+import { ThreadsService } from '../threads/threads.service';
 
 @Injectable()
 export class ChannelsService {
-  constructor(private db: DatabaseService, private attachmentService: ImagehandlerService) { }
+  constructor(
+    private db: DatabaseService,
+    private attachmentService: ImagehandlerService,
+    private threadService: ThreadsService
+  ) { }
 
   private groupChannel(channels: any[]) {
     const grouped = channels.reduce((acc, channel) => {
@@ -170,59 +175,68 @@ export class ChannelsService {
 
   }
 
+
   async deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, type: string) {
 
     try {
+      await this.db.pool.query('BEGIN');
 
-      const isAllowedToManageChannel = await this.isAllowedToManageChannel(serverId, userId)
-
+      const isAllowedToManageChannel = await this.isAllowedToManageChannel(serverId, userId);
       if (isAllowedToManageChannel.length < 1 && userId !== serverAuthor) {
-        throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED)
+        throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
       }
 
-      const channel = await this.db.pool.query(`select * from channels where id = $1`, [channelId])
+      const channel = await this.db.pool.query('SELECT * FROM channels WHERE id = $1', [channelId]);
       if (channel.rows.length < 1) {
-        throw new NotFoundException("Channel not found")
+        throw new NotFoundException("Channel not found");
       }
 
       if (type === 'text') {
-
         const channelMessages = await this.db.pool.query(`
-          select * from channel_messages as cm 
-          join messages as m on m.id = cm.message_id
-          where cm.channel_id = $1`,
-          [channelId])
-        await this.db.pool.query(`begin`)
+        SELECT * FROM channel_messages AS cm 
+        JOIN messages AS m ON m.id = cm.message_id
+        WHERE cm.channel_id = $1
+      `, [channelId]);
 
-        const allMedia = channelMessages.rows.map(message => message.image_asset_id).filter(Boolean)
-        if (allMedia.length >= 1) {
-          for await (const media of allMedia) {
-            await this.attachmentService.deleteImage(media)
+        const threads = await this.threadService.getAllThreads(channelId, serverId);
+
+        if (threads.data.length > 0) {
+          for (const thread of threads.data) {
+            const threadMessages = await this.threadService.getThreadMessage(thread.thread_id, serverId);
+
+            const allThreadMedia = threadMessages.map(msg => msg.media_image).filter(Boolean);
+            if (allThreadMedia.length > 0) {
+              await Promise.all(allThreadMedia.map(media => this.attachmentService.deleteImage(media)));
+            }
+            if (threadMessages.length > 0) {
+              await Promise.all(threadMessages.map(msg => this.db.pool.query('DELETE FROM messages WHERE id = $1', [msg.message_id])));
+            }
+            await this.db.pool.query('DELETE FROM threads WHERE id = $1', [thread.thread_id]);
           }
         }
 
-        if (channelMessages.rows.length >= 1) {
-          for await (const message of channelMessages.rows) {
-            await this.db.pool.query(`delete from messages where id = $1`, [message.message_id])
-          }
-
+        const allChannelMedia = channelMessages.rows.map(message => message.image_asset_id).filter(Boolean)
+        if (allChannelMedia.length > 0) {
+          await Promise.all(allChannelMedia.map(media => this.attachmentService.deleteImage(media)));
         }
 
+        if (channelMessages.rows.length > 0) {
+          await Promise.all(channelMessages.rows.map(message => this.db.pool.query('DELETE FROM messages WHERE id = $1', [message.message_id])));
+        }
 
       }
-      await this.db.pool.query(`delete from channels where id = $1`, [channel.rows[0].id])
-      await this.db.pool.query(`commit`)
+      await this.db.pool.query('DELETE FROM channels WHERE id = $1', [channelId]);
+
+      await this.db.pool.query('COMMIT');
 
       return {
         message: "Channel deleted",
         error: false
-      }
-    } catch (e) {
-      await this.db.pool.query(`rollback`)
-      throw e
-
+      };
+    } catch (error) {
+      await this.db.pool.query('ROLLBACK');
+      throw error;
     }
-
   }
 
   async getAllChannelsInServer(serverId: string) {
