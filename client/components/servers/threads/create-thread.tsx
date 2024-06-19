@@ -9,7 +9,7 @@ import { revalidate } from '@/utils/cache';
 import { cn } from '@/lib/utils';
 import EmojiPicker from '@/components/shared/emoji-picker';
 import { formatDate } from '@/utils/date';
-import { useSelectedMessageStore, useSocketStore } from '@/providers';
+import { useSelectedMessageStore } from '@/providers';
 
 export default function CreateThread({
   channelId,
@@ -28,7 +28,6 @@ export default function CreateThread({
     setMessage: state.setSelectedMessage,
   }));
 
-  const socket = useSocketStore(state => state.socket)
 
   const appendEmoji = useCallback((emoji: string) => {
     if (ref.current) {
@@ -79,7 +78,7 @@ export default function CreateThread({
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-50 h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
+        'ease fixed -right-full top-0 z-50 h-dvh md:h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
         selectedMessage &&
         selectedMessage &&
         selectedMessage.action === 'create_thread' &&
@@ -145,9 +144,9 @@ export default function CreateThread({
         </div>
       )}
       <div className='flex min-h-[calc(100vh-100px)] flex-col justify-end p-3'>
-        <form onSubmit={handleSubmit} className='flex flex-col gap-8'>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
           <div>
-            <div className='z-0 flex size-16 items-center justify-center rounded-full bg-foreground brightness-125'>
+            <div className='z-0 flex size-16 items-center justify-center rounded-full bg-background/50 md:bg-foreground brightness-125'>
               <Image
                 src={'/general/icons/threads.svg'}
                 width={40}
@@ -179,7 +178,7 @@ export default function CreateThread({
               autoComplete='off'
               placeholder='Enter a message to start conversations'
               autoFocus={false}
-              className='w-full rounded bg-transparent placeholder:font-light focus-visible:outline-none'
+              className='w-full rounded placeholder:text-sm bg-transparent placeholder:font-light focus-visible:outline-none'
             />
             <EmojiPicker appendEmoji={({ emoji }) => appendEmoji(emoji)} />
             <button
