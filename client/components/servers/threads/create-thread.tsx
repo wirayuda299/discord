@@ -73,12 +73,12 @@ export default function CreateThread({
     }
   };
 
-  if (!selectedMessage) return null
+  if (!selectedMessage || selectedMessage && selectedMessage.action !== 'create_thread') return null
 
   return (
     <aside
       className={cn(
-        'ease fixed -right-full top-0 z-50 max-h-dvh min-h-dvh  md:max-h-screen md:min-h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
+        'ease fixed -right-full top-0 z-50 max-h-dvh min-h-dvh flex flex-col  md:max-h-screen md:min-h-screen min-w-96 bg-black opacity-0 shadow-2xl transition-all duration-300 md:bg-foreground',
         selectedMessage &&
         selectedMessage &&
         selectedMessage.action === 'create_thread' &&
@@ -143,7 +143,7 @@ export default function CreateThread({
             )}
         </div>
       )}
-      <div className='flex min-h-[calc(100vh-100px)] flex-col justify-end p-3'>
+      <div className='flex grow h-full min-h-fit flex-col justify-end p-3'>
         <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
           <div>
             <div className='z-0 flex size-16 items-center justify-center rounded-full bg-background/50 md:bg-foreground brightness-125'>
