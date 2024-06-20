@@ -372,6 +372,7 @@ export class ServersService {
 
         // Delete all images in all messages
         if (imageAssetIds.length > 0) {
+          console.log("Image asset id in messages -> ", imageAssetIds)
           await Promise.all(imageAssetIds.map(img => this.attachmentService.deleteImage(img)));
         }
 
@@ -387,7 +388,10 @@ export class ServersService {
       }
 
       // Delete server logo
-      await this.attachmentService.deleteImage(server.rows[0].logo_asset_id);
+      if (server.rows[0].logo_asset_id) {
+        await this.attachmentService.deleteImage(server.rows[0].logo_asset_id);
+
+      }
 
       // Delete all server profiles
       const serverProfiles = await this.databaseService.pool.query(
@@ -396,7 +400,7 @@ export class ServersService {
       );
       const filterNotNull = serverProfiles.rows
         .filter(asset => asset.avatar_asset_id !== null)
-        .map(asset => asset.avatar_asset_id);
+        .map(asset => asset.avatar_asset_id).filter(id => id !== '');
 
       if (filterNotNull.length > 0) {
         await Promise.all(filterNotNull.map(id => this.attachmentService.deleteImage(id)));
