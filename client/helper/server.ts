@@ -58,7 +58,7 @@ export async function generateNewInviteCode(serverId: string, path: string) {
       },
       'PATCH',
     );
-    revalidatePath(path);
+    revalidate(path);
   } catch (error) {
     throw error;
   }
