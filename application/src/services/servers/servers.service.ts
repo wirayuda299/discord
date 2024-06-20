@@ -369,6 +369,8 @@ export class ServersService {
         WHERE cm.channel_id = $1
       `, [channel.id]);
 
+        console.log("messages in channels", messages.rows)
+
         const imageAssetIds = messages.rows.map(msg => msg.image_asset_id).filter(Boolean);
 
         // Delete all images in all messages
@@ -382,11 +384,32 @@ export class ServersService {
           }
         }
 
+
         // Delete all messages to trigger delete to threads, pinned_messages
         const messageIds = messages.rows.map(msg => msg.message_id).flat();
         if (messageIds.length > 0) {
+
+          for (const id of messageIds) {
+
+            const threadMessages = await this.databaseService.pool.query(`
+              select image_url from thread_messages as tm  
+              join messages as m on m.id = tm.message_id
+              where tm.message_id = $1
+              `, [id])
+            const media = threadMessages.rows.map(msg => msg.image_url).filter(Boolean).flat()
+            for (const img of media) {
+              if (img) {
+                await this.attachmentService.deleteImage(img)
+              }
+            }
+          }
+
+
+        }
+        if (messageIds.length > 0) {
           const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
           try {
+
             await this.databaseService.pool.query(
               `DELETE FROM messages WHERE id IN (${placeholders})`,
               messageIds
