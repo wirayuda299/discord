@@ -36,8 +36,7 @@ export default function UserProfile() {
     setSelectedOption(option);
   }
 
-  if (userLoading || isLoading)
-    return <PulseLoader />
+  if (userLoading || isLoading) return <PulseLoader />
 
   if (userError || error) return null
 
@@ -67,9 +66,8 @@ export default function UserProfile() {
 
       {selectedOption === 'user' && (
         <div
-          className={cn(
-            'ease mt-4 flex h-36 w-full flex-col justify-center overflow-hidden rounded-lg bg-[url("/server/images/banner.png")] bg-cover bg-fixed bg-center p-2 transition-all duration-500',
-          )}
+          className='ease mt-4 flex h-36 w-full flex-col justify-center overflow-hidden rounded-lg bg-[url("/server/images/banner.png")] bg-cover bg-fixed bg-center p-2 transition-all duration-500'
+
         >
           <div className='flex w-full items-center justify-between'>
             <Image
@@ -90,7 +88,7 @@ export default function UserProfile() {
                 </p>
               </div>
               <Button
-                size={'sm'}
+                size='sm'
                 className='!bg-white font-light text-blue-600'
               >
                 Go to shop

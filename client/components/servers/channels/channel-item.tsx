@@ -78,6 +78,7 @@ export default function ChannelItem({
                     search: `channel_type=${channel.channel_type
                       }&channel_name=${encodeURIComponent(channel.channel_name)}`,
                   }}
+                  prefetch
                   key={channel.channel_id}
                   className='flex-center gap-2 text-base w-full'>
                   <div className='flex items-center gap-3'>

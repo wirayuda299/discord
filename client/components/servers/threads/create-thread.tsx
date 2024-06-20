@@ -133,12 +133,12 @@ export default function CreateThread({
           {selectedMessage.message.media_image &&
             !selectedMessage.message.parent_message_id && (
               <Image
-                src={selectedMessage.message.media_image}
+                src={selectedMessage.message?.media_image}
                 width={200}
                 height={100}
                 alt='media'
-                className='ml-9 mt-3 aspect-auto rounded-md object-cover'
-                loading='lazy'
+                priority
+                className='ml-9 mt-3 aspect-auto size-56 max-h-56 max-w-56 rounded-md object-cover'
               />
             )}
         </div>

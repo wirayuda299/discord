@@ -132,7 +132,7 @@ function ChatItem(props: Props) {
             height={100}
             alt='media'
             priority
-            className='ml-9 mt-3 aspect-auto rounded-md object-cover'
+            className='ml-9 mt-3 aspect-auto size-56 max-h-56 max-w-56 rounded-md object-cover'
           />
         )}
         {(props.msg.threads || []).length >= 1 && (

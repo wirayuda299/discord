@@ -170,14 +170,14 @@ export class ChannelsService {
 
     } catch (e) {
       throw e
-
     }
 
   }
 
 
-  async deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, type: string) {
 
+
+  async deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, type: string) {
     try {
       await this.db.pool.query('BEGIN');
 
@@ -193,7 +193,7 @@ export class ChannelsService {
 
       if (type === 'text') {
         const channelMessages = await this.db.pool.query(`
-        SELECT * FROM channel_messages AS cm 
+        SELECT m.id, m.image_asset_id FROM channel_messages AS cm 
         JOIN messages AS m ON m.id = cm.message_id
         WHERE cm.channel_id = $1
       `, [channelId]);
@@ -208,23 +208,27 @@ export class ChannelsService {
             if (allThreadMedia.length > 0) {
               await Promise.all(allThreadMedia.map(media => this.attachmentService.deleteImage(media)));
             }
-            if (threadMessages.length > 0) {
-              await Promise.all(threadMessages.map(msg => this.db.pool.query('DELETE FROM messages WHERE id = $1', [msg.message_id])));
+            const threadMessageIds = threadMessages.map(msg => msg.message_id);
+            if (threadMessageIds.length > 0) {
+              const placeholders = threadMessageIds.map((_, index) => `$${index + 1}`).join(',');
+              await this.db.pool.query(`DELETE FROM messages WHERE id IN (${placeholders})`, threadMessageIds);
             }
             await this.db.pool.query('DELETE FROM threads WHERE id = $1', [thread.thread_id]);
           }
         }
 
-        const allChannelMedia = channelMessages.rows.map(message => message.image_asset_id).filter(Boolean)
+        const allChannelMedia = channelMessages.rows.map(message => message.image_asset_id).filter(Boolean);
         if (allChannelMedia.length > 0) {
           await Promise.all(allChannelMedia.map(media => this.attachmentService.deleteImage(media)));
         }
 
-        if (channelMessages.rows.length > 0) {
-          await Promise.all(channelMessages.rows.map(message => this.db.pool.query('DELETE FROM messages WHERE id = $1', [message.message_id])));
+        const channelMessageIds = channelMessages.rows.map(message => message.id);
+        if (channelMessageIds.length > 0) {
+          const placeholders = channelMessageIds.map((_, index) => `$${index + 1}`).join(',');
+          await this.db.pool.query(`DELETE FROM messages WHERE id IN (${placeholders})`, channelMessageIds);
         }
-
       }
+
       await this.db.pool.query('DELETE FROM channels WHERE id = $1', [channelId]);
 
       await this.db.pool.query('COMMIT');
