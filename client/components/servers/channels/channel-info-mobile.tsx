@@ -30,9 +30,10 @@ export default function ChannelInfoMobile({
 
   const media = useMemo(() => messages.map(msg => msg.media_image).filter(Boolean), [messages])
 
-  const linksSet = new Set(
+  const linksSet = useMemo(() => new Set(
     messages?.map(msg => msg.message).filter(msg => msg.startsWith('https'))
-  )
+  ), [messages])
+
   const pins = []
 
   const links = useMemo(() => Array.from(linksSet), [linksSet])
