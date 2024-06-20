@@ -1,10 +1,10 @@
-import { revalidatePath } from 'next/cache';
 
 import { Categories } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
 import { ApiRequest } from '@/utils/api';
 import { createError } from '@/utils/error';
 import { revalidate } from '@/utils/cache';
+import { toast } from 'sonner';
 
 const api = new ApiRequest();
 
@@ -175,7 +175,7 @@ export async function updateServerProfile(
   }
 }
 
-export async function deleteServer(serverId: string, currentSessionId: string) {
+export async function deleteServer(serverId: string, currentSessionId: string, pathname: string) {
   try {
     await api.update(
       `/servers/delete`,
@@ -185,9 +185,10 @@ export async function deleteServer(serverId: string, currentSessionId: string) {
       },
       'DELETE',
     );
-    revalidatePath('/server');
+    toast.success("Server has been deleted")
+    revalidate(pathname);
   } catch (error) {
-    throw error;
+    createError(error)
   }
 }
 
@@ -227,9 +228,7 @@ export async function updateChannel(
 
 
 export async function deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, pathname: string, type: string) {
-
   try {
-
     await api.update('/channels/delete', {
       serverId,
       userId,

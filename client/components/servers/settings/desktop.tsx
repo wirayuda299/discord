@@ -23,6 +23,9 @@ const ServerBanList = dynamic(() => import('./bans'));
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useServerStates } from '@/providers';
+import { deleteServer } from '@/helper/server';
+import { useAuth } from '@clerk/nextjs';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function ServerSettingsDesktop({ server }: { server: Servers }) {
   const { selectedSetting, setSelectedSetting } = useServerStates(
@@ -30,7 +33,10 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
       selectedSetting: state.selectedSetting,
       setSelectedSetting: state.setSelectedSetting,
     })),
-  );
+  )
+  const { userId } = useAuth()
+  const pathname = usePathname()
+  const router = useRouter()
 
   const settings = useMemo(() => getServerSettings(server.name), [server.name]);
   return (
@@ -46,7 +52,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
         <div className='flex h-full max-h-screen w-full'>
           <aside className='flex h-screen min-w-96 grow flex-col items-end overflow-y-auto bg-[#2b2d31] p-3 max-lg:min-w-72'>
             <ul className='flex flex-col'>
-              {settings?.map((setting, i) => (
+              {settings?.map((setting) => (
                 <li key={setting.label}>
                   <ul className='flex flex-col gap-1'>
                     <h4 className='py-2 text-sm font-semibold uppercase text-[#949ba4]'>
@@ -59,7 +65,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
                         className={cn(
                           'cursor-pointer rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110',
                           selectedSetting === item &&
-                            'bg-foreground text-white brightness-110',
+                          'bg-foreground text-white brightness-110',
                         )}
                         key={item}
                       >
@@ -70,7 +76,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
                   </ul>
                 </li>
               ))}
-              <li className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
+              <li onClick={() => deleteServer(server.id, userId!, pathname).then(() => router.push('/direct-messages'))} className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
                 Delete server
                 <Trash size={18} className='text-red-600' />
               </li>

@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
+import { ImagehandlerService } from '../imagehandler/imagehandler.service';
 
 const schema = z.object({
   name: z
@@ -23,8 +24,9 @@ const schema = z.object({
 export class ServersService {
   constructor(
     private validationService: ValidationService,
-    private databaseService: DatabaseService
-  ) {}
+    private databaseService: DatabaseService,
+    private attachmentService: ImagehandlerService
+  ) { }
 
   async createServer(
     name: string,
@@ -327,17 +329,17 @@ export class ServersService {
         error: false,
       };
     } catch (error) {
-      console.log(error);
 
       await this.databaseService.pool.query('rollback');
       throw error;
     }
   }
 
+
   async deleteServer(serverId: string, currentSessionId: string) {
     try {
       const server = await this.databaseService.pool.query(
-        `select * from servers where id = $1`,
+        `SELECT * FROM servers WHERE id = $1`,
         [serverId]
       );
       if (server.rows.length < 1) {
@@ -351,24 +353,79 @@ export class ServersService {
         );
       }
 
-      await this.databaseService.pool.query(`begin`);
-      await this.databaseService.pool.query(
-        `delete from servers where id = $1`,
-        [serverId]
-      );
-      await this.databaseService.pool.query(
-        `delete from members where members.server_id = $1`,
+      await this.databaseService.pool.query('BEGIN');
+      const { rows: channels } = await this.databaseService.pool.query(
+        `SELECT id FROM channels WHERE server_id = $1`,
         [serverId]
       );
 
-      await this.databaseService.pool.query(`commit`);
+      for await (const channel of channels) {
+        // Get all messages in each channel
+        const messages = await this.databaseService.pool.query(`
+        SELECT message_id, image_asset_id 
+        FROM channel_messages AS cm 
+        JOIN messages AS m ON m.id = cm.message_id
+        WHERE cm.channel_id = $1
+      `, [channel.id]);
+
+        const imageAssetIds = messages.rows.map(msg => msg.image_asset_id).filter(Boolean);
+
+        // Delete all images in all messages
+        if (imageAssetIds.length > 0) {
+          await Promise.all(imageAssetIds.map(img => this.attachmentService.deleteImage(img)));
+        }
+
+        // Delete all messages to trigger delete to threads, pinned_messages
+        const messageIds = messages.rows.map(msg => msg.message_id).flat();
+        if (messageIds.length > 0) {
+          const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
+          await this.databaseService.pool.query(
+            `DELETE FROM messages WHERE id IN (${placeholders})`,
+            messageIds
+          );
+        }
+      }
+
+      // Delete server logo
+      await this.attachmentService.deleteImage(server.rows[0].logo_asset_id);
+
+      // Delete all server profiles
+      const serverProfiles = await this.databaseService.pool.query(
+        `SELECT avatar_asset_id FROM server_profile WHERE server_id = $1`,
+        [serverId]
+      );
+      const filterNotNull = serverProfiles.rows
+        .filter(asset => asset.avatar_asset_id !== null)
+        .map(asset => asset.avatar_asset_id);
+
+      if (filterNotNull.length > 0) {
+        await Promise.all(filterNotNull.map(id => this.attachmentService.deleteImage(id)));
+      }
+
+      if (server.rows[0].banner_asset_id) {
+        await this.attachmentService.deleteImage(server.rows[0].banner_asset_id);
+      }
+      const roles = await this.databaseService.pool.query(
+        `SELECT icon_asset_id FROM roles WHERE server_id = $1 AND icon_asset_id != ''`,
+        [serverId]
+      );
+
+      if (roles.rows.length > 0) {
+        await Promise.all(roles.rows.map(icon => this.attachmentService.deleteImage(icon.icon_asset_id)));
+      }
+
+      await this.databaseService.pool.query(
+        `DELETE FROM servers WHERE id = $1`,
+        [serverId]
+      );
+      await this.databaseService.pool.query('COMMIT');
 
       return {
         message: 'Server has been deleted',
         error: false,
       };
     } catch (error) {
-      await this.databaseService.pool.query(`rollback`);
+      await this.databaseService.pool.query('ROLLBACK');
       throw error;
     }
   }
@@ -444,6 +501,8 @@ export class ServersService {
       throw error;
     }
   }
+
+
 
   async updateServerprofile(
     serverId: string,
