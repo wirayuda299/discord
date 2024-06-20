@@ -336,6 +336,7 @@ export class ServersService {
   }
 
 
+
   async deleteServer(serverId: string, currentSessionId: string) {
     try {
       const server = await this.databaseService.pool.query(
@@ -372,25 +373,40 @@ export class ServersService {
 
         // Delete all images in all messages
         if (imageAssetIds.length > 0) {
-          console.log("Image asset id in messages -> ", imageAssetIds)
-          await Promise.all(imageAssetIds.map(img => this.attachmentService.deleteImage(img)));
+          console.log("Image asset id in messages -> ", imageAssetIds);
+          try {
+            await Promise.all(imageAssetIds.map(img => this.attachmentService.deleteImage(img)));
+          } catch (error) {
+            await this.databaseService.pool.query('ROLLBACK');
+            throw new HttpException("Failed to delete all images in messages", HttpStatus.INTERNAL_SERVER_ERROR);
+          }
         }
 
         // Delete all messages to trigger delete to threads, pinned_messages
         const messageIds = messages.rows.map(msg => msg.message_id).flat();
         if (messageIds.length > 0) {
           const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
-          await this.databaseService.pool.query(
-            `DELETE FROM messages WHERE id IN (${placeholders})`,
-            messageIds
-          );
+          try {
+            await this.databaseService.pool.query(
+              `DELETE FROM messages WHERE id IN (${placeholders})`,
+              messageIds
+            );
+          } catch (error) {
+            await this.databaseService.pool.query('ROLLBACK');
+            throw new HttpException("Failed to delete allmessages", HttpStatus.INTERNAL_SERVER_ERROR);
+          }
         }
       }
 
       // Delete server logo
       if (server.rows[0].logo_asset_id) {
-        await this.attachmentService.deleteImage(server.rows[0].logo_asset_id);
+        try {
+          await this.attachmentService.deleteImage(server.rows[0].logo_asset_id);
+        } catch (error) {
+          await this.databaseService.pool.query('ROLLBACK');
+          throw new HttpException(`Failed to delete server logo: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
 
+        }
       }
 
       // Delete all server profiles
@@ -403,19 +419,37 @@ export class ServersService {
         .map(asset => asset.avatar_asset_id).filter(id => id !== '');
 
       if (filterNotNull.length > 0) {
-        await Promise.all(filterNotNull.map(id => this.attachmentService.deleteImage(id)));
+        try {
+          await Promise.all(filterNotNull.map(id => this.attachmentService.deleteImage(id)));
+        } catch (error) {
+          await this.databaseService.pool.query('ROLLBACK');
+
+          throw new HttpException(`Failed to delete all server profiles logo: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
       }
 
       if (server.rows[0].banner_asset_id) {
-        await this.attachmentService.deleteImage(server.rows[0].banner_asset_id);
+        try {
+          await this.attachmentService.deleteImage(server.rows[0].banner_asset_id);
+        } catch (error) {
+          await this.databaseService.pool.query('ROLLBACK');
+          throw new HttpException(`Failed to delete all server banner: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
       }
+
       const roles = await this.databaseService.pool.query(
         `SELECT icon_asset_id FROM roles WHERE server_id = $1 AND icon_asset_id != ''`,
         [serverId]
       );
 
       if (roles.rows.length > 0) {
-        await Promise.all(roles.rows.map(icon => this.attachmentService.deleteImage(icon.icon_asset_id)));
+        try {
+          await Promise.all(roles.rows.map(icon => this.attachmentService.deleteImage(icon.icon_asset_id)));
+        } catch (error) {
+          await this.databaseService.pool.query('ROLLBACK');
+          throw new HttpException(`Failed to delete all roles icon: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
       }
 
       await this.databaseService.pool.query(
