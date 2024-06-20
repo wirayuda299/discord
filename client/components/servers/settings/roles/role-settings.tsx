@@ -120,7 +120,7 @@ export default function RolesSettings({
       manage_role,
       manage_thread,
     } = data;
-
+    console.log("icon file", files)
     try {
       if (type === 'create') {
         if (files && files.icon) {

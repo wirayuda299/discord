@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
+import { toast } from 'sonner';
 
 import useUploadFile from '@/hooks/useFileUpload';
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,6 @@ export default function CreateServerForm() {
 
     let file: { publicId: string; url: string } | null = null;
 
-    const { toast } = await import('sonner');
     const { revalidate } = await import('@/utils/cache');
     const { createServer } = await import('@/actions/server');
     const { deleteImage, uploadFile } = await import('@/helper/file');
