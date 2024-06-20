@@ -372,10 +372,10 @@ export class ServersService {
         console.log("messages in channels", messages.rows)
 
         const imageAssetIds = messages.rows.map(msg => msg.image_asset_id).filter(Boolean);
+        console.log("Image asset id in messages -> ", imageAssetIds);
 
         // Delete all images in all messages
         if (imageAssetIds.length > 0) {
-          console.log("Image asset id in messages -> ", imageAssetIds);
           try {
             await Promise.all(imageAssetIds.map(img => this.attachmentService.deleteImage(img)));
           } catch (error) {
@@ -397,6 +397,7 @@ export class ServersService {
               where tm.message_id = $1
               `, [id])
             const media = threadMessages.rows.map(msg => msg.image_url).filter(Boolean).flat()
+            console.log("media threads", media)
             for (const img of media) {
               if (img) {
                 await this.attachmentService.deleteImage(img)
