@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
 import { ImagehandlerService } from '../imagehandler/imagehandler.service';
+import { ThreadsService } from '../threads/threads.service';
 
 const schema = z.object({
   name: z
@@ -20,12 +21,18 @@ const schema = z.object({
   logo_asset_id: z.string().min(10),
 });
 
+
+// TODO: fix issue where all images in roles icon (if any) and images in thread messages not deleted when server has been deleted
+
+
+
 @Injectable()
 export class ServersService {
   constructor(
     private validationService: ValidationService,
     private databaseService: DatabaseService,
-    private attachmentService: ImagehandlerService
+    private attachmentService: ImagehandlerService,
+    private threadservice: ThreadsService
   ) { }
 
   async createServer(
@@ -363,16 +370,26 @@ export class ServersService {
       for await (const channel of channels) {
         // Get all messages in each channel
         const messages = await this.databaseService.pool.query(`
-        SELECT message_id, image_asset_id 
+        SELECT message_id, image_asset_id, channel_id
         FROM channel_messages AS cm 
         JOIN messages AS m ON m.id = cm.message_id
         WHERE cm.channel_id = $1
       `, [channel.id]);
+        const threads = await this.threadservice.getAllThreads(channel.channel_id, serverId)
 
-        console.log("messages in channels", messages.rows)
+        if (threads.data.length > 0) {
+          for (const thread of threads.data) {
+            const messages = await this.threadservice.getThreadMessage(thread.thread_id, serverId)
+            const media = messages.map(msg => msg.media_image).filter(Boolean)
+            if (media.length > 0) {
+
+              await Promise.all(media.map(img => this.attachmentService.deleteImage(img)))
+            }
+          }
+        }
+
 
         const imageAssetIds = messages.rows.map(msg => msg.image_asset_id).filter(Boolean);
-        console.log("Image asset id in messages -> ", imageAssetIds);
 
         // Delete all images in all messages
         if (imageAssetIds.length > 0) {
@@ -387,26 +404,7 @@ export class ServersService {
 
         // Delete all messages to trigger delete to threads, pinned_messages
         const messageIds = messages.rows.map(msg => msg.message_id).flat();
-        if (messageIds.length > 0) {
 
-          for (const id of messageIds) {
-
-            const threadMessages = await this.databaseService.pool.query(`
-              select image_url from thread_messages as tm  
-              join messages as m on m.id = tm.message_id
-              where tm.message_id = $1
-              `, [id])
-            const media = threadMessages.rows.map(msg => msg.image_url).filter(Boolean).flat()
-            console.log("media threads", media)
-            for (const img of media) {
-              if (img) {
-                await this.attachmentService.deleteImage(img)
-              }
-            }
-          }
-
-
-        }
         if (messageIds.length > 0) {
           const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
           try {
@@ -440,7 +438,7 @@ export class ServersService {
       );
       const filterNotNull = serverProfiles.rows
         .filter(asset => asset.avatar_asset_id !== null)
-        .map(asset => asset.avatar_asset_id).filter(id => id !== '');
+        .map(asset => asset.avatar_asset_id).filter(Boolean);
 
       if (filterNotNull.length > 0) {
         try {
@@ -463,13 +461,14 @@ export class ServersService {
       }
 
       const roles = await this.databaseService.pool.query(
-        `SELECT icon_asset_id FROM roles WHERE server_id = $1 AND icon_asset_id != ''`,
+        `SELECT icon_asset_id FROM roles WHERE server_id = $1`,
         [serverId]
       );
+      const rolesImageIds = roles.rows.map(role => role.icon_asset_id).filter(Boolean)
 
-      if (roles.rows.length > 0) {
+      if (rolesImageIds.length > 0) {
         try {
-          await Promise.all(roles.rows.map(icon => this.attachmentService.deleteImage(icon.icon_asset_id)));
+          await Promise.all(rolesImageIds.rows.map(icon => this.attachmentService.deleteImage(icon)));
         } catch (error) {
           await this.databaseService.pool.query('ROLLBACK');
           throw new HttpException(`Failed to delete all roles icon: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
