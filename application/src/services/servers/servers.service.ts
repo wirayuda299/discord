@@ -375,16 +375,16 @@ export class ServersService {
         JOIN messages AS m ON m.id = cm.message_id
         WHERE cm.channel_id = $1
       `, [channel.id]);
-        const threads = await this.threadservice.getAllThreads(channel.channel_id, serverId)
+        const threads = await this.databaseService.pool.query(`  select image_asset_id from threads as t
+        join thread_messages as tm on tm.thread_id = t.id 
+        join messages as m on m.id = tm.message_id 
+        where t.channel_id = $1
+        `, [channel.id])
 
-        if (threads.data.length > 0) {
-          for (const thread of threads.data) {
-            const messages = await this.threadservice.getThreadMessage(thread.thread_id, serverId)
-            const media = messages.map(msg => msg.media_image).filter(Boolean)
-            if (media.length > 0) {
-
-              await Promise.all(media.map(img => this.attachmentService.deleteImage(img)))
-            }
+        if (threads.rows.length > 0) {
+          const media = threads.rows.map(msg => msg.image_asset_id).filter(Boolean)
+          if (media.length > 0) {
+            await Promise.all(media.map(img => this.attachmentService.deleteImage(img)))
           }
         }
 
@@ -437,7 +437,6 @@ export class ServersService {
         [serverId]
       );
       const filterNotNull = serverProfiles.rows
-        .filter(asset => asset.avatar_asset_id !== null)
         .map(asset => asset.avatar_asset_id).filter(Boolean);
 
       if (filterNotNull.length > 0) {
@@ -470,6 +469,7 @@ export class ServersService {
         try {
           await Promise.all(rolesImageIds.map(icon => this.attachmentService.deleteImage(icon)));
         } catch (error) {
+          console.log("Roles error", error)
           await this.databaseService.pool.query('ROLLBACK');
           throw new HttpException(`Failed to delete all roles icon: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
         }

@@ -120,7 +120,6 @@ export default function RolesSettings({
       manage_role,
       manage_thread,
     } = data;
-    console.log("icon file", files)
     try {
       if (type === 'create') {
         if (files && files.icon) {
@@ -129,8 +128,8 @@ export default function RolesSettings({
         await createRole(
           color,
           name,
-          media?.publicId || '',
           media?.url || '',
+          media?.publicId || '',
           params.id as string,
           attach_file,
           ban_member,

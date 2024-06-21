@@ -38,6 +38,7 @@ export class ImagehandlerService {
         error: false,
       };
     } catch (error) {
+      console.log("image deleted error", error)
       throw error;
     }
   }
