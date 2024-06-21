@@ -9,7 +9,7 @@ export const createServerSchema = z.object({
   name: z
     .string()
     .min(4, 'Min character is 4')
-    .max(30, 'Max character for server name is 30'),
+    .max(25, 'Max character for server name is 25'),
   logo: z.string().min(10),
 });
 

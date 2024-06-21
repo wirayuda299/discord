@@ -117,6 +117,8 @@ export default function ChannelSetting({ selectedChannel, serverId, serverAuthor
               <FormControl>
                 <Input
                   {...field}
+                  max={50}
+                  maxLength={50}
                   placeholder="Channel topic"
                   autoComplete='off'
                   className='flex min-h-[30px] w-full max-w-full break-before-auto items-center !border-none bg-background px-3 pt-2 text-sm text-white caret-white outline-none focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:animate-pulse' />

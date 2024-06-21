@@ -71,6 +71,7 @@ export default function CreateServerForm() {
         },
       );
     } catch (error) {
+      setStatus('Create Server')
       createError(error);
       if (file) {
         await deleteImage(file?.publicId);
@@ -140,8 +141,8 @@ export default function CreateServerForm() {
                     placeholder='Server name'
                     className='border-none bg-background ring-offset-transparent focus:shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:ring-transparent'
                     required
-                    max={30}
-                    maxLength={30}
+                    max={25}
+                    maxLength={25}
                     aria-disabled={isSubmitting}
                     disabled={isSubmitting}
                     {...field}

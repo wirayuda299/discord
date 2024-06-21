@@ -165,6 +165,8 @@ export default function CreateThread({
             name='thread_name'
             type='text'
             id='thread_name'
+            max={50}
+            maxLength={50}
             autoComplete='off'
             placeholder='Thread name'
             autoFocus={false}
