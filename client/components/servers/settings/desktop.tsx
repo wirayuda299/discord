@@ -98,8 +98,8 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
                 </h2>
                 <p className='text-balance text-sm text-gray-2'>
                   Upload custom sound reactions that anyone in this server can
-                  use. Nitro members will be able to access these sounds in any
-                  server on Discord.
+                  use. ChatFusion Pro members will be able to access these sounds in any
+                  server on ChatFusion.
                 </p>
                 <div className='flex flex-col items-center justify-center py-6'>
                   <Image

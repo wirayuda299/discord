@@ -7,7 +7,7 @@ export default function EmojiUpload() {
         <h1 className='mb-4 text-lg font-semibold'>Emoji</h1>
         <p className='mb-4 text-balance text-sm text-gray-2'>
           Add up to 50 custom emoji that anyone can use in this server. Animated
-          GIF emoji may be used by members with Discord Nitro.
+          GIF emoji may be used by members with ChatFusion Pro.
         </p>
         <div>
           <h2 className='mb-2 text-lg font-semibold'>Upload Requirements</h2>

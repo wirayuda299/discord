@@ -42,7 +42,7 @@ export default function UserSettingsDesktop() {
         <div className='flex h-full max-h-screen w-full'>
           <aside className='flex h-screen min-w-[350px] grow flex-col items-end overflow-y-auto bg-[#2b2d31] p-3 max-lg:min-w-60'>
             <ul className='flex flex-col'>
-              {user_settings?.map((setting, i) => (
+              {user_settings?.map((setting) => (
                 <li key={setting.label}>
                   <ul className='flex flex-col gap-1'>
                     <h4 className='py-2 text-sm font-semibold uppercase text-[#949ba4]'>

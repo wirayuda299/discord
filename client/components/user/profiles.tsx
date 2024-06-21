@@ -66,23 +66,23 @@ export default function UserProfile() {
 
       {selectedOption === 'user' && (
         <div
-          className='ease mt-4 flex h-36 w-full flex-col justify-center overflow-hidden rounded-lg bg-[url("/server/images/banner.png")] bg-cover bg-fixed bg-center p-2 transition-all duration-500'
+          className='ease mt-4 flex h-36 w-full flex-col justify-center overflow-hidden rounded-lg bg-[url("/server/images/banner.jpg")] bg-cover bg-fixed bg-center p-2 transition-all duration-500'
 
         >
           <div className='flex w-full items-center justify-between'>
             <Image
               className='hidden aspect-auto size-32 object-contain lg:block lg:w-44'
-              src={'/server/images/art.png'}
+              src={'/server/images/banner.jpg'}
               width={200}
               height={144}
               alt='art'
             />
             <div className='flex flex-wrap items-center gap-3'>
               <div>
-                <h3 className='text-wrap text-base font-extrabold lg:text-xl'>
+                <h3 className='text-wrap text-base font-extrabold text-white lg:text-xl'>
                   Fresh look, Clean aim. Must be valorant
                 </h3>
-                <p className='truncate text-balance text-xs'>
+                <p className='truncate text-balance text-xs text-white'>
                   Keep your profile looking clutch with new avatar decorations
                   and profile effects.
                 </p>

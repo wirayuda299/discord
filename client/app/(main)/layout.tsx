@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { MessageCircle } from 'lucide-react';
 
 import UserChatAndServer from './direct-messages/_components/sidebar/UserChatAndServer';
 
@@ -17,23 +16,18 @@ export default async function MainLayout({
           aria-label='direct messages'
           title='direct messages'
           href='/direct-messages'
-          className='flex size-12 items-center justify-center rounded-full bg-foreground p-2 md:rounded-md md:bg-primary'
+          className='flex size-12 items-center justify-center rounded-full bg-foreground md:rounded-md md:bg-primary'
         >
           <Image
             priority
-            src='/general/icons/discord.svg'
-            width={35}
-            height={35}
-            sizes='35px'
-            alt='discord'
-            className='hidden aspect-auto object-contain md:block'
+            src='/general/icons/logo.svg'
+            width={50}
+            height={50}
+            sizes='50px'
+            alt='logo'
+            className=' aspect-auto object-cover rounded-md'
           />
-          <MessageCircle
-            fill='#fff'
-            stroke='#fff'
-            className='mx-auto md:hidden'
-            size={30}
-          />
+
         </Link>
         <UserChatAndServer />
       </aside>

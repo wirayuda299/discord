@@ -7,6 +7,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
 
 import useUploadFile from '@/hooks/useFileUpload';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { CreateServerSchemaType, createServerSchema } from '@/validations';
 import { createError } from '@/utils/error';
 import { DialogClose } from '@/components/ui/dialog';
-import { usePathname } from 'next/navigation';
+
 
 export default function CreateServerForm() {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -146,7 +147,7 @@ export default function CreateServerForm() {
                     {...field}
                   />
                   <p className='text-xs font-light leading-relaxed'>
-                    By createing a server, you&apos;re agree to discord{' '}
+                    By createing a server, you&apos;re agree to ChatFusion{' '}
                     <span className='font-semibold text-primary'>
                       Community Guidelines
                     </span>
@@ -168,20 +169,39 @@ export default function CreateServerForm() {
           >
             Back
           </DialogClose>
-          <Button
-            aria-label='create'
-            name='create'
-            title='create'
-            aria-disabled={isSubmitting}
-            disabled={isSubmitting}
-            type='submit'
-            className='flex items-center gap-2 bg-primary text-white disabled:cursor-not-allowed disabled:opacity-80'
-          >
-            {isSubmitting && (
-              <div className='ease size-5 animate-spin rounded-full border-t-2 border-t-white transition-all duration-500'></div>
-            )}
-            {status}
-          </Button>
+
+          {status === 'Done' ? (
+
+            <DialogClose
+              aria-label='close'
+              name='close'
+              title='close'
+              aria-disabled={isSubmitting}
+              disabled={isSubmitting}
+              type='button'
+              className=' w-20 text-center px-2 py-1 rounded-sm gap-2 bg-primary text-white disabled:cursor-not-allowed disabled:opacity-80'
+            >
+              Close
+            </DialogClose>
+
+          ) : (
+            <Button
+              aria-label='create'
+              name='create'
+              title='create'
+              aria-disabled={isSubmitting}
+              disabled={isSubmitting}
+              type='submit'
+              className='flex items-center gap-2 bg-primary text-white disabled:cursor-not-allowed disabled:opacity-80'
+            >
+              {isSubmitting && (
+                <div className='ease size-5 animate-spin rounded-full border-t-2 border-t-white transition-all duration-500'></div>
+              )}
+              {status}
+            </Button>
+
+
+          )}
         </div>
       </form>
     </Form>

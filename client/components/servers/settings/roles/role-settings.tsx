@@ -79,7 +79,7 @@ export default function RolesSettings({
     resolver: zodResolver(schema),
     defaultValues: {
       color: selectedRole ? selectedRole.role_color : '#99aab5',
-      name: selectedRole ? selectedRole.name : 'new role',
+      name: selectedRole ? selectedRole.name : '',
       icon: selectedRole ? selectedRole.icon : '',
       attach_file: selectedRole ? selectedRole.permissions.attach_file : false,
       ban_member: selectedRole ? selectedRole.permissions.ban_member : false,
@@ -106,7 +106,7 @@ export default function RolesSettings({
 
   const handleCreateOrUpdateRole = async (data: z.infer<typeof schema>) => {
     let media = null;
-    if (!userId) return;
+    if (!userId || !data.name) return;
 
     const {
       color,
