@@ -468,7 +468,7 @@ export class ServersService {
 
       if (rolesImageIds.length > 0) {
         try {
-          await Promise.all(rolesImageIds.rows.map(icon => this.attachmentService.deleteImage(icon)));
+          await Promise.all(rolesImageIds.map(icon => this.attachmentService.deleteImage(icon)));
         } catch (error) {
           await this.databaseService.pool.query('ROLLBACK');
           throw new HttpException(`Failed to delete all roles icon: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
