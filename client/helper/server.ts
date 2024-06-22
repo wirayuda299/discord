@@ -15,7 +15,6 @@ export async function getAllServerCreatedByCurrentUser(
     if (!id) return [];
 
     return await api.getData<Servers[]>(`/servers/all-servers?userId=${id}`);
-
   } catch (error) {
     throw error;
   }

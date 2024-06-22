@@ -42,7 +42,7 @@ export default function CreateServerForm() {
   const isSubmitting = form.formState.isSubmitting;
 
   async function onSubmit(data: CreateServerSchemaType) {
-    if (!files || !user) return;
+    if (files === null || !user) return;
 
     let file: { publicId: string; url: string } | null = null;
 
@@ -55,10 +55,13 @@ export default function CreateServerForm() {
       file = await uploadFile(files.logo);
       setStatus('Image uploaded');
 
-      if (!file)
+      if (!file.url || !file.publicId) {
         throw new Error('Please add server logo', {
           cause: 'file is not defined',
-        });
+        })
+      }
+
+
       setStatus('Creating server...');
 
       await createServer(data.name, file.url, file.publicId, user?.id).then(
