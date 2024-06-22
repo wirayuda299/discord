@@ -1,24 +1,21 @@
+import { toast } from 'sonner';
 
 import { Categories } from '@/types/channels';
 import { Member, MemberWithRole, ServerProfile, Servers } from '@/types/server';
 import { ApiRequest } from '@/utils/api';
 import { createError } from '@/utils/error';
 import { revalidate } from '@/utils/cache';
-import { toast } from 'sonner';
 
 const api = new ApiRequest();
 
 export async function getAllServerCreatedByCurrentUser(
-  userId: string,
+  id: string
 ): Promise<Servers[]> {
   try {
-    if (!userId) return [];
+    if (!id) return [];
 
-    const servers = await api.getData<Servers[]>(
-      `/servers/all-servers?userId=${userId}`,
-    );
+    return await api.getData<Servers[]>(`/servers/all-servers?userId=${id}`);
 
-    return servers;
   } catch (error) {
     throw error;
   }
@@ -39,66 +36,49 @@ export async function getServerByCode(code: string) {
   }
 }
 
-export async function getAllChannels(serverId: string) {
+export async function getAllChannels(id: string) {
   try {
-    return await api.getData<Categories[]>(
-      `/channels/list?serverId=${serverId}`,
-    );
+    return await api.getData<Categories[]>(`/channels/list?serverId=${id}`);
   } catch (error) {
     throw error;
   }
 }
 
-export async function generateNewInviteCode(serverId: string, path: string) {
+export async function generateNewInviteCode(id: string, path: string) {
   try {
-    await api.update(
-      `/servers/new-invite-code`,
-      {
-        serverId,
-      },
-      'PATCH',
-    );
+    await api.update(`/servers/new-invite-code`, { serverId: id }, 'PATCH');
     revalidate(path);
   } catch (error) {
     throw error;
   }
 }
 
-export async function getServerMembers(serverId: string) {
+export async function getServerMembers(id: string) {
   try {
-    const members = await api.getData<Member[]>(
-      `/members?serverId=${serverId}`,
-    );
-    return members;
+    return await api.getData<Member[]>(`/members?serverId=${id}`);
   } catch (error) {
     throw error;
   }
 }
 
 export async function getMembersByRole(
-  serverId: string,
-  roleName: string,
+  id: string,
+  name: string,
 ): Promise<MemberWithRole[]> {
   try {
-    if (!serverId || !roleName) return [];
+    if (!id || !name) return [];
 
-    const members = await api.getData<MemberWithRole[]>(
-      `/members/by-role?roleName=${roleName}&serverId=${serverId}`,
-    );
-
-    return members;
+    return await api.getData<MemberWithRole[]>(`/members/by-role?roleName=${name}&serverId=${id}`);
   } catch (error) {
     throw error;
   }
 }
 
 export async function getMemberWithoutRole(
-  serverId: string,
+  id: string
 ): Promise<MemberWithRole[]> {
   try {
-    return await api.getData<MemberWithRole[]>(
-      `/members/without-role?serverId=${serverId}`,
-    );
+    return await api.getData<MemberWithRole[]>(`/members/without-role?serverId=${id}`);
   } catch (error) {
     throw error;
   }
@@ -116,21 +96,20 @@ export async function updateServer(
   showProgressBar: boolean,
 ) {
   try {
-    return await api.update(
-      `/servers/update`,
-      {
-        serverId,
-        currentSessionId,
-        name,
-        logo,
-        logoAssetId,
-        showBanner,
-        showProgressBar,
-        banner,
-        bannerAssetId,
-      },
-      'PATCH',
-    );
+
+    const body = {
+      serverId,
+      currentSessionId,
+      name,
+      logo,
+      logoAssetId,
+      showBanner,
+      showProgressBar,
+      banner,
+      bannerAssetId,
+    }
+
+    return await api.update(`/servers/update`, body, 'PATCH');
   } catch (error) {
     throw error;
   }
@@ -157,19 +136,16 @@ export async function updateServerProfile(
   avatarAssetId: string,
   bio: string,
 ) {
+  const body = {
+    serverId,
+    userId,
+    username,
+    avatar,
+    avatarAssetId,
+    bio,
+  }
   try {
-    await api.update(
-      `/servers/update-server-profile`,
-      {
-        serverId,
-        userId,
-        username,
-        avatar,
-        avatarAssetId,
-        bio,
-      },
-      'PATCH',
-    );
+    await api.update(`/servers/update-server-profile`, body, 'PATCH');
   } catch (error) {
     throw error;
   }
@@ -177,14 +153,7 @@ export async function updateServerProfile(
 
 export async function deleteServer(serverId: string, currentSessionId: string, pathname: string) {
   try {
-    await api.update(
-      `/servers/delete`,
-      {
-        serverId,
-        currentSessionId,
-      },
-      'DELETE',
-    );
+    await api.update(`/servers/delete`, { serverId, currentSessionId }, 'DELETE');
     toast.success("Server has been deleted")
     revalidate(pathname);
   } catch (error) {
@@ -216,26 +185,35 @@ export async function updateChannel(
   name: string,
   serverAuthor: string,
   topic: string = '') {
-
   try {
-    return await api.update('/channels/update', {
+    const body = {
       name, topic, userId, serverId, serverAuthor, channelId
-    }, "PUT")
+    }
+    return await api.update('/channels/update', body, "PUT")
   } catch (e) {
     throw e
   }
 }
 
 
-export async function deleteChannel(serverId: string, userId: string, channelId: string, serverAuthor: string, pathname: string, type: string) {
+export async function deleteChannel(
+  serverId: string,
+  userId: string,
+  channelId: string,
+  serverAuthor: string,
+  pathname: string,
+  type: string) {
+
   try {
-    await api.update('/channels/delete', {
+    const body = {
       serverId,
       userId,
       channelId,
       serverAuthor,
       type
-    }, "DELETE")
+    }
+
+    await api.update('/channels/delete', body, "DELETE")
     revalidate(pathname)
 
   } catch (e) {

@@ -1,15 +1,20 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Cog, Trash, X } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
+import { usePathname, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 
 import {
   Dialog,
+  DialogTitle,
   DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
   DialogTrigger,
 } from '../../ui/dialog';
 import { getServerSettings } from '@/constants/servers-settings';
@@ -24,8 +29,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useServerStates } from '@/providers';
 import { deleteServer } from '@/helper/server';
-import { useAuth } from '@clerk/nextjs';
-import { usePathname, useRouter } from 'next/navigation';
 
 export default function ServerSettingsDesktop({ server }: { server: Servers }) {
   const { selectedSetting, setSelectedSetting } = useServerStates(
@@ -34,11 +37,11 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
       setSelectedSetting: state.setSelectedSetting,
     })),
   )
-  const { userId } = useAuth()
-  const pathname = usePathname()
-  const router = useRouter()
-
-  const settings = useMemo(() => getServerSettings(server.name), [server.name]);
+  const { userId } = useAuth(),
+    pathname = usePathname(),
+    router = useRouter(),
+    [isSubmitting, setIsSubmitting] = useState(false),
+    settings = useMemo(() => getServerSettings(server.name), [server.name]);
   return (
     <Dialog>
       <DialogTrigger
@@ -76,10 +79,44 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
                   </ul>
                 </li>
               ))}
-              <li onClick={() => deleteServer(server.id, userId!, pathname).then(() => router.push('/direct-messages'))} className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
-                Delete server
-                <Trash size={18} className='text-red-600' />
-              </li>
+
+              <Dialog>
+                <DialogTrigger className='flex-center text-red-600 gap-2 font-medium p-1'>
+                  Delete server
+                  <Trash size={18} className='text-red-600' />
+                </DialogTrigger>
+                <DialogContent className='border-none bg-black'>
+                  <DialogHeader>
+                    <DialogTitle className='text-center block text-white pb-3'>
+                      Are you sure to delete this server?
+                    </DialogTitle>
+
+                    <DialogDescription className='text-center text-gray-2 text-balance text-xs'>
+                      Deleting a server is a permanent action that cannot be undone. This will delete all messages (including files and media), Server settings, roles, members (including roles and permissions) and all channels in this server.
+                    </DialogDescription>
+
+                  </DialogHeader>
+                  <div className='flex-center'>
+                    <DialogClose className='w-full'>
+                      Back
+                    </DialogClose>
+                    <Button
+                      disabled={isSubmitting}
+                      onClick={() => {
+                        setIsSubmitting(true)
+                        deleteServer(server.id, userId!!, pathname)
+                          .then(() => {
+                            setIsSubmitting(false)
+                            router.push('/direct-messages')
+                          }).catch(() => setIsSubmitting(false))
+                      }}
+                      className='w-full !bg-red-600 text-white'>
+                      {isSubmitting ? 'Deleting server...' : 'Delete'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
             </ul>
           </aside>
           <section className='col-span-3 w-full bg-[#313338]'>

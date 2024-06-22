@@ -1,3 +1,6 @@
+# Note!!! This project only for learning purposes!
+
+
 # Chat fusion
 
 Welcome to the **ChatFusion** project inspired by discord! This repository contains the source code for a full-stack, real-time chat application inspired by Discord. This project showcases the use of modern web development technologies and tools to build a scalable and efficient application.

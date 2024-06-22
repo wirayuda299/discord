@@ -14,11 +14,9 @@ export interface Role {
   permissions: Permission;
 }
 
-export async function getAllRoles(serverId: string): Promise<Role[]> {
+export async function getAllRoles(serverId: string) {
   try {
-    const roles = await api.getData<Role[]>(
-      `/roles/all-roles?serverId=${serverId}`,
-    );
+    const roles = await api.getData<Role[]>(`/roles/all-roles?serverId=${serverId}`);
     return roles;
   } catch (error) {
     throw error;
@@ -40,26 +38,23 @@ export async function updateRole(
   manageRole: boolean,
   manageThread: boolean,
 ) {
+  const requestBody = {
+    color,
+    name,
+    icon,
+    icon_asset_id: iconAssetId,
+    serverId,
+    attach_file: attachFile,
+    ban_member: banMember,
+    kick_member: kickMember,
+    manage_channel: manageChannel,
+    manage_message: manageMessage,
+    manage_role: manageRole,
+    manage_thread: manageThread,
+    roleId,
+  }
   try {
-    await api.update(
-      '/roles/update-role',
-      {
-        color,
-        name,
-        icon,
-        icon_asset_id: iconAssetId,
-        serverId,
-        attach_file: attachFile,
-        ban_member: banMember,
-        kick_member: kickMember,
-        manage_channel: manageChannel,
-        manage_message: manageMessage,
-        manage_role: manageRole,
-        manage_thread: manageThread,
-        roleId,
-      },
-      'PUT',
-    );
+    await api.update('/roles/update-role', requestBody, 'PUT');
   } catch (error) {
     throw error;
   }
@@ -67,13 +62,7 @@ export async function updateRole(
 
 export async function removeRoleFromUser(userId: string) {
   try {
-    await api.update(
-      '/roles/remove-role',
-      {
-        userId,
-      },
-      'DELETE',
-    );
+    await api.update('/roles/remove-role', { userId }, 'DELETE');
   } catch (error) {
     throw error;
   }
