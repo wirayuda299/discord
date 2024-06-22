@@ -147,12 +147,7 @@ export default function CreateServerForm() {
                     disabled={isSubmitting}
                     {...field}
                   />
-                  <p className='text-xs font-light leading-relaxed'>
-                    By createing a server, you&apos;re agree to ChatFusion{' '}
-                    <span className='font-semibold text-primary'>
-                      Community Guidelines
-                    </span>
-                  </p>
+
                   <FormMessage className='text-xs text-red-600' />
                 </>
               </FormControl>

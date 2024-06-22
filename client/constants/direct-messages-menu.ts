@@ -4,7 +4,7 @@ export const directMessagesItems = [
     icon: '/general/icons/friend.svg',
   },
   {
-    label: 'nitro',
+    label: 'subscription',
     icon: '/general/icons/nitro.svg',
   },
   {

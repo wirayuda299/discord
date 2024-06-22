@@ -16,7 +16,7 @@ export default function SidebarItem({
 
   const handleClick = useCallback((label: string) => {
     push(`?option=${label}`);
-  }, []);
+  }, [push]);
 
   return (
     <li

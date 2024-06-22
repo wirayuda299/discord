@@ -22,6 +22,7 @@ import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
 import { createError } from '@/utils/error';
 import ServersMembers from '../members';
+import { Suspense } from 'react';
 
 type Props = {
   channelName: string;
@@ -92,66 +93,71 @@ export default function ChannelsHeader({
         )}
       </div>
       <div className='flex-center gap-3 overflow-x-auto'>
-        <ThreadList threads={threads} />
-        <NotificationSettings />
-        <PinnedMessage pinnedMessages={pinnedMessages} type='channel'>
-          <ul className='relative flex max-h-96 flex-col gap-6 overflow-y-auto p-3'>
-            {pinnedMessages?.map((msg) => (
-              <li
-                key={msg?.message_id}
-                className='group flex justify-between rounded-md p-2 hover:bg-foreground hover:brightness-125'
-              >
-                <div className='flex-center gap-2'>
-                  <Image
-                    src={msg.avatar}
-                    width={35}
-                    height={35}
-                    alt='author'
-                    className='size-9 rounded-full object-cover'
-                  />
-                  <div className=''>
-                    <h5 className='flex-center gap-2 truncate text-sm text-white'>
-                      {msg.username}
-                      <span className='text-[10px] text-white'>
-                        {new Date(msg.created_at).toLocaleString()}
-                      </span>
-                    </h5>
-                    <p className='truncate text-sm font-medium text-white'>
-                      {msg.message}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  aria-label='delete'
-                  name='delete'
-                  onClick={() => handleDeletePinnedMessage(msg.message_id)}
-                  title='delete'
-                  className='absolute right-1 hidden size-5 rounded-full bg-foreground text-xs text-white group-hover:block'
+        <Suspense fallback={<div className='w-full min-h-9 rounded bg-foreground brightness-110 animate-pulse'></div>} key={channelId}>
+
+          <ThreadList threads={threads} />
+          <NotificationSettings />
+          <PinnedMessage pinnedMessages={pinnedMessages} type='channel'>
+            <ul className='relative flex max-h-96 flex-col gap-6 overflow-y-auto p-3'>
+              {pinnedMessages?.map((msg) => (
+                <li
+                  key={msg?.message_id}
+                  className='group flex justify-between rounded-md p-2 hover:bg-foreground hover:brightness-125'
                 >
-                  <X size={15} className='mx-auto' />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </PinnedMessage>
-        <ServersMembers serverId={serverId}>
+                  <div className='flex-center gap-2'>
+                    <Image
+                      src={msg.avatar}
+                      width={35}
+                      height={35}
+                      alt='author'
+                      className='size-9 rounded-full object-cover'
+                    />
+                    <div className=''>
+                      <h5 className='flex-center gap-2 truncate text-sm text-white'>
+                        {msg.username}
+                        <span className='text-[10px] text-white'>
+                          {new Date(msg.created_at).toLocaleString()}
+                        </span>
+                      </h5>
+                      <p className='truncate text-sm font-medium text-white'>
+                        {msg.message}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    aria-label='delete'
+                    name='delete'
+                    onClick={() => handleDeletePinnedMessage(msg.message_id)}
+                    title='delete'
+                    className='absolute right-1 hidden size-5 rounded-full bg-foreground text-xs text-white group-hover:block'
+                  >
+                    <X size={15} className='mx-auto' />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </PinnedMessage>
+          <ServersMembers serverId={serverId}>
+            <Image
+              className='min-w-6'
+              src={'/server/icons/member.svg'}
+              width={24}
+              height={24}
+              alt='member'
+            />
+          </ServersMembers>
+          <SearchForm />
+          <Inbox>Channel inbox</Inbox>
           <Image
             className='min-w-6'
-            src={'/server/icons/member.svg'}
+            src={'/general/icons/ask.svg'}
             width={24}
             height={24}
-            alt='member'
+            alt='ask'
           />
-        </ServersMembers>
-        <SearchForm />
-        <Inbox>Channel inbox</Inbox>
-        <Image
-          className='min-w-6'
-          src={'/general/icons/ask.svg'}
-          width={24}
-          height={24}
-          alt='ask'
-        />
+
+        </Suspense>
+
       </div>
     </header>
   );

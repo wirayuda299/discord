@@ -22,34 +22,36 @@ export default async function Sidebar() {
         {directMessagesItems?.map((item) => (
           <SidebarItem key={item.label} icon={item.icon} label={item.label} />
         ))}
+        {conversations.length > 0 && (
+          <>
+            <p className='border-b border-b-gray-1 text-sm uppercase'>
+              Direct messages
+            </p>
 
-        <p className='border-b border-b-gray-1 text-sm uppercase'>
-          Direct messages
-        </p>
+            {conversations?.map(conversation => (
+              <li key={conversation.conversationId}>
+                <Link
+                  aria-label='direct messages'
+                  title='direct messages'
+                  className='group hidden gap-2 rounded-md p-1 hover:bg-foreground hover:brightness-105 md:flex md:items-center'
+                  href={`/direct-messages?userId=${conversation.friendId}&friendId=${conversation?.id}&conversationId=${conversation?.conversationId}`}
+                >
+                  <Image
+                    src={conversation.friendImage}
+                    width={50}
+                    height={50}
+                    alt={conversation.friendUsername}
+                    className='size-12 rounded-full object-cover'
+                  />
+                  <p className='text-lg group-hover:text-white'>
+                    {conversation.friendUsername}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </>
 
-        {conversations?.map((conversation) => {
-          return (
-            <li key={conversation.conversationId}>
-              <Link
-                aria-label='direct messages'
-                title='direct messages'
-                className='group hidden gap-2 rounded-md p-1 hover:bg-foreground hover:brightness-105 md:flex md:items-center'
-                href={`/direct-messages?userId=${conversation.friendId}&friendId=${conversation?.id}&conversationId=${conversation?.conversationId}`}
-              >
-                <Image
-                  src={conversation.friendImage}
-                  width={50}
-                  height={50}
-                  alt={conversation.friendUsername}
-                  className='size-12 rounded-full object-cover'
-                />
-                <p className='text-lg group-hover:text-white'>
-                  {conversation.friendUsername}
-                </p>
-              </Link>
-            </li>
-          );
-        })}
+        )}
       </ul>
 
       <SidebarMobile conversations={conversations} />
