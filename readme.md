@@ -36,6 +36,7 @@ Welcome to the **ChatFusion** project inspired by discord! This repository conta
 - **TailwindCSS**: Utility-first CSS framework.
 - **ShadCN/UI**: A design system built on TailwindCSS.
 - **Clerk**: Authentication and user management.
+- **Zustand**: Small-Fast state management
 
 ### Backend
 - **NestJS**: A progressive Node.js framework for building efficient, reliable, and scalable server-side applications.
