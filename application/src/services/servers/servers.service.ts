@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { ValidationService } from '../validation/validation.service';
 import { DatabaseService } from '../database/database.service';
 import { ImagehandlerService } from '../imagehandler/imagehandler.service';
-import { ThreadsService } from '../threads/threads.service';
+import { MessagesService } from '../messages/messages.service';
 
 const schema = z.object({
   name: z
@@ -27,6 +27,7 @@ export class ServersService {
     private validationService: ValidationService,
     private databaseService: DatabaseService,
     private attachmentService: ImagehandlerService,
+    private messageService: MessagesService
   ) { }
 
   async createServer(
@@ -105,16 +106,15 @@ export class ServersService {
           rows: [audioChannel],
         } = await this.databaseService.pool.query(
           `insert into channels (server_id, type, name)
-        VALUES($1, 'audio', 'general')
-         RETURNING id`,
+           VALUES($1, 'audio', 'general')
+           RETURNING id`,
           [serverId]
         );
 
         const {
           rows: [category2],
         } = await this.databaseService.pool.query(
-          `
-          insert into categories (name, server_id)
+          `insert into categories (name, server_id)
           values('voice', $1)
           returning id`,
           [serverId]
@@ -214,10 +214,9 @@ export class ServersService {
   async updateServerCode(serverId: string) {
     try {
       const res = await this.databaseService.pool.query(
-        `
-      update servers 
-      set invite_code = uuid_generate_v4()
-      where id = $1`,
+        `update servers 
+        set invite_code = uuid_generate_v4()
+        where id = $1`,
         [serverId]
       );
       return {
@@ -330,7 +329,6 @@ export class ServersService {
         error: false,
       };
     } catch (error) {
-
       await this.databaseService.pool.query('rollback');
       throw error;
     }
@@ -369,7 +367,7 @@ export class ServersService {
         JOIN messages AS m ON m.id = cm.message_id
         WHERE cm.channel_id = $1
       `, [channel.id]);
-        const threads = await this.databaseService.pool.query(`  select image_asset_id from threads as t
+        const threads = await this.databaseService.pool.query(`select image_asset_id from threads as t
         join thread_messages as tm on tm.thread_id = t.id 
         join messages as m on m.id = tm.message_id 
         where t.channel_id = $1
@@ -400,6 +398,7 @@ export class ServersService {
         const messageIds = messages.rows.map(msg => msg.message_id).flat();
 
         if (messageIds.length > 0) {
+          // [$1, $2]....
           const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
           try {
 
@@ -558,6 +557,82 @@ export class ServersService {
   }
 
 
+  async leaveServer(serverId: string, userId: string, channels: string[]) {
+    try {
+      const isMember = await this.databaseService.pool.query(`
+          SELECT user_id FROM members WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
+
+      if (isMember.rows.length < 1) {
+        throw new HttpException("Member not found", HttpStatus.NOT_FOUND);
+      }
+
+      const user_roles = await this.databaseService.pool.query(`
+          SELECT r.id, ur.user_id, r.icon_asset_id FROM user_roles as ur 
+          JOIN roles as r ON r.id = ur.role_id
+          WHERE ur.user_id = $1 AND r.server_id = $2`, [userId, serverId]);
+
+      await this.databaseService.pool.query(`BEGIN`);
+
+      if (user_roles.rows.length > 0) {
+        const iconAssetId = user_roles.rows[0]?.icon_asset_id;
+
+        if (iconAssetId) {
+          await this.attachmentService.deleteImage(iconAssetId);
+        }
+
+        await this.databaseService.pool.query(`
+        DELETE FROM user_roles
+        WHERE user_id = $1
+        AND role_id IN (
+          SELECT id FROM roles
+          WHERE server_id = $2)`, [userId, serverId]);
+      }
+
+      for (const channel of channels) {
+        const channelMessages = await this.messageService.getMessageByChannelId(channel, serverId)
+
+
+        const messageIds = channelMessages.filter(message => message.author === userId).map(msg => msg.message_id)
+
+        const allMediaIds = channelMessages.map(msg => msg.media_image_asset_id).filter(Boolean).flat()
+        console.log({ allMediaIds })
+
+        if (allMediaIds.length > 0) {
+          for (const id of allMediaIds) {
+            await this.attachmentService.deleteImage(id);
+          }
+        }
+
+        if (messageIds.length > 0) {
+          const placeholders = messageIds.map((_, index) => `$${index + 1}`).join(',');
+          await this.databaseService.pool.query(`DELETE FROM messages WHERE id IN (${placeholders})`, messageIds);
+        }
+      }
+
+      const serverProfile = await this.databaseService.pool.query(`
+        SELECT avatar_asset_id FROM server_profile WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
+
+      const avatarAssetId = serverProfile.rows[0]?.avatar_asset_id;
+      if (avatarAssetId) {
+        await this.attachmentService.deleteImage(avatarAssetId);
+      }
+
+      await this.databaseService.pool.query(`DELETE FROM server_profile WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
+      await this.databaseService.pool.query(`DELETE FROM members WHERE user_id = $1 AND server_id = $2`, [userId, serverId]);
+
+      await this.databaseService.pool.query(`COMMIT`);
+      return {
+        message: 'Successfully left the server',
+        error: false
+      };
+    } catch (error) {
+      await this.databaseService.pool.query(`ROLLBACK`);
+      console.error("Error during leaveServer:", error);
+      throw error;
+    }
+  }
+
+  // Function to recursively get all replies and nested replies
 
   async updateServerprofile(
     serverId: string,

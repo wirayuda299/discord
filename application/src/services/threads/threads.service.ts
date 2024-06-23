@@ -11,7 +11,7 @@ export class ThreadsService {
     private db: DatabaseService,
     private reactionService: ReactionsService,
     private messageService: MessagesService
-  ) {}
+  ) { }
 
   async sendThreadMessage(
     message: string,
@@ -35,8 +35,6 @@ export class ThreadsService {
         [threadMessage.id, threadId]
       );
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }
@@ -249,7 +247,6 @@ export class ThreadsService {
     imageAssetId: string
   ) {
     try {
-      console.log('reply thread');
 
       await this.db.pool.query('begin');
 

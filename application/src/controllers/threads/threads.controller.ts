@@ -5,7 +5,7 @@ import { ThreadsService } from 'src/services/threads/threads.service';
 
 @Controller('api/v1/threads')
 export class ThreadsController {
-  constructor(private threadService: ThreadsService) {}
+  constructor(private threadService: ThreadsService) { }
 
   @Get()
   getAllThreads(
@@ -19,8 +19,6 @@ export class ThreadsController {
   createThread(@Req() req: Request) {
     const { imageAssetId, message, image, name, userId, messageId, channelId } =
       req.body;
-
-    console.log(req.body);
 
     return this.threadService.createThread(
       messageId,

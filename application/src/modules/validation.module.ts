@@ -1,9 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ValidationService } from '../services/validation/validation.service';
 
-@Module({
-
-})
+@Module({})
 export class ValidationModule {
   static forRoot(): DynamicModule {
     return {

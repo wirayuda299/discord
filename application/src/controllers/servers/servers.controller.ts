@@ -17,7 +17,7 @@ import { ServersService } from 'src/services/servers/servers.service';
 
 @Controller('/api/v1/servers')
 export class ServersController {
-  constructor(private serverService: ServersService) {}
+  constructor(private serverService: ServersService) { }
 
   @Post('/create')
   createServer(
@@ -117,4 +117,11 @@ export class ServersController {
     const { inviteCode, userId, serverId } = req.body;
     return this.serverService.joinServer(inviteCode, userId, serverId);
   }
+
+  @Delete('/leave-server')
+  handleLeaverServer(@Body('userId') userId: string, @Body('serverId') serverid: string, @Body('channels') channels: string[]) {
+
+    return this.serverService.leaveServer(serverid, userId, channels)
+  }
+
 }

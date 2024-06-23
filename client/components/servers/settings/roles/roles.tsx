@@ -16,16 +16,21 @@ import { Button } from '@/components/ui/button';
 import { Role, getAllRoles } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import PulseLoader from '@/components/shared/pulse-loader';
+import { cn } from '@/lib/utils';
 const RoleSettings = dynamic(() => import('./role-settings'));
 
 export default function Roles({
   serverAuthor,
   serverId,
-  styles
+  styles,
+  searchFormStyle,
+  permissionContainerStyle
 }: {
   serverAuthor: string;
   serverId: string;
-  styles?: string
+  styles?: string,
+  permissionContainerStyle?: string
+  searchFormStyle?: string
 }) {
   const { data, isLoading, error } = useFetch('roles', () =>
     getAllRoles(serverId),
@@ -73,7 +78,7 @@ export default function Roles({
             Use roles to group your server members and assign permissions.
           </p>
 
-          <div className='flex-center group mt-5 min-h-20 gap-3 rounded-md bg-background/50 p-5 hover:bg-foreground hover:brightness-110'>
+          <div className={cn('flex-center group mt-5 min-h-20 gap-3 rounded-md bg-background/50 p-5 hover:bg-foreground hover:brightness-110', permissionContainerStyle)}>
             <div className='flex size-8 items-center rounded-full bg-background/30 group-hover:bg-foreground'>
               <Image
                 className='mx-auto'
@@ -93,7 +98,7 @@ export default function Roles({
 
           <div className='mt-5 flex gap-3'>
             <div className='w-full'>
-              <SearchForm styles='max-w-full py-2' placeholder='Search roles' />
+              <SearchForm styles={cn('max-w-full py-2', searchFormStyle)} placeholder='Search roles' />
               <p className='pt-1 text-sm text-gray-2'>
                 Members use the color of the highest role they have on this
                 list. Drag roles to reorder them.{' '}

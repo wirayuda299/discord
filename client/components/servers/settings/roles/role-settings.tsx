@@ -383,7 +383,7 @@ export default function RolesSettings({
                         </FormControl>
                         <div className='flex w-full gap-3 rounded-md bg-background p-3'>
                           <Image
-                            src={'/general/icons/discord.svg'}
+                            src={'/general/icons/logo.svg'}
                             width={30}
                             height={30}
                             alt='discord'

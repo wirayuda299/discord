@@ -5,7 +5,7 @@ import { MembersService } from 'src/services/members/members.service';
 
 @Controller('api/v1/members')
 export class MembersController {
-  constructor(private memberService: MembersService) {}
+  constructor(private memberService: MembersService) { }
 
   @Get()
   getMembers(@Query('serverId') id: string) {
@@ -40,7 +40,6 @@ export class MembersController {
 
   @Get('/without-role')
   getMemberWithNoRole(@Query('serverId') serverId: string) {
-    console.log({ serverId });
 
     return this.memberService.getMembersHasNoRole(serverId);
   }

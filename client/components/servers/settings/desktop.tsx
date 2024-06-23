@@ -46,7 +46,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
     <Dialog>
       <DialogTrigger
         onClick={() => setSelectedSetting('overview')}
-        className='flex w-full items-center justify-between rounded px-2 py-2 !text-gray-2 hover:!bg-primary hover:!text-white'
+        className='flex w-full items-center justify-between rounded px-2 py-2 !text-gray-2 hover:!bg-primary hover:!text-white text-sm'
       >
         <span className='text-sm'>Server settings</span>
         <Cog size={20} />

@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   getServerByCode,
-  getServerById,
   isMemberOrAdmin,
 } from '@/helper/server';
 import { auth } from '@clerk/nextjs';

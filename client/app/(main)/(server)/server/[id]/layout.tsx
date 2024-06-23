@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, useMemo, type ReactNode } from 'react';
 
 import { getAllChannels, getServerById } from '@/helper/server';
 import ChannelItem from '@/components/servers/channels/channel-item';
@@ -22,6 +22,7 @@ export default async function ServerLayout({ params, children }: Props) {
   ]);
 
   if (!server) return notFound();
+  const channels = categories.filter(category => category.channel_type === 'text').map(c => c.channel_id)
 
   return (
     <PermissionsProvider>
@@ -33,7 +34,7 @@ export default async function ServerLayout({ params, children }: Props) {
               <div className='h-8 w-full animate-pulse rounded-md bg-foreground brightness-110'></div>
             }
           >
-            <ServersMenuDesktop server={server} />
+            <ServersMenuDesktop server={server} channels={channels} />
             <ServerMenuMobile server={server} categories={categories} />
           </Suspense>
           {server.banner && server.settings.show_banner_background && (

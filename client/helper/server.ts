@@ -20,6 +20,21 @@ export async function getAllServerCreatedByCurrentUser(
   }
 }
 
+export async function leaveServer(userId: string, serverId: string, channels: string[], channelId?: string) {
+  try {
+    await api.update('/servers/leave-server', { userId, serverId, channels }, 'DELETE')
+    revalidate(`/server/${serverId}`)
+
+    if (channelId) {
+      revalidate(`/server/${serverId}/${channelId}`)
+    }
+
+  } catch (e) {
+    createError(e)
+
+  }
+}
+
 export async function getServerById(id: string) {
   try {
     return await api.getData<Servers>(`/servers/${id}`);

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class ConversationsService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async getUserConversations(userId: string) {
     try {

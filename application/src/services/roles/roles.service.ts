@@ -4,7 +4,7 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class RolesService {
-  constructor(private db: DatabaseService) {}
+  constructor(private db: DatabaseService) { }
 
   async isAllowedToCreateRole(serverId: string, userId: string) {
     const isallowed = await this.db.pool.query(
@@ -125,8 +125,7 @@ export class RolesService {
     try {
       await this.db.pool.query(
         `insert into user_roles(user_id, role_id, permission_id)
-      values($1,$2,$3)
-      `,
+          values($1,$2,$3)`,
         [user_id, role_id, permission_id]
       );
     } catch (error) {
@@ -156,20 +155,16 @@ export class RolesService {
       update roles 
       set name = $1, 
       icon = $2, 
-    role_color = $3, 
-    icon_asset_id = $4
-    where id = $5
-    `,
+      role_color = $3, 
+      icon_asset_id = $4
+      where id = $5`,
         [name, icon, color, icon_asset_id, roleId]
       );
 
       await this.db.pool.query(
-        `
-      update permissions
-      set manage_channel = $1, manage_role=$2, kick_member = $3, ban_member=$4,attach_file=$5, manage_thread=$6, manage_message= $7
-      where server_id = $8
-      
-      `,
+        `update permissions
+          set manage_channel = $1, manage_role=$2, kick_member = $3, ban_member=$4,attach_file=$5, manage_thread=$6, manage_message= $7
+          where server_id = $8`,
         [
           manage_channel,
           manage_role,
@@ -214,8 +209,7 @@ export class RolesService {
     try {
       await this.db.pool.query(
         `delete from user_roles
-        where user_id = $1
-        `,
+         where user_id = $1`,
         [userId]
       );
     } catch (error) {

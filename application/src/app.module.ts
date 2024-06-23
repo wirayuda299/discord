@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { FriendsController } from './controllers/friends/friends.controller';
@@ -51,6 +51,7 @@ import { RolesController } from './controllers/roles/roles.controller';
     RolesController,
   ],
   providers: [
+    DatabaseService,
     UserService,
     ValidationService,
     FriendsService,
@@ -59,7 +60,6 @@ import { RolesController } from './controllers/roles/roles.controller';
     ChannelsService,
     MessagesService,
     InvitationService,
-    DatabaseService,
     ReactionsService,
     ThreadsService,
     ImagehandlerService,

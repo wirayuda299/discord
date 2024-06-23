@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 import {
   DropdownMenu,
@@ -17,11 +19,19 @@ import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
 import UserSettingsDesktop from '../settings/user-settings/desktop';
 import useWindowResize from '@/hooks/useWindowResize';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader, DialogClose } from '@/components/ui/dialog';
 import Roles from '../settings/roles/roles';
 
-export default function ServersMenuDesktop({ server }: { server: Servers }) {
+import { Button } from '@/components/ui/button';
+import { leaveServer } from '@/helper/server';
+import { useState } from 'react';
+
+
+export default function ServersMenuDesktop({ server, channels }: { server: Servers, channels: string[] }) {
   const { permission, errors, loading, userId } = usePermissionsContext();
+  const router = useRouter()
+  const params = useParams()
+  const [isLoading, setIsLoading] = useState(false)
 
   const { windowWidth } = useWindowResize();
   if (windowWidth < 768) return null;
@@ -32,6 +42,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
     );
 
   if (errors) return <p>{errors.message}</p>;
+  console.log(channels)
 
   return (
     <DropdownMenu>
@@ -45,7 +56,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
         <ChevronDown size={18} className='text-gray-1' />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-full min-w-[250px] space-y-1 px-2 !border-none bg-[#111214]'>
-        <DropdownMenuItem className='flex items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
+        <DropdownMenuItem className='flex items-center text-sm justify-between !text-gray-2 hover:!bg-primary hover:!text-white'>
           <p>Server boost</p>
           <Image
             src={'/server/icons/boost.svg'}
@@ -60,7 +71,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
           inviteCode={server.invite_code}
           serverName={server.name}
         >
-          <DropdownMenuItem className='flex items-center justify-between !text-primary/80 hover:!bg-primary hover:!text-white'>
+          <DropdownMenuItem className='flex items-center justify-between !text-primary/80 hover:!bg-primary hover:!text-white text-sm'>
             <p>Invite user</p>
             <Image
               src={'/server/icons/user-plus.svg'}
@@ -81,7 +92,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
             serverId={server.id}
             type={'text'}
           >
-            <div className='group flex cursor-pointer items-center justify-between rounded px-2 py-2 text-sm !text-gray-2 hover:!bg-primary hover:!text-white'>
+            <div className='group text-sm flex cursor-pointer items-center justify-between rounded px-2 py-2  !text-gray-2 hover:!bg-primary hover:!text-white'>
               Create channel
               <div className='flex size-[18px] items-center justify-center rounded-full bg-[#b5bac1] group-hover:bg-white'>
                 <Plus size={20} className='text-gray-1' />
@@ -94,7 +105,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
           (permission && permission.manage_role) ? (
 
           <Dialog>
-            <DialogTrigger className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white w-full rounded-sm px-2 py-2 text-sm'>
+            <DialogTrigger className='flex cursor-pointer items-center justify-between !text-gray-2 hover:!bg-primary hover:!text-white w-full text-sm rounded-sm px-2 py-2 '>
               <p>Create role</p>
               <Image
                 src={'/server/icons/guards.svg'}
@@ -104,7 +115,7 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
               />
             </DialogTrigger>
             <DialogContent className='w-full p-0 border-none max-h-[500px] h-full overflow-hidden'>
-              <Roles serverId={server.id} serverAuthor={server.owner_id} styles='!hidden' />
+              <Roles serverId={server.id} serverAuthor={server.owner_id} styles='!hidden' permissionContainerStyle='bg-foreground/50' searchFormStyle='bg-foreground/50 py-1.5' />
             </DialogContent>
           </Dialog>
         ) : null}
@@ -113,16 +124,48 @@ export default function ServersMenuDesktop({ server }: { server: Servers }) {
         <DropdownMenuSeparator className='border-b border-b-background' />
 
         {userId && userId !== server.owner_id && (
-          <DropdownMenuItem className='group flex items-center justify-between !text-red-600 hover:!bg-red-600 hover:!text-white'>
-            <p>Leave server</p>
-            <Image
-              className='group-hover:brightness-0 group-hover:invert'
-              src={'/server/icons/leave.svg'}
-              width={20}
-              height={20}
-              alt='leave server'
-            />
-          </DropdownMenuItem>
+          <Dialog>
+            <DialogTrigger className='group flex items-center justify-between !text-red-600 hover:!bg-red-600 hover:!text-white w-full rounded px-2 py-1 mt-1 text-sm'>
+              <p>Leave server</p>
+              <Image
+                className='group-hover:brightness-0 group-hover:invert'
+                src={'/server/icons/leave.svg'}
+                width={20}
+                height={20}
+                alt='leave server'
+              />
+
+            </DialogTrigger>
+            <DialogContent className='bg-black border-none'>
+              <DialogHeader className='justify-center items-center'>
+                <DialogTitle className='text-white'>Are you sure want to leave this server?</DialogTitle>
+                <DialogDescription>
+                  You will lost all your roles, permission and messages in this server.
+                </DialogDescription>
+
+              </DialogHeader>
+              <div className='flex-center justify-between mt-5'>
+                <DialogClose className='w-full'>
+                  Cancel
+                </DialogClose>
+                <Button
+                  disabled={isLoading}
+                  onClick={async () => {
+                    setIsLoading(true)
+                    await leaveServer(userId, server.id, channels, params?.channel_id as string).then(() => {
+                      toast.success('Successfully leave server')
+                      router.push('/direct-messages')
+                    })
+                    setIsLoading(false)
+                  }
+                  }
+                  className='w-full !bg-red-600'>
+                  Leave
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
         )}
       </DropdownMenuContent>
     </DropdownMenu>

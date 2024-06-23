@@ -59,8 +59,6 @@ export class UserService {
         error: false,
       };
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }

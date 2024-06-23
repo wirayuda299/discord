@@ -4,25 +4,21 @@ import {
   Get,
   Put,
   Param,
-  Patch,
   Post,
   Query,
   Req,
-  Logger
 } from '@nestjs/common';
 import { Request } from 'express';
 import { UserService } from '../../services/user/user.service';
 
 @Controller('/api/v1/user')
 export class UserController {
-  constructor(private userService: UserService) {}
-  private logger= new Logger()
+  constructor(private userService: UserService) { }
 
 
   @Put('/update')
   updateUser(@Req() req: Request) {
     const { name, id, bio, image, imageAssetId } = req.body;
-   this.logger.log("Update user payload -> ", req.body) 
     return this.userService.updateUser(name, id, bio, image, imageAssetId);
   }
 
