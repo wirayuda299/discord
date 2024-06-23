@@ -1,6 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 import { ConfigModule } from '@nestjs/config';
 
 import { FriendsController } from './controllers/friends/friends.controller';
