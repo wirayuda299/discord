@@ -149,8 +149,6 @@ export class MessagesService {
         throw e;
       }
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }
@@ -336,15 +334,15 @@ export class MessagesService {
     try {
       const pinnedMessages = await this.db.pool.query(
         `select
-        pm.message_id as message_id,
-        pm.channel_id as channel_id, 
-        m."content" as message, 
-        m.image_url as image,
-        sp.user_id as pinned_by,
-        sp.username as username,
-        sp.avatar as avatar,
-        pm.created_at as created_at
-        from channel_pinned_messages as pm
+          pm.message_id as message_id,
+          pm.channel_id as channel_id, 
+          m."content" as message, 
+          m.image_url as image,
+          sp.user_id as pinned_by,
+          sp.username as username,
+          sp.avatar as avatar,
+          pm.created_at as created_at
+          from channel_pinned_messages as pm
           join messages as m on m.id = pm.message_id
           join server_profile as sp on sp.user_id = pm.pinned_by and sp.server_id = $1
           where pm.channel_id = $2`,
@@ -370,10 +368,10 @@ export class MessagesService {
           u.image as avatar,
           u.username as username,
           ppm.created_at as created_at 
-        from personal_pinned_messages as ppm
-        join messages as m on m.id = ppm.message_id
-        join users as u on ppm.pinned_by = u.id
-        where ppm.conversation_id = $1 `,
+          from personal_pinned_messages as ppm
+          join messages as m on m.id = ppm.message_id
+          join users as u on ppm.pinned_by = u.id
+          where ppm.conversation_id = $1 `,
         [conversationId]
       );
       return {
@@ -431,7 +429,6 @@ export class MessagesService {
     image_asset_id: string = '',
     recipientId: string
   ) {
-    console.log({ content, userId, image_url, image_asset_id, recipientId })
     try {
       await this.db.pool.query(`BEGIN`);
 

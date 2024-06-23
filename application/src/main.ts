@@ -3,7 +3,6 @@ import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ValidationFilter } from './common/errorhandler/error-handler';
 
 async function bootstrap() {
@@ -15,11 +14,10 @@ async function bootstrap() {
       credentials: true,
     },
   });
-  const loggerService = app.get(WINSTON_MODULE_NEST_PROVIDER);
-  app.useLogger(loggerService);
+
+
   app.use(cookieParser());
   app.use(compression());
-  // app.useGlobalGuards(new AuthGuard());
   app.useGlobalFilters(new ValidationFilter());
 
   await app.listen(process.env.PORT || 3001);

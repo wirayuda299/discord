@@ -1,8 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 import { ConfigModule } from '@nestjs/config';
+
 import { FriendsController } from './controllers/friends/friends.controller';
 import { UserController } from './controllers/user/user.controller';
-
 import { ChannelsController } from './controllers/channels/channels.controller';
 import { FileUploadController } from './controllers/file-upload/file-upload.controller';
 import { ServersController } from './controllers/servers/servers.controller';
@@ -28,21 +30,12 @@ import { MembersService } from './services/members/members.service';
 import { MembersController } from './controllers/members/members.controller';
 import { RolesService } from './services/roles/roles.service';
 import { RolesController } from './controllers/roles/roles.controller';
-import { LogMiddleware } from './common/logger.middleware';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
-/* import { ValidationModule } from './modules/validation.module'; */
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-    }),
-    WinstonModule.forRoot({
-      format: winston.format.json(),
-      level: 'debug',
-      transports: [new winston.transports.Console()],
     }),
   ],
   controllers: [
@@ -77,12 +70,6 @@ import * as winston from 'winston';
     RolesService,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LogMiddleware).forRoutes({
-      path: "/api/*",
-      method: RequestMethod.ALL
-    })
-  }
+export class AppModule {
 
 }

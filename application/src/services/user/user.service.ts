@@ -8,7 +8,7 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class UserService {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(private databaseService: DatabaseService) { }
 
   async createUser(id: string, name: string, email: string, image: string) {
     try {
@@ -108,8 +108,6 @@ export class UserService {
         };
       }
     } catch (error) {
-      console.log(error);
-
       throw error;
     }
   }

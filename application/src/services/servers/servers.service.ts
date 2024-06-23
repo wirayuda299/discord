@@ -21,18 +21,12 @@ const schema = z.object({
   logo_asset_id: z.string().min(10),
 });
 
-
-// TODO: fix issue where all images in roles icon (if any) and images in thread messages not deleted when server has been deleted
-
-
-
 @Injectable()
 export class ServersService {
   constructor(
     private validationService: ValidationService,
     private databaseService: DatabaseService,
     private attachmentService: ImagehandlerService,
-    private threadservice: ThreadsService
   ) { }
 
   async createServer(

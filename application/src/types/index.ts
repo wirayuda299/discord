@@ -10,6 +10,7 @@ export type Permission = {
   manage_thread: boolean;
   manage_message: boolean;
 };
+
 export interface Role {
   id: string;
   name: string;
