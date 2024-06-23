@@ -46,8 +46,8 @@ Welcome to the **ChatFusion** project inspired by discord! This repository conta
     - Create(text and audio), update, and delete (coming soon) channels within a server.
   - Threads Management
     - Create, update(coming soon), and delete(coming soon) threads within channels.
- - Server profile 
-   - View or edit server profile.
+  - Server profile 
+    - View or edit server profile.
   - Voice Channels
     - Create and join voice channels for real-time voice communication (coming soon).
 
