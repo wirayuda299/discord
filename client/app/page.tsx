@@ -14,14 +14,14 @@ export default function Home() {
           <h2 className="font-bold  text-2xl hidden md:block">ChatFuzion</h2>
 
         </div>
-        <Link className="w-24 bg-white font-semibold h-10 text-sm rounded-full text-black text-center flex-center justify-center" href={'/direct-message'}>
+        <Link className="w-24 bg-white font-semibold h-10 text-sm rounded-full text-black text-center flex-center justify-center" href={'/direct-messages'}>
           Start Chat
         </Link>
       </header>
 
       <section className="grid max-lg:grid-cols-1 grid-cols-2 text-white gap-10 md:gap-5 justify-center items-center min-h-[calc(100vh-100px)] mx-auto pt-5 ">
         <div className="max-w-[520px] flex flex-col gap-3">
-          <h1 className="md:text-5xl text-3xl text-balance font-extrabold pb-2 ">
+          <h1 className="md:text-6xl text-3xl text-balance font-extrabold pb-2 ">
             Bringing People Together Through Fun and Interactive Chats
           </h1>
           <p className="text-sm md:text-base text-white">
