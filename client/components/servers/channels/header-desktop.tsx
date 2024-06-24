@@ -4,6 +4,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { ChevronRight, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
+import { Suspense } from 'react';
 
 const NotificationSettings = dynamic(
   () => import('@/components/servers/notification-settings'),
@@ -22,7 +23,7 @@ import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
 import { createError } from '@/utils/error';
 import ServersMembers from '../members';
-import { Suspense } from 'react';
+
 
 type Props = {
   channelName: string;
@@ -95,7 +96,7 @@ export default function ChannelsHeader({
       <div className='flex-center gap-3 overflow-x-auto'>
         <Suspense fallback={<div className='w-full min-h-9 rounded bg-foreground brightness-110 animate-pulse'></div>} key={channelId}>
 
-          <ThreadList threads={threads} />
+          <ThreadList threads={threads} serverId={serverId} channelId={channelId} />
           <NotificationSettings />
           <PinnedMessage pinnedMessages={pinnedMessages} type='channel'>
             <ul className='relative flex max-h-96 flex-col gap-6 overflow-y-auto p-3'>

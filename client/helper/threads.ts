@@ -54,3 +54,16 @@ export async function updateThread(serverId: string, userId: string, threadId: s
     createError(error)
   }
 }
+
+
+export async function deleteThread(threadId: string, userId: string, reloadMessage: () => void, pathname: string, serverId: string) {
+  try {
+    await api.update('/threads/delete', { threadId, userId, serverId }, "DELETE").then(() => {
+      toast.success("Thread successfully deleted")
+      reloadMessage()
+      revalidate(pathname)
+    })
+  } catch (error) {
+    createError(error)
+  }
+}

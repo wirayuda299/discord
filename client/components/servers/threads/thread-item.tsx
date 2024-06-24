@@ -1,35 +1,44 @@
 import Image from "next/image";
-import { Pencil } from "lucide-react";
-import { FormEvent, useRef, useState } from "react";
-import { useParams, usePathname } from "next/navigation";
+import { Pencil, Trash } from "lucide-react";
+import { FormEvent, useCallback, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 
-import { AllThread, updateThread } from "@/helper/threads";
+import { AllThread, deleteThread, updateThread } from "@/helper/threads";
 import { getCreatedDate } from "@/utils/date";
 import { Input } from "@/components/ui/input";
-import { useSocketStore } from "@/providers";
+import type { Socket } from "socket.io-client";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
+type Props = {
+  socket: Socket | null,
+  thread: AllThread,
+  serverId: string,
+  channelId: string
+}
 
-
-export default function ThreadItem({ thread }: { thread: AllThread }) {
+export default function ThreadItem({ thread, serverId, channelId, socket }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { userId } = useAuth()
   const threadNameRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
-  const params = useParams()
-  const socket = useSocketStore(state => state.socket)
 
+  const reloadMessage = useCallback(() => {
+    socket?.emit('get-channel-message', {
+      serverId,
+      channelId
+    })
+  }, [])
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault()
     if (!threadNameRef.current) return
 
-    await updateThread(params.id as string, userId!, thread.thread_id, threadNameRef.current.value, pathname)
+    await updateThread(serverId, userId!, thread.thread_id, threadNameRef.current.value, pathname)
     setIsOpen(false)
-    socket?.emit('get-channel-message', {
-      serverId: params.id as string,
-      channelId: params.channel_id as string
-    })
+    reloadMessage()
   }
+
   return (
     <>
       {isOpen ? (
@@ -69,12 +78,38 @@ export default function ThreadItem({ thread }: { thread: AllThread }) {
 
             </div>
             {userId && userId === thread.author && (
+              <div className="flex-center gap-2">
+                <button onClick={() => setIsOpen(prev => !prev)} className="group-hover:opacity-100 opacity-0">
+                  <Pencil size={17} className='text-gray-2' />
+                </button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="group-hover:opacity-100 opacity-0">
+                      <Trash size={17} className='text-red-600' />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="border-none bg-black">
+                    <DialogHeader>
+                      <DialogTitle className="text-center text-white">Are you sure want to delete this thread?</DialogTitle>
+                      <DialogDescription className="text-xs text-center">
+                        This action will permanently delete this thread and all thread messages including all media.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="w-full flex-center">
+                      <DialogClose className="w-full">Cancel</DialogClose>
+                      <Button
+                        onClick={() => deleteThread(thread.thread_id, userId!, reloadMessage, pathname, serverId).then(() => {
+                          setIsOpen(false)
+                        })}
+                        className="!bg-red-600 w-full">
+                        Delete
 
-              <button onClick={() => setIsOpen(prev => !prev)} className="group-hover:opacity-100 opacity-0">
-                <Pencil size={17} className='text-gray-2' />
-              </button>
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-
+              </div>
             )}
           </div>
         </div>

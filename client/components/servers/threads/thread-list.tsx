@@ -7,9 +7,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AllThread } from '@/helper/threads';
 import ThreadItem from './thread-item';
+import { useSocketStore } from '@/providers';
 
 
-export default function ThreadList({ threads = [] }: { threads: AllThread[] }) {
+export default function ThreadList({ threads = [], serverId, channelId }: { threads: AllThread[], serverId: string, channelId: string }) {
+  const socket = useSocketStore(state => state.socket)
+
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -70,7 +74,12 @@ export default function ThreadList({ threads = [] }: { threads: AllThread[] }) {
           ) : (
             <div className='divide-y divide-gray-1'>
               {threads?.map((thread) => (
-                <ThreadItem thread={thread} key={thread.thread_id} />
+                <ThreadItem
+                  thread={thread}
+                  key={thread.thread_id}
+                  serverId={serverId}
+                  channelId={channelId}
+                  socket={socket} />
               ))}
             </div>
           )}

@@ -4,13 +4,15 @@ import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from 'src/common/utils/groupMessageByEmoji';
 import { ReactionsService } from '../reactions/reactions.service';
 import { MessagesService } from '../messages/messages.service';
+import { ImagehandlerService } from '../imagehandler/imagehandler.service';
 
 @Injectable()
 export class ThreadsService {
   constructor(
     private db: DatabaseService,
     private reactionService: ReactionsService,
-    private messageService: MessagesService
+    private messageService: MessagesService,
+    private attachementService: ImagehandlerService
   ) { }
 
   async sendThreadMessage(
@@ -248,14 +250,51 @@ export class ThreadsService {
         message: "Thread has successfully updated",
         error: false
       }
-
-
-
-
     } catch (error) {
       throw error
     }
   }
+
+
+  async deleteThread(threadId: string, userId: string, serverId: string) {
+    try {
+      const thread = await this.db.pool.query(`SELECT id, author FROM threads WHERE id = $1`, [threadId]);
+      if (thread.rows.length < 1) {
+        throw new HttpException('Thread not found', HttpStatus.NOT_FOUND);
+      }
+      const { author } = thread.rows[0];
+      if (author !== userId) {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+
+      await this.db.pool.query(`BEGIN`);
+      const messages = await this.getThreadMessage(threadId, serverId);
+      const messageIds = messages.map(msg => msg.message_id).flat();
+      const mediaIds = messages.map(msg => msg.media_image_asset_id).filter(Boolean).flat();
+      console.log(mediaIds)
+      if (messageIds.length > 0) {
+        const placeholders = messageIds.map((_, i) => `$${i + 1}`).join(',');
+        await this.db.pool.query(`DELETE FROM messages WHERE id IN (${placeholders})`, messageIds);
+      }
+
+      if (mediaIds.length > 0) {
+        for (const id of mediaIds) {
+          await this.attachementService.deleteImage(id);
+        }
+      }
+
+      await this.db.pool.query(`DELETE FROM threads WHERE id = $1`, [threadId]);
+      await this.db.pool.query(`COMMIT`);
+      return {
+        message: 'Thread successfully deleted',
+        error: false
+      };
+    } catch (error) {
+      await this.db.pool.query(`ROLLBACK`);
+      throw error;
+    }
+  }
+
   async getAllThreads(channelId: string, serverId: string) {
     try {
       const allThreads = await this.db.pool.query(

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Query, Req } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put, Query, Req, Body } from '@nestjs/common';
 import { Request } from 'express';
 
 import { ThreadsService } from 'src/services/threads/threads.service';
@@ -34,7 +34,15 @@ export class ThreadsController {
   @Put('/update')
   updateThread(@Req() req: Request) {
     const { userId, threadId, threadName } = req.body
-    console.log(req.body)
     return this.threadService.updateThread(threadId, userId, threadName)
+  }
+
+  @Delete('/delete')
+  deleteThread(
+    @Body('threadId') threadId: string,
+    @Body('userId') id: string,
+    @Body('serverId') serverId: string
+  ) {
+    return this.threadService.deleteThread(threadId, id, serverId)
   }
 }
