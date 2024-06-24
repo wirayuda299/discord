@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Query, Req } from '@nestjs/common';
 import { Request } from 'express';
 
 import { ThreadsService } from 'src/services/threads/threads.service';
@@ -29,5 +29,12 @@ export class ThreadsController {
       channelId,
       name
     );
+  }
+
+  @Put('/update')
+  updateThread(@Req() req: Request) {
+    const { userId, threadId, threadName } = req.body
+    console.log(req.body)
+    return this.threadService.updateThread(threadId, userId, threadName)
   }
 }

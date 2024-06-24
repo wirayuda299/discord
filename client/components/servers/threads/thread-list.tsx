@@ -6,7 +6,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AllThread } from '@/helper/threads';
-import { getCreatedDate } from '@/utils/date';
+import ThreadItem from './thread-item';
+
 
 export default function ThreadList({ threads = [] }: { threads: AllThread[] }) {
   return (
@@ -67,29 +68,9 @@ export default function ThreadList({ threads = [] }: { threads: AllThread[] }) {
               </p>
             </div>
           ) : (
-            <div>
+            <div className='divide-y divide-gray-1'>
               {threads?.map((thread) => (
-                <div
-                  key={thread.thread_id}
-                  className='flex flex-col gap-1 p-2 hover:bg-foreground'
-                >
-                  <p className='text-sm font-medium text-gray-2'>
-                    {thread.thread_name}
-                  </p>
-                  <div className='flex-center gap-2 text-gray-2'>
-                    <Image
-                      src={thread.avatar}
-                      width={25}
-                      height={25}
-                      alt='avatar'
-                      className='size-5 rounded-full object-cover'
-                    />
-                    <h4 className='text-gray-2'>{thread.username}</h4> &#x2022;
-                    <span className='text-xs font-semibold text-gray-2'>
-                      {getCreatedDate(new Date(thread.created_at))}
-                    </span>
-                  </div>
-                </div>
+                <ThreadItem thread={thread} key={thread.thread_id} />
               ))}
             </div>
           )}

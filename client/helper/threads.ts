@@ -1,6 +1,10 @@
 import { ApiRequest } from '@/utils/api';
+import { revalidate } from '@/utils/cache';
+import { createError } from '@/utils/error';
+import { toast } from 'sonner';
 
 const api = new ApiRequest();
+
 export type AllThread = {
   thread_id: string;
   message_id: string;
@@ -22,5 +26,31 @@ export async function getAllThreads(
     );
   } catch (error) {
     throw error;
+  }
+}
+
+export async function updateThread(serverId: string, userId: string, threadId: string, threadName: string, pathname: string) {
+  try {
+    if (!userId) {
+      toast.error("Unauthorized")
+      return
+    }
+    if (!threadName) {
+      toast.error("Thread name is required")
+      return
+    }
+    if (!threadId) {
+      toast.error("Thread ID is required")
+      return
+    }
+    await api.update('/threads/update', {
+      serverId, userId, threadId, threadName
+    }, "PUT").then(() => {
+
+      toast.success("Thread has been updated")
+      revalidate(pathname)
+    })
+  } catch (error) {
+    createError(error)
   }
 }

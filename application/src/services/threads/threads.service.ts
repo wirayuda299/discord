@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
 import { groupReactionsByEmoji } from 'src/common/utils/groupMessageByEmoji';
@@ -38,7 +38,20 @@ export class ThreadsService {
       throw error;
     }
   }
-
+  async isAllowedToManageThread(serverId: string, userId: string) {
+    const isallowed = await this.db.pool.query(
+      `SELECT p.manage_channel
+        FROM permissions p
+        JOIN role_permissions rp ON p.id = rp.permission_id
+        JOIN user_roles ur ON rp.role_id = ur.role_id
+        JOIN members m ON ur.user_id = m.user_id
+        WHERE m.user_id = $1
+        AND m.server_id = $2
+        AND p.manage_thread = true`,
+      [serverId, userId]
+    );
+    return isallowed.rows;
+  }
   async createThread(
     message_id: string,
     user_id: string,
@@ -80,11 +93,11 @@ export class ThreadsService {
     }
   }
 
-  getReplies = async (
+  async getReplies(
     message: any,
     serverId: string,
     messagesWithReactions: any[]
-  ) => {
+  ) {
     const reactions = await this.reactionService.getReactions(
       message.message_id
     );
@@ -211,6 +224,38 @@ export class ThreadsService {
     }
   }
 
+  async updateThread(threadId: string, userId: string, threadName: string) {
+
+    try {
+      if (!threadId) {
+        throw new HttpException('Thread ID is required', HttpStatus.BAD_REQUEST)
+      }
+
+      if (!threadName) {
+        throw new HttpException("Thread name is required", HttpStatus.BAD_REQUEST)
+      }
+
+      const thread = await this.db.pool.query(`select id, author from threads where id = $1`, [threadId])
+      if (thread.rows.length < 1) {
+        throw new HttpException("Thread not found", HttpStatus.NOT_FOUND)
+      }
+      const { author } = thread.rows[0]
+      if (author !== userId) {
+        throw new HttpException("You are not allowed to edit this thread", HttpStatus.UNAUTHORIZED)
+      }
+      await this.db.pool.query(`update threads set name = $1 where id = $2`, [threadName, threadId])
+      return {
+        message: "Thread has successfully updated",
+        error: false
+      }
+
+
+
+
+    } catch (error) {
+      throw error
+    }
+  }
   async getAllThreads(channelId: string, serverId: string) {
     try {
       const allThreads = await this.db.pool.query(
