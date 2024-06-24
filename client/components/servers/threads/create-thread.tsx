@@ -42,10 +42,6 @@ export default function CreateThread({
     // @ts-ignore
     const message = e.target.message.value;
 
-    if (!message) {
-      toast.message('Please select a message to start create thread');
-      return;
-    }
 
     if (!threadName || !message) {
       toast.error('Please add thread name and message');

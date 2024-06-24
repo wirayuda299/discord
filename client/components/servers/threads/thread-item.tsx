@@ -3,11 +3,11 @@ import { Pencil, Trash } from "lucide-react";
 import { FormEvent, useCallback, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import type { Socket } from "socket.io-client";
 
 import { AllThread, deleteThread, updateThread } from "@/helper/threads";
 import { getCreatedDate } from "@/utils/date";
 import { Input } from "@/components/ui/input";
-import type { Socket } from "socket.io-client";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Thread } from "@/types/messages";
@@ -26,6 +26,7 @@ export default function ThreadItem({ thread, serverId, channelId, socket, select
   const { userId } = useAuth()
   const threadNameRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const reloadMessage = useCallback(() => {
     socket?.emit('get-channel-message', {
@@ -33,6 +34,7 @@ export default function ThreadItem({ thread, serverId, channelId, socket, select
       channelId
     })
   }, [])
+
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault()
     if (!threadNameRef.current) return
@@ -40,6 +42,19 @@ export default function ThreadItem({ thread, serverId, channelId, socket, select
     await updateThread(serverId, userId!, thread.thread_id, threadNameRef.current.value, pathname)
     setIsOpen(false)
     reloadMessage()
+  }
+
+  const handleDelete = async () => {
+    setIsSubmitting(true)
+    await deleteThread(thread.thread_id, userId!, reloadMessage, pathname, serverId)
+      .then(() => {
+        setIsOpen(false)
+        if (selectedThread) {
+          reset()
+        }
+      })
+    setIsSubmitting(false)
+
   }
 
   return (
@@ -101,12 +116,8 @@ export default function ThreadItem({ thread, serverId, channelId, socket, select
                     <div className="w-full flex-center">
                       <DialogClose className="w-full">Cancel</DialogClose>
                       <Button
-                        onClick={() => deleteThread(thread.thread_id, userId!, reloadMessage, pathname, serverId).then(() => {
-                          setIsOpen(false)
-                          if (selectedThread) {
-                            reset()
-                          }
-                        })}
+                        disabled={isSubmitting}
+                        onClick={handleDelete}
                         className="!bg-red-600 w-full">
                         Delete
 
