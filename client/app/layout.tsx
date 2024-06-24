@@ -61,7 +61,7 @@ export default function RootLayout({
       <html lang='en'>
         <body
           className={
-            ggsans.className + 'h-full w-full overflow-hidden text-secondary'
+            ggsans.className + 'h-full w-full bg-foreground overflow-hidden text-secondary'
           }
         >
           <ClerkLoading>
@@ -69,7 +69,7 @@ export default function RootLayout({
           </ClerkLoading>
           <ClerkLoaded>
             <SocketProvider>
-              <div className='w-full max-w-screen-2xl !overflow-hidden bg-black text-secondary md:bg-foreground'>
+              <div className='w-full !overflow-hidden bg-black text-secondary md:bg-foreground'>
                 {children}
               </div>
             </SocketProvider>

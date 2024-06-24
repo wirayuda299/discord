@@ -10,7 +10,7 @@ export default async function MainLayout({
   children: ReactNode;
 }) {
   return (
-    <main className='flex h-full w-full overflow-hidden'>
+    <main className='flex h-full w-full max-w-screen-2xl mx-auto overflow-hidden'>
       <aside className='flex h-dvh w-full min-w-20 max-w-20 flex-col place-items-center overflow-y-auto border-r border-foreground bg-black py-3 md:h-screen md:bg-background'>
         <Link
           aria-label='direct messages'
