@@ -7,11 +7,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AllThread } from '@/helper/threads';
 import ThreadItem from './thread-item';
-import { useSocketStore } from '@/providers';
+import { useServerStates, useSocketStore } from '@/providers';
 
 
 export default function ThreadList({ threads = [], serverId, channelId }: { threads: AllThread[], serverId: string, channelId: string }) {
   const socket = useSocketStore(state => state.socket)
+  const { selectedThread, setSelectedThread } = useServerStates(state => ({
+    selectedThread: state.selectedThread,
+    setSelectedThread: state.setSelectedThread
+  }))
+
+  const reset = () => setSelectedThread(null)
 
 
   return (
@@ -75,6 +81,8 @@ export default function ThreadList({ threads = [], serverId, channelId }: { thre
             <div className='divide-y divide-gray-1'>
               {threads?.map((thread) => (
                 <ThreadItem
+                  selectedThread={selectedThread}
+                  reset={reset}
                   thread={thread}
                   key={thread.thread_id}
                   serverId={serverId}

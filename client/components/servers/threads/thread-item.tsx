@@ -10,15 +10,18 @@ import { Input } from "@/components/ui/input";
 import type { Socket } from "socket.io-client";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Thread } from "@/types/messages";
 
 type Props = {
   socket: Socket | null,
   thread: AllThread,
   serverId: string,
   channelId: string
+  reset: () => void
+  selectedThread: Thread | null
 }
 
-export default function ThreadItem({ thread, serverId, channelId, socket }: Props) {
+export default function ThreadItem({ thread, serverId, channelId, socket, selectedThread, reset }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const { userId } = useAuth()
   const threadNameRef = useRef<HTMLInputElement>(null)
@@ -100,6 +103,9 @@ export default function ThreadItem({ thread, serverId, channelId, socket }: Prop
                       <Button
                         onClick={() => deleteThread(thread.thread_id, userId!, reloadMessage, pathname, serverId).then(() => {
                           setIsOpen(false)
+                          if (selectedThread) {
+                            reset()
+                          }
                         })}
                         className="!bg-red-600 w-full">
                         Delete
