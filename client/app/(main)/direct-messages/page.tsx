@@ -20,10 +20,15 @@ type Props = {
 };
 
 export default async function DirectMessages({ searchParams }: Props) {
-  const friend = await getFriend(searchParams.friendId, searchParams.userId);
-  const pinnedMessages = await getPersonalPinnedMessages(
-    searchParams.conversationId || '',
-  );
+
+  const [friend, pinnedMessages] = await Promise.all([
+
+    getFriend(searchParams.friendId, searchParams.userId),
+    getPersonalPinnedMessages(
+      searchParams.conversationId || '',
+    )
+
+  ])
 
   return (
     <div className='flex w-full'>
