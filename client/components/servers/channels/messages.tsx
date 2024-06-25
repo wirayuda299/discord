@@ -2,7 +2,6 @@ import dynamic from 'next/dynamic';
 import { useParams, usePathname } from 'next/navigation';
 import type { Socket } from 'socket.io-client';
 
-import PulseLoader from '@/components/shared/pulse-loader';
 import { Message, Thread } from '@/types/messages';
 import { useCallback } from 'react';
 

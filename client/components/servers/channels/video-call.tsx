@@ -50,7 +50,7 @@ export default function VideoCall({ room, serverId }: { room: string; serverId: 
       token={token}
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
       data-lk-theme='default'
-      className='!fixed inset-x-0 top-0 z-50 md:!static md:z-0'
+      className='!fixed inset-x-0 top-0 min-h-dvh md:min-h-screen overflow-y-auto z-50 md:!static md:z-0'
     >
       <MyVideoConference />
       <RoomAudioRenderer />
