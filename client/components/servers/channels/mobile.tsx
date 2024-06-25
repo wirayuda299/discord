@@ -9,19 +9,21 @@ import ChannelInfoMobile from './channel-info-mobile';
 import { Message, Thread } from '@/types/messages';
 import { cn } from '@/lib/utils';
 
+type Props = {
+  serverId: string;
+  socket: Socket | null;
+  messages: Message[];
+  thread: Thread | null;
+  channelId: string
+}
+
 export default function ChannelDetailMobile({
   serverId,
   socket,
   messages,
   thread,
   channelId
-}: {
-  serverId: string;
-  socket: Socket | null;
-  messages: Message[];
-  thread: Thread | null;
-  channelId: string
-}) {
+}: Props) {
   const { selectedChannel, setSelectedChannel, selectedThread, setSelectedThread } = useServerStates((state) => ({
     selectedChannel: state.selectedChannel,
     setSelectedChannel: state.setSelectedChannel,

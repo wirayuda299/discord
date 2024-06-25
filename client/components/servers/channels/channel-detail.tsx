@@ -9,10 +9,11 @@ import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
 import PulseLoader from "@/components/shared/pulse-loader"
 import useWindowResize from '@/hooks/useWindowResize';
+
 const ChannelsMessages = dynamic(() => import('./messages'), { ssr: false });
 const ChannelDetailMobile = dynamic(() => import('./mobile'), { ssr: false });
 const ChannelsHeader = dynamic(() => import('./header-desktop'), { ssr: false })
-
+const VideoCall = dynamic(() => import('./video-call'), { ssr: false })
 
 type Props = {
   channelName: string;
@@ -20,6 +21,7 @@ type Props = {
   serverId: string;
   threads: AllThread[];
   pinnedMessages: PinnedMessageType[];
+  channel_type: string
 };
 
 export default function ChannelsDetail(props: Props) {
@@ -47,33 +49,46 @@ export default function ChannelsDetail(props: Props) {
 
   return (
     <>
-      {windowWidth >= 768 ? (
-        <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
-          <ChannelsHeader
-            channelId={props.channelId}
-            serverId={props.serverId}
-            channelName={props.channelName}
-            threads={props.threads}
-            pinnedMessages={props.pinnedMessages}
+      {props.channel_type === 'text' ? (
+        <>
+          {windowWidth >= 768 ? (
+            <div className='no-scrollbar hidden max-h-screen min-h-screen w-full overflow-y-auto md:block'>
+              <ChannelsHeader
+                channelId={props.channelId}
+                serverId={props.serverId}
+                channelName={props.channelName}
+                threads={props.threads}
+                pinnedMessages={props.pinnedMessages}
 
-          />
-          <ChannelsMessages
-            messages={messages}
-            // @ts-ignore
-            socket={socket}
-            thread={thread}
-          />
-        </div>
+              />
+              {props.channel_type === 'text' ? (
+                <ChannelsMessages
+                  messages={messages}
+                  // @ts-ignore
+                  socket={socket}
+                  thread={thread}
+                />
+              ) : (
+                <VideoCall room={props.channelId} serverId={props.serverId} />
+              )}
+
+            </div>
+          ) : (
+            <Suspense fallback={<PulseLoader />} key={props.channelId}>
+              <ChannelDetailMobile
+                channelId={props.channelId}
+                serverId={props.serverId}
+                messages={messages}
+                socket={socket}
+                thread={thread}
+              />
+            </Suspense>
+          )}
+
+        </>
       ) : (
-        <Suspense fallback={<PulseLoader />} key={props.channelId}>
-          <ChannelDetailMobile
-            channelId={props.channelId}
-            serverId={props.serverId}
-            messages={messages}
-            socket={socket}
-            thread={thread}
-          />
-        </Suspense>
+
+        <VideoCall room={props.channelId} serverId={props.serverId} />
       )}
     </>
   );
