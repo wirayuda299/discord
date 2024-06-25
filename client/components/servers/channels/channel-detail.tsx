@@ -76,6 +76,8 @@ export default function ChannelsDetail(props: Props) {
           ) : (
             <Suspense fallback={<PulseLoader />} key={props.channelId}>
               <ChannelDetailMobile
+                threads={props.threads}
+                pinnedMessages={props.pinnedMessages}
                 channelId={props.channelId}
                 serverId={props.serverId}
                 messages={messages}

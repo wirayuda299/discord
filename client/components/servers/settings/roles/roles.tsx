@@ -24,11 +24,13 @@ export default function Roles({
   serverId,
   styles,
   searchFormStyle,
-  permissionContainerStyle
+  permissionContainerStyle,
+  uiSize
 }: {
   serverAuthor: string;
   serverId: string;
   styles?: string,
+  uiSize: string
   permissionContainerStyle?: string
   searchFormStyle?: string
 }) {
@@ -59,6 +61,7 @@ export default function Roles({
     <div className='w-full min-h-fit-content max-h-screen overflow-y-auto'>
       {type === 'create' || type === 'update' || selectedRole ? (
         <RoleSettings
+          uiSize={uiSize}
           styles={styles}
           selectType={selectType}
           roles={data || []}

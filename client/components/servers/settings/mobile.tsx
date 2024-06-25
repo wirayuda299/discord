@@ -106,7 +106,7 @@ export default function ServerSettingsMobile({
                   <h3 className='font-semibold'>Server Roles</h3>
                 </header>
                 <div className='h-dvh overflow-y-auto'>
-                  <Roles serverAuthor={server.owner_id} serverId={server.id} />
+                  <Roles serverAuthor={server.owner_id} serverId={server.id} uiSize='sm' />
                 </div>
               </SheetContent>
             </Sheet>

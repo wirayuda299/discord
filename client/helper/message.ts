@@ -112,7 +112,7 @@ export async function deleteChannelPinnedMessage(
       });
     revalidate(path);
   } catch (error) {
-    throw error;
+    createError(error)
   }
 }
 

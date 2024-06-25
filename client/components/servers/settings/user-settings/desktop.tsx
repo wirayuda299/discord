@@ -13,13 +13,16 @@ import { useServerStates } from '@/providers';
 import UserAccount from '@/components/user/user-account';
 import UserProfile from '@/components/user/profiles';
 import useWindowResize from '@/hooks/useWindowResize';
+import { useClerk } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 export default function UserSettingsDesktop() {
   const { setSelectedSetting, selectedSetting } = useServerStates((state) => ({
     setSelectedSetting: state.setSelectedSetting,
     selectedSetting: state.selectedSetting,
   }));
-
+  const { signOut } = useClerk()
+  const router = useRouter()
   const { windowWidth } = useWindowResize();
 
   if (windowWidth < 768) return null;
@@ -65,9 +68,10 @@ export default function UserSettingsDesktop() {
                   </ul>
                 </li>
               ))}
-              <li className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
-                Delete server
-                <Trash size={18} className='text-red-600' />
+              <li
+                onClick={() => signOut().then(() => router.push('/sign-in'))}
+                className='flex-center cursor-pointer justify-between rounded-md p-1 text-base capitalize text-[#a9b0bb] hover:bg-foreground hover:text-white hover:brightness-110'>
+                Sign Out
               </li>
             </ul>
           </aside>

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 import {
   DropdownMenu,
@@ -24,7 +25,7 @@ import Roles from '../settings/roles/roles';
 
 import { Button } from '@/components/ui/button';
 import { leaveServer } from '@/helper/server';
-import { useState } from 'react';
+
 
 
 export default function ServersMenuDesktop({ server, channels }: { server: Servers, channels: string[] }) {
@@ -42,7 +43,6 @@ export default function ServersMenuDesktop({ server, channels }: { server: Serve
     );
 
   if (errors) return <p>{errors.message}</p>;
-  console.log(channels)
 
   return (
     <DropdownMenu>
@@ -115,7 +115,7 @@ export default function ServersMenuDesktop({ server, channels }: { server: Serve
               />
             </DialogTrigger>
             <DialogContent className='w-full p-0 border-none max-h-[500px] h-full overflow-hidden'>
-              <Roles serverId={server.id} serverAuthor={server.owner_id} styles='!hidden' permissionContainerStyle='bg-foreground/50' searchFormStyle='bg-foreground/50 py-1.5' />
+              <Roles serverId={server.id} serverAuthor={server.owner_id} styles='!hidden' permissionContainerStyle='bg-foreground/50' searchFormStyle='bg-foreground/50 py-1.5' uiSize='sm' />
             </DialogContent>
           </Dialog>
         ) : null}

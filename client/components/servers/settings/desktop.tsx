@@ -124,7 +124,7 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
               <ServerOverview server={server} />
             )}
             {selectedSetting === 'roles' && (
-              <Roles serverAuthor={server.owner_id} serverId={server.id} />
+              <Roles serverAuthor={server.owner_id} serverId={server.id} uiSize='lg' />
             )}
             {selectedSetting === 'emoji' && <EmojiUpload />}
             {selectedSetting === 'stickers' && <StickerUpload />}

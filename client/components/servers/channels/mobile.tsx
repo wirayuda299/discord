@@ -8,13 +8,17 @@ import { useServerStates } from '@/providers';
 import ChannelInfoMobile from './channel-info-mobile';
 import { Message, Thread } from '@/types/messages';
 import { cn } from '@/lib/utils';
+import { PinnedMessageType } from '@/helper/message';
+import { AllThread } from '@/helper/threads';
 
 type Props = {
   serverId: string;
   socket: Socket | null;
   messages: Message[];
   thread: Thread | null;
-  channelId: string
+  channelId: string,
+  pinnedMessages: PinnedMessageType[]
+  threads: AllThread[]
 }
 
 export default function ChannelDetailMobile({
@@ -22,7 +26,9 @@ export default function ChannelDetailMobile({
   socket,
   messages,
   thread,
-  channelId
+  channelId,
+  pinnedMessages,
+  threads
 }: Props) {
   const { selectedChannel, setSelectedChannel, selectedThread, setSelectedThread } = useServerStates((state) => ({
     selectedChannel: state.selectedChannel,
@@ -50,7 +56,10 @@ export default function ChannelDetailMobile({
             {selectedChannel.channel_name}
           </p>
           <ChannelInfoMobile
+            threads={threads}
+            channelId={channelId}
             messages={messages}
+            pinnedMessages={pinnedMessages}
             channelName={selectedChannel.channel_name}
             serverId={serverId}
           />

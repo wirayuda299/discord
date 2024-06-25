@@ -75,7 +75,7 @@ export default function ThreadItem({ thread, serverId, channelId, socket, select
       ) : (
 
         <div
-          className="w-full p-2 hover:bg-foreground group"
+          className="w-full p-2 hover:bg-foreground/50 md:hover:bg-foreground group"
         >
           <p className='text-sm font-medium text-gray-2'>
             {thread.thread_name}

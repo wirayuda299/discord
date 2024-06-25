@@ -42,6 +42,7 @@ type Props = {
   serverAuthor: string;
   roles: Role[];
   selectRole: (role: Role | null) => void;
+  uiSize: string
   selectType: (type: 'create' | 'update' | null) => void;
   styles?: string
 };
@@ -68,6 +69,7 @@ export default function RolesSettings({
   roles,
   selectRole,
   selectType,
+  uiSize,
   styles
 }: Props) {
   const { userId } = useAuth();
@@ -187,45 +189,47 @@ export default function RolesSettings({
 
   return (
     <div className='flex h-full w-full md:py-7'>
-      <aside className={cn(' top-0 min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block', styles)}>
-        <header className='flex-center w-full justify-between'>
-          <Button
-            onClick={() => {
-              selectRole(null);
-              selectType(null);
-            }}
-            className='inline-flex gap-1 !bg-transparent uppercase text-gray-2'
-          >
-            <ArrowLeft size={20} /> Back
-          </Button>
-          <Button
-            size='icon'
-            className='inline-flex gap-3 !bg-transparent uppercase text-gray-2'
-          >
-            <Plus size={20} />
-          </Button>
-        </header>
-
-        <ul className={cn('flex w-full flex-col gap-3 pl-9 pr-4', styles)}>
-          {roles.map((role) => (
-            <li
-              onClick={() => selectRole(role)}
-              key={role.id}
-              className={cn(
-                'flex cursor-pointer items-center gap-2 rounded py-2 text-sm font-medium capitalize text-gray-2 hover:bg-foreground hover:brightness-110',
-                selectedRole?.name === role.name &&
-                'bg-foreground brightness-110',
-              )}
+      {uiSize === 'lg' && (
+        <aside className={cn(' top-0 min-h-screen w-full min-w-48 max-w-48 overflow-y-auto border-r border-background md:block', styles)}>
+          <header className='flex-center w-full justify-between'>
+            <Button
+              onClick={() => {
+                selectRole(null);
+                selectType(null);
+              }}
+              className='inline-flex gap-1 !bg-transparent uppercase text-gray-2'
             >
-              <div
-                className='size-2 rounded-full'
-                style={{ background: role.role_color }}
-              ></div>
-              {role.name}
-            </li>
-          ))}
-        </ul>
-      </aside>
+              <ArrowLeft size={20} /> Back
+            </Button>
+            <Button
+              size='icon'
+              className='inline-flex gap-3 !bg-transparent uppercase text-gray-2'
+            >
+              <Plus size={20} />
+            </Button>
+          </header>
+
+          <ul className={cn('flex w-full flex-col gap-3 pl-9 pr-4', styles)}>
+            {roles.map((role) => (
+              <li
+                onClick={() => selectRole(role)}
+                key={role.id}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded py-2 text-sm font-medium capitalize text-gray-2 hover:bg-foreground hover:brightness-110',
+                  selectedRole?.name === role.name &&
+                  'bg-foreground brightness-110',
+                )}
+              >
+                <div
+                  className='size-2 rounded-full'
+                  style={{ background: role.role_color }}
+                ></div>
+                {role.name}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
       <div className='w-full overflow-y-auto px-2 pt-1 md:px-4'>
         <div className='flex-center justify-between'>
           <h4 className='text-lg font-medium uppercase text-gray-2'>

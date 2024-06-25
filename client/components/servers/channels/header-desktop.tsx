@@ -17,11 +17,10 @@ const PinnedMessage = dynamic(
   () => import('@/components/shared/pinned-message'),
 );
 
-import { PinnedMessageType } from '@/helper/message';
+import { PinnedMessageType, deleteChannelPinnedMessage } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
 import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
-import { createError } from '@/utils/error';
 import ServersMembers from '../members';
 
 
@@ -48,18 +47,7 @@ export default function ChannelsHeader({
     })),
   );
 
-  const handleDeletePinnedMessage = async (id: string) => {
-    try {
-      const { deleteChannelPinnedMessage } = await import('@/helper/message');
-      await deleteChannelPinnedMessage(
-        id,
-        channelId,
-        `/server/${serverId}/${channelId}`,
-      );
-    } catch (error) {
-      createError(error);
-    }
-  };
+
 
   return (
     <header className='flex-center sticky top-0 z-10 h-[49px] min-w-full justify-between border-b border-background bg-foreground p-2'>
@@ -128,7 +116,8 @@ export default function ChannelsHeader({
                   <button
                     aria-label='delete'
                     name='delete'
-                    onClick={() => handleDeletePinnedMessage(msg.message_id)}
+
+                    onClick={() => deleteChannelPinnedMessage(msg.message_id, channelId, `/server/${serverId}/${channelId}`)}
                     title='delete'
                     className='absolute right-1 hidden size-5 rounded-full bg-foreground text-xs text-white group-hover:block'
                   >
