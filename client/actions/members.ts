@@ -10,7 +10,6 @@ export async function banMember(
   serverId: string,
   memberId: string,
   bannedBy: string,
-  pathname: string
 ) {
   try {
     await api.update(
@@ -22,7 +21,7 @@ export async function banMember(
       },
       'POST',
     );
-    revalidatePath(pathname);
+    revalidatePath('/');
   } catch (error) {
     throw error;
   }

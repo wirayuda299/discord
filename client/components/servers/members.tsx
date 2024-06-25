@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { Ellipsis, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { usePathname } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { useAuth } from '@clerk/nextjs';
 
@@ -14,6 +13,7 @@ import { banMember } from '@/actions/members';
 import { createError } from '@/utils/error';
 
 import { useSocketStore } from '@/providers';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 export default function ServersMembers({
   serverId,
@@ -23,9 +23,7 @@ export default function ServersMembers({
   children: ReactNode;
 }) {
   const { userId } = useAuth()
-  const pathname = usePathname()
   const { data, error, isLoading } = useServerMembers(serverId);
-  const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { mutate } = useSWRConfig()
   const socket = useSocketStore(state => state.socket)
@@ -34,7 +32,7 @@ export default function ServersMembers({
   const handleBanMember = async (memberId: string) => {
     try {
       setIsSubmitting(true)
-      await banMember(serverId, memberId, userId!, pathname)
+      await banMember(serverId, memberId, userId!)
         .then(() => {
           mutate('members')
           toast.success('Member has banned!')
@@ -110,24 +108,20 @@ export default function ServersMembers({
 
 
               </div>
-              <div className='relative'>
-                <button className=' group-hover:opacity-100 opacity-0' onClick={() => setIsOpen(prev => !prev)}>
+              <DropdownMenu>
+                <DropdownMenuTrigger className='opacity-0 group-hover:opacity-100'>
                   <Ellipsis className='text-gray-2' />
-                </button>
-
-                <div className={cn('w-full rounded space-y-3 min-w-56 bg-black text-white absolute top-7 p-2 right-0 items-start flex-col hidden', isOpen && 'flex')}>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className='min-w-48 rounded !bg-black text-white'>
                   <button
                     title='ban'
                     disabled={isSubmitting}
                     onClick={() => handleBanMember(member.user_id)}
-                    className='text-sm rounded-sm w-full hover:bg-background/50 p-1 cursor-pointer'>
+                    className='text-sm text-left rounded-sm w-full hover:bg-background/50 p-1 cursor-pointer'>
                     {isSubmitting ? 'Loading..' : 'Ban Member'}
                   </button>
-                  <button className='text-sm hover:bg-background/50 rounded-sm p-1 cursor-pointer'>
-                    Kick member
-                  </button>
-                </div>
-              </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
           ))}
         </ul>

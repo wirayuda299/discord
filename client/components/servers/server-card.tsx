@@ -8,7 +8,6 @@ import { useState } from "react";
 
 import { joinServer } from "@/actions/server";
 import { Servers } from "@/types/server";
-import { createError } from "@/utils/error";
 import { Button } from "../ui/button";
 
 type Props = { server: Servers, inviteCode: string, userId: string }
@@ -20,17 +19,21 @@ export default function ServerCard({ server, inviteCode, userId }: Props) {
   const handleJoinServer = async () => {
     try {
       setIsLoading(true)
-      await joinServer(
+      const res = await joinServer(
         server.id,
         userId!!,
         inviteCode,
-      ).then(() => {
+      )
+      if (res?.success) {
         toast.success("Welcome! You've successfully joined the server.")
         router.push(`/server/${server.id}`);
-      });
+      }
+      if (!res?.success) {
+        toast.error(res?.message)
+      }
 
     } catch (error) {
-      createError(error)
+      console.log(error)
     } finally {
       setIsLoading(false)
     }

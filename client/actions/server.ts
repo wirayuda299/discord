@@ -43,12 +43,20 @@ export async function joinServer(
         serverId,
       },
       'POST',
-    );
+    ).then(() => {
 
-    revalidatePath(`/server/${serverId}`);
+      revalidatePath('/');
+      return {
+        success: true,
+        message: 'Success'
+      }
+    })
+
   } catch (error) {
-    console.log(error);
+    return {
+      success: false,
+      message: (error as Error).message
+    }
 
-    throw error;
   }
 }
