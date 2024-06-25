@@ -1,13 +1,9 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 
 import { DatabaseService } from '../database/database.service';
 import { ServersService } from '../servers/servers.service';
-import { ImagehandlerService } from '../imagehandler/imagehandler.service';
 import { ChannelsService } from '../channels/channels.service';
 
 @Injectable()
@@ -15,7 +11,6 @@ export class MembersService {
   constructor(
     private db: DatabaseService,
     private serverService: ServersService,
-    private imageService: ImagehandlerService,
     private channelService: ChannelsService
   ) { }
 

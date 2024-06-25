@@ -290,36 +290,38 @@ export class ServersService {
           'You already a member of this server',
           HttpStatus.BAD_REQUEST
         );
-      }
-
-
-      const user = await this.databaseService.pool.query(
-        `select * from users where id = $1`,
-        [userId]
-      );
-      const isServerProfileExists = await this.databaseService.pool.query(
-        `select * from server_profile where user_id = $1 and server_id = $2`,
-        [userId, server_id]
-      );
-      await this.databaseService.pool.query('begin');
-
-      await this.databaseService.pool.query(
-        `INSERT INTO members(server_id, user_id) VALUES($1, $2)
-        returning id`,
-        [server_id, userId]
-      );
-      if (isServerProfileExists.rows.length < 1) {
-        await this.databaseService.pool.query(
-          `insert into server_profile(server_id, user_id, avatar, username)
-          values($1, $2, $3, $4)`,
-          [
-            server_id,
-            user.rows[0].id,
-            user.rows[0].image,
-            user.rows[0].username,
-          ]
+      } else {
+        const user = await this.databaseService.pool.query(
+          `select * from users where id = $1`,
+          [userId]
         );
+        const isServerProfileExists = await this.databaseService.pool.query(
+          `select * from server_profile where user_id = $1 and server_id = $2`,
+          [userId, server_id]
+        );
+        await this.databaseService.pool.query('begin');
+
+        await this.databaseService.pool.query(
+          `INSERT INTO members(server_id, user_id) VALUES($1, $2)
+        returning id`,
+          [server_id, userId]
+        );
+        if (isServerProfileExists.rows.length < 1) {
+          await this.databaseService.pool.query(
+            `insert into server_profile(server_id, user_id, avatar, username)
+          values($1, $2, $3, $4)`,
+            [
+              server_id,
+              user.rows[0].id,
+              user.rows[0].image,
+              user.rows[0].username,
+            ]
+          );
+        }
+
+
       }
+
 
       await this.databaseService.pool.query('commit');
       return {
