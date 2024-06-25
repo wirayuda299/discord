@@ -44,16 +44,6 @@ export class MembersController {
     return this.memberService.getMembersHasNoRole(serverId);
   }
 
-  @Post('/kick')
-  kickMemberFromServer(@Req() req: Request) {
-    const { serverId, memberId, serverAuthor, currentUser } = req.body;
-    return this.memberService.kickMember(
-      serverId,
-      memberId,
-      serverAuthor,
-      currentUser
-    );
-  }
   @Post('/ban')
   async banMember(@Req() req: Request) {
     const { serverId, memberId, bannedBy } = req.body;

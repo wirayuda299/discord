@@ -5,33 +5,12 @@ import { revalidatePath } from 'next/cache';
 
 const api = new ApiRequest();
 
-export async function kickMember(
-  serverId: string,
-  memberId: string,
-  serverAuthor: string,
-  currentUser: string,
-) {
-  try {
-    await api.update(
-      `/members/kick`,
-      {
-        serverId,
-        memberId,
-        serverAuthor,
-        currentUser,
-      },
-      'POST',
-    );
-    revalidatePath(`/server/${serverId}`);
-  } catch (error) {
-    throw error;
-  }
-}
 
 export async function banMember(
   serverId: string,
   memberId: string,
   bannedBy: string,
+  pathname: string
 ) {
   try {
     await api.update(
@@ -43,7 +22,7 @@ export async function banMember(
       },
       'POST',
     );
-    revalidatePath(`/server/${serverId}`);
+    revalidatePath(pathname);
   } catch (error) {
     throw error;
   }

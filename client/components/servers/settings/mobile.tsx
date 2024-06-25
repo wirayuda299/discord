@@ -137,7 +137,6 @@ export default function ServerSettingsMobile({
                 <h3 className='font-semibold'>Bans</h3>
               </header>
               <ServerBanList
-                serverAuthor={server.owner_id}
                 serverId={server.id}
               />
             </SheetContent>

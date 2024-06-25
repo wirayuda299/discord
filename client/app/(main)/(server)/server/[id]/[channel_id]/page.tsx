@@ -25,6 +25,7 @@ export default async function ChannelId({ searchParams, params }: Props) {
     redirect('/sign-in')
   }
   const { isAuthor, isMember } = await isMemberOrAdmin(userId, params.id)
+  console.log({ isAuthor, isMember })
   if (!isAuthor && !isMember) {
     redirect('/direct-messages')
   }

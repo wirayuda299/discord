@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Suspense, useMemo, type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 
 import { getAllChannels, getServerById } from '@/helper/server';
 import ChannelItem from '@/components/servers/channels/channel-item';

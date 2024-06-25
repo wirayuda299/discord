@@ -2,10 +2,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { Ellipsis, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
+import { useSWRConfig } from 'swr';
+import { useAuth } from '@clerk/nextjs';
 
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import useServerMembers from '@/hooks/useServerMember';
 import { cn } from '@/lib/utils';
+import { banMember } from '@/actions/members';
+import { createError } from '@/utils/error';
+
+import { useSocketStore } from '@/providers';
 
 export default function ServersMembers({
   serverId,
@@ -14,8 +22,30 @@ export default function ServersMembers({
   serverId: string;
   children: ReactNode;
 }) {
+  const { userId } = useAuth()
+  const pathname = usePathname()
   const { data, error, isLoading } = useServerMembers(serverId);
   const [isOpen, setIsOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { mutate } = useSWRConfig()
+  const socket = useSocketStore(state => state.socket)
+
+
+  const handleBanMember = async (memberId: string) => {
+    try {
+      setIsSubmitting(true)
+      await banMember(serverId, memberId, userId!, pathname)
+        .then(() => {
+          mutate('members')
+          toast.success('Member has banned!')
+          socket?.emit('banned_members', { serverId })
+        })
+    } catch (error) {
+      createError(error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
 
   if (isLoading)
@@ -48,7 +78,6 @@ export default function ServersMembers({
               className='flex-center justify-between gap-2 rounded-md p-2 hover:bg-foreground group hover:brightness-110'
             >
               <div className='flex-center gap-2'>
-
                 <Image
                   src={member.serverProfile.avatar}
                   width={50}
@@ -86,15 +115,18 @@ export default function ServersMembers({
                   <Ellipsis className='text-gray-2' />
                 </button>
 
-                <ul className={cn('w-full rounded space-y-3 min-w-56 bg-black text-white absolute top-7 p-2 right-0 hidden', isOpen && "block")}>
-                  <li className='text-sm rounded-sm hover:bg-background/50 p-1 cursor-pointer'>
-
-                    Ban Member
-                  </li>
-                  <li className='text-sm hover:bg-background/50 rounded-sm p-1 cursor-pointer'>
+                <div className={cn('w-full rounded space-y-3 min-w-56 bg-black text-white absolute top-7 p-2 right-0 items-start flex-col hidden', isOpen && 'flex')}>
+                  <button
+                    title='ban'
+                    disabled={isSubmitting}
+                    onClick={() => handleBanMember(member.user_id)}
+                    className='text-sm rounded-sm w-full hover:bg-background/50 p-1 cursor-pointer'>
+                    {isSubmitting ? 'Loading..' : 'Ban Member'}
+                  </button>
+                  <button className='text-sm hover:bg-background/50 rounded-sm p-1 cursor-pointer'>
                     Kick member
-                  </li>
-                </ul>
+                  </button>
+                </div>
               </div>
             </li>
           ))}

@@ -8,14 +8,16 @@ import {
 import { DatabaseService } from '../database/database.service';
 import { ServersService } from '../servers/servers.service';
 import { ImagehandlerService } from '../imagehandler/imagehandler.service';
+import { ChannelsService } from '../channels/channels.service';
 
 @Injectable()
 export class MembersService {
   constructor(
     private db: DatabaseService,
     private serverService: ServersService,
-    private imageService: ImagehandlerService
-  ) {}
+    private imageService: ImagehandlerService,
+    private channelService: ChannelsService
+  ) { }
 
   async isAllowedToKickMember(serverId: string, userId: string) {
     const isallowed = await this.db.pool.query(
@@ -136,100 +138,35 @@ export class MembersService {
     }
   }
 
-  async kickMember(
-    serverId: string,
-    memberId: string,
-    serverAuthor: string,
-    currentUser: string
-  ) {
-    try {
-      console.log({ serverId, memberId, serverAuthor, currentUser });
-
-      const isAllowed = await this.isAllowedToKickMember(serverId, memberId);
-      if (isAllowed.length < 1 && serverAuthor !== currentUser) {
-        throw new HttpException(
-          'You are not allowed to kick member',
-          HttpStatus.FORBIDDEN
-        );
-      }
-
-      const foundMember = await this.db.pool.query(
-        `select * from members where server_id = $1 and user_id = $2`,
-        [serverId, memberId]
-      );
-
-      const serverProfile = await this.serverService.getServerProfile(
-        serverId,
-        memberId
-      );
-      const roles = await this.db.pool.query(
-        ` select * from user_roles as ur
-          join roles as r on r.id = ur.role_id 
-          join permissions as p on p.id = ur.permission_id 
-          where ur.user_id = $1 and p.server_id = $2`,
-        [memberId, serverId]
-      );
-
-      const serverProfileAssetId = serverProfile.data?.avatar_asset_id;
-      await this.db.pool.query(`begin`);
-
-      if (serverProfileAssetId) {
-        await this.imageService.deleteImage(serverProfileAssetId);
-      }
-
-      if (foundMember.rows.length < 1) {
-        throw new NotFoundException('Member not found');
-      }
-
-      await this.db.pool.query(
-        `delete from members where user_id = $1 and server_id = $2`,
-        [memberId, serverId]
-      );
-
-      if (roles.rows.length >= 1) {
-        await this.db.pool.query(
-          `DELETE FROM user_roles
-            WHERE user_id = $1
-            AND role_id IN (
-                SELECT id FROM roles
-                WHERE server_id =$2
-            )`,
-          [memberId, serverId]
-        );
-      }
-
-      await this.db.pool.query(
-        `delete from server_profile as sp where sp.server_id = $1 and sp.user_id = $2`,
-        [serverId, memberId]
-      );
-      await this.db.pool.query(`commit`);
-      return {
-        messages: 'Member kicked from server',
-        error: false,
-      };
-    } catch (error) {
-      console.log(error);
-
-      throw error;
-    }
-  }
 
   async banMember(serverId: string, memberId: string, bannedBy: string) {
+
     try {
+      const channelList = await this.channelService.getAllChannelsInServer(serverId);
+      const channelIds = channelList.data.filter(channel => channel.channel_type === 'text').map(c => c.channel_id)
+
+      await this.db.pool.query('BEGIN');
       await this.db.pool.query(
-        `insert into banned_members(server_id, member_id, banned_by)
-        values($1, $2, $3)`,
+        `INSERT INTO banned_members(server_id, member_id, banned_by)
+            VALUES($1, $2, $3)`,
         [serverId, memberId, bannedBy]
       );
+      await this.db.pool.query('COMMIT');
+
+      await this.db.pool.query('BEGIN');
+      await this.serverService.leaveServer(serverId, memberId, channelIds);
+      await this.db.pool.query('COMMIT');
+
       return {
         message: 'Member banned',
         error: false,
       };
     } catch (error) {
+      await this.db.pool.query('ROLLBACK');
+      console.error('Error in banMember:', error);
       throw error;
     }
   }
-
   async revokeBannedMember(serverId: string, memberId: string) {
     try {
       await this.db.pool.query(

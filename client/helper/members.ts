@@ -1,6 +1,6 @@
 import { BannedMembers } from '@/types/socket-states';
-import { prepareHeaders } from './cookies';
 import { ApiRequest } from '@/utils/api';
+import { createError } from '@/utils/error';
 
 const api = new ApiRequest();
 
@@ -19,7 +19,7 @@ export async function getBannedMembers(
 
 export async function revokeMember(serverId: string, memberId: string) {
   try {
-    const revokeMember = await api.update(
+    await api.update(
       '/members/revoke',
       {
         serverId,
@@ -28,8 +28,7 @@ export async function revokeMember(serverId: string, memberId: string) {
       'PATCH',
     );
 
-    return revokeMember;
   } catch (error) {
-    throw error;
+    createError(error)
   }
 }

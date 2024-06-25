@@ -22,6 +22,7 @@ import { AllThread } from '@/helper/threads';
 import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
 import ServersMembers from '../members';
+import { cn } from '@/lib/utils';
 
 
 type Props = {
@@ -60,7 +61,7 @@ export default function ChannelsHeader({
         />
         <h3
           onClick={thread ? () => setSelectedThread(null) : undefined}
-          className='cursor-pointer truncate text-base font-semibold text-gray-2'
+          className={cn('truncate text-base font-semibold text-gray-2', thread ? 'cursor-pointer' : 'cursor-auto')}
         >
           {channelName}
         </h3>

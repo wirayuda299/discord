@@ -1,14 +1,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 
 import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
 import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
-import PulseLoader from "@/components/shared/pulse-loader"
 import useWindowResize from '@/hooks/useWindowResize';
+import { BannedMembers } from '@/types/socket-states';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 const ChannelsMessages = dynamic(() => import('./messages'), { ssr: false });
 const ChannelDetailMobile = dynamic(() => import('./mobile'), { ssr: false });
@@ -27,9 +29,10 @@ type Props = {
 export default function ChannelsDetail(props: Props) {
   const thread = useServerStates((state) => state.selectedThread);
   const socket = useSocketStore((state) => state.socket);
-
+  const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([]);
   const { windowWidth } = useWindowResize()
+  const { userId } = useAuth()
 
   useEffect(() => {
     if (props.serverId && props.channelId) {
@@ -38,13 +41,26 @@ export default function ChannelsDetail(props: Props) {
         channelId: props.channelId,
       });
     }
+    socket?.emit('banned_members', { serverId: props.serverId })
     return () => {
       socket?.off('get-channel-message');
+      socket?.off('banned_members')
     };
   }, [socket, props.serverId, props.channelId]);
 
   useEffect(() => {
     socket?.on('set-message', (messages) => setMessages(messages));
+    socket?.on('set-banned-members', (members: BannedMembers[]) => {
+      const membersMap = new Map(members.map(member => [member.id, member]))
+      if (userId) {
+        console.log(membersMap.get(userId))
+        const isInclude = membersMap.get(userId)
+        if (isInclude?.id === userId) {
+          router.push('/direct-messages')
+        }
+      }
+
+    })
   }, [socket]);
 
   return (
@@ -74,22 +90,19 @@ export default function ChannelsDetail(props: Props) {
 
             </div>
           ) : (
-            <Suspense fallback={<PulseLoader />} key={props.channelId}>
-              <ChannelDetailMobile
-                threads={props.threads}
-                pinnedMessages={props.pinnedMessages}
-                channelId={props.channelId}
-                serverId={props.serverId}
-                messages={messages}
-                socket={socket}
-                thread={thread}
-              />
-            </Suspense>
+            <ChannelDetailMobile
+              threads={props.threads}
+              pinnedMessages={props.pinnedMessages}
+              channelId={props.channelId}
+              serverId={props.serverId}
+              messages={messages}
+              socket={socket}
+              thread={thread}
+            />
           )}
 
         </>
       ) : (
-
         <VideoCall room={props.channelId} serverId={props.serverId} />
       )}
     </>

@@ -9,6 +9,7 @@ import {
 
 import { MessagesService } from 'src/services/messages/messages.service';
 import { ThreadsService } from 'src/services/threads/threads.service';
+import { MembersService } from 'src/services/members/members.service';
 
 type PayloadTypes = {
   content: string;
@@ -40,7 +41,8 @@ export class SocketGateway implements OnModuleInit {
 
   constructor(
     private messagesService: MessagesService,
-    private threadsService: ThreadsService
+    private threadsService: ThreadsService,
+    private memberService: MembersService
   ) { }
 
   onModuleInit() {
@@ -206,4 +208,16 @@ export class SocketGateway implements OnModuleInit {
       this.logger.error('Error getting personal messages', error);
     }
   }
+
+  @SubscribeMessage('banned_members')
+  async getBannedMembers(@MessageBody() payload: { serverId: string }) {
+    try {
+      const bannedMebers = await this.memberService.getBannedMembers(payload.serverId)
+      this.server.emit('set-banned-members', bannedMebers.data)
+    } catch (error) {
+      this.logger.error('Error getting banned members', error.message)
+    }
+  }
 }
+
+

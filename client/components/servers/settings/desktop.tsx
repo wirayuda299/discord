@@ -155,7 +155,6 @@ export default function ServerSettingsDesktop({ server }: { server: Servers }) {
             )}
             {selectedSetting === 'bans' && (
               <ServerBanList
-                serverAuthor={server.owner_id}
                 serverId={server.id}
               />
             )}

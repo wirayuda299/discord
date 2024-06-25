@@ -266,12 +266,11 @@ export class ServersService {
           WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
         [server_id, userId]
       );
-
+      console.log(banned_members.rows)
       if (banned_members.rows.length >= 1) {
         throw new HttpException(
           'You are banned from this server, ask the author to remove you from banned list to join again',
           HttpStatus.FORBIDDEN,
-          { cause: 'You are banned from this server' }
         );
       }
 
@@ -557,19 +556,21 @@ export class ServersService {
   }
 
 
+
   async leaveServer(serverId: string, userId: string, channels: string[]) {
     try {
       const isMember = await this.databaseService.pool.query(`
-          SELECT user_id FROM members WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
+            SELECT user_id FROM members WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
 
       if (isMember.rows.length < 1) {
         throw new HttpException("Member not found", HttpStatus.NOT_FOUND);
       }
 
       const user_roles = await this.databaseService.pool.query(`
-          SELECT r.id, ur.user_id, r.icon_asset_id FROM user_roles as ur 
-          JOIN roles as r ON r.id = ur.role_id
-          WHERE ur.user_id = $1 AND r.server_id = $2`, [userId, serverId]);
+            SELECT ur.role_id, ur.permission_id, r.icon_asset_id 
+            FROM user_roles as ur 
+            JOIN roles as r ON r.id = ur.role_id
+            WHERE ur.user_id = $1 AND r.server_id = $2`, [userId, serverId]);
 
       await this.databaseService.pool.query(`BEGIN`);
 
@@ -580,22 +581,25 @@ export class ServersService {
           await this.attachmentService.deleteImage(iconAssetId);
         }
 
+        console.log('Deleting user roles:', user_roles.rows);
+
         await this.databaseService.pool.query(`
-        DELETE FROM user_roles
-        WHERE user_id = $1
-        AND role_id IN (
-          SELECT id FROM roles
-          WHERE server_id = $2)`, [userId, serverId]);
+                DELETE FROM user_roles
+                WHERE user_id = $1 AND role_id IN (
+                    SELECT id FROM roles WHERE server_id = $2)`,
+          [userId, serverId]);
+
+        await this.databaseService.pool.query(`
+                DELETE FROM role_permissions
+                WHERE role_id IN (
+                    SELECT id FROM roles WHERE server_id = $1)`, [serverId]);
       }
 
       for (const channel of channels) {
-        const channelMessages = await this.messageService.getMessageByChannelId(channel, serverId)
+        const channelMessages = await this.messageService.getMessageByChannelId(channel, serverId);
 
-
-        const messageIds = channelMessages.filter(message => message.author === userId).map(msg => msg.message_id)
-
-        const allMediaIds = channelMessages.map(msg => msg.media_image_asset_id).filter(Boolean).flat()
-        console.log({ allMediaIds })
+        const messageIds = channelMessages.filter(message => message.author === userId).map(msg => msg.message_id);
+        const allMediaIds = channelMessages.map(msg => msg.media_image_asset_id).filter(Boolean).flat();
 
         if (allMediaIds.length > 0) {
           for (const id of allMediaIds) {
@@ -610,7 +614,7 @@ export class ServersService {
       }
 
       const serverProfile = await this.databaseService.pool.query(`
-        SELECT avatar_asset_id FROM server_profile WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
+            SELECT avatar_asset_id FROM server_profile WHERE server_id = $1 AND user_id = $2`, [serverId, userId]);
 
       const avatarAssetId = serverProfile.rows[0]?.avatar_asset_id;
       if (avatarAssetId) {
@@ -632,7 +636,6 @@ export class ServersService {
     }
   }
 
-  // Function to recursively get all replies and nested replies
 
   async updateServerprofile(
     serverId: string,
