@@ -29,6 +29,7 @@ export default function Home() {
               Our platform is perfect for engaging in group chats and video calls with friends or building a global community. Customize your own space to talk, connect, and hang out in real-time </p>
           </div>
 
+
           <Image priority fetchPriority="high" className="object-cover aspect-auto object-center h-full" sizes="700px" src='/general/images/mockup.png' width={700} height={700} alt="mockup" />
         </section>
 

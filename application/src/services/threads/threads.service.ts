@@ -258,12 +258,17 @@ export class ThreadsService {
 
   async deleteThread(threadId: string, userId: string, serverId: string) {
     try {
+      const server = await this.db.pool.query(`select id, owner_id from servers where id = $1`, [serverId])
+      const { owner_id } = server.rows[0]
+
       const thread = await this.db.pool.query(`SELECT id, author FROM threads WHERE id = $1`, [threadId]);
       if (thread.rows.length < 1) {
         throw new HttpException('Thread not found', HttpStatus.NOT_FOUND);
       }
-      const { author } = thread.rows[0];
-      if (author !== userId) {
+      const isallowedToDeleteThread = await this.isAllowedToManageThread(serverId, userId)
+
+
+      if (isallowedToDeleteThread.length < 1 && owner_id === userId) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
 
@@ -271,7 +276,7 @@ export class ThreadsService {
       const messages = await this.getThreadMessage(threadId, serverId);
       const messageIds = messages.map(msg => msg.message_id).flat();
       const mediaIds = messages.map(msg => msg.media_image_asset_id).filter(Boolean).flat();
-      console.log(mediaIds)
+
       if (messageIds.length > 0) {
         const placeholders = messageIds.map((_, i) => `$${i + 1}`).join(',');
         await this.db.pool.query(`DELETE FROM messages WHERE id IN (${placeholders})`, messageIds);
