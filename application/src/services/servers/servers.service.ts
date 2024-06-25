@@ -259,40 +259,40 @@ export class ServersService {
           HttpStatus.BAD_REQUEST
         );
 
-      const banned_members = await this.databaseService.pool.query(
-        `SELECT * 
+      const [banned_members, isServerExists, isUserMember] = await Promise.all([
+        this.databaseService.pool.query(
+          `SELECT * 
           FROM banned_members AS bm
           JOIN server_profile AS sp ON sp.user_id = bm.member_id 
           WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
-        [server_id, userId]
-      );
+          [server_id, userId]
+        ),
+        this.getServerByItsCode(inviteCode),
+        this.databaseService.pool.query(
+          `SELECT * FROM members AS m WHERE m.user_id = $1 AND m.server_id = $2`,
+          [userId, server_id]
+        ),
+      ])
+
+
       if (banned_members.rows.length > 0) {
         throw new HttpException(
           'You are banned from this server, ask the author to remove you from banned list to join again',
           HttpStatus.FORBIDDEN,
         );
-      }
-
-      const isServerExists = await this.getServerByItsCode(inviteCode);
-
-      if (isServerExists.data?.owner_id === userId) {
+      } else if (isServerExists.data.owner_id === userId) {
         throw new HttpException(
           'You already an admin of this server',
           HttpStatus.BAD_REQUEST
         );
-      }
-
-      const isUserMember = await this.databaseService.pool.query(
-        `SELECT * FROM members AS m WHERE m.user_id = $1 AND m.server_id = $2`,
-        [userId, server_id]
-      );
-
-      if (isUserMember.rows.length >= 1) {
+      } else if (isUserMember.rows.length > 0) {
         throw new HttpException(
           'You already a member of this server',
           HttpStatus.BAD_REQUEST
         );
       }
+
+
       const user = await this.databaseService.pool.query(
         `select * from users where id = $1`,
         [userId]
