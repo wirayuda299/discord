@@ -266,8 +266,7 @@ export class ServersService {
           WHERE bm.server_id = $1 AND sp.server_id = $1 and bm.member_id = $2`,
         [server_id, userId]
       );
-      console.log(banned_members.rows)
-      if (banned_members.rows.length >= 1) {
+      if (banned_members.rows.length > 0) {
         throw new HttpException(
           'You are banned from this server, ask the author to remove you from banned list to join again',
           HttpStatus.FORBIDDEN,
