@@ -80,12 +80,9 @@ export default function UserProfile() {
             <div className='flex flex-wrap items-center gap-3'>
               <div>
                 <h3 className='text-wrap text-base font-extrabold text-white lg:text-xl'>
-                  Fresh look, Clean aim. Must be valorant
-                </h3>
+                  New style, sharp focus. Welcome to our server</h3>
                 <p className='truncate text-balance text-xs text-white'>
-                  Keep your profile looking clutch with new avatar decorations
-                  and profile effects.
-                </p>
+                  Elevate your profile with fresh avatar decorations and stunning effects.</p>
               </div>
               <Button
                 size='sm'

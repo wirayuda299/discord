@@ -83,18 +83,18 @@ export default function RolesSettings({
       color: selectedRole ? selectedRole.role_color : '#99aab5',
       name: selectedRole ? selectedRole.name : '',
       icon: selectedRole ? selectedRole.icon : '',
-      attach_file: selectedRole ? selectedRole.permissions.attach_file : false,
-      ban_member: selectedRole ? selectedRole.permissions.ban_member : false,
-      kick_member: selectedRole ? selectedRole.permissions.kick_member : false,
+      attach_file: selectedRole ? selectedRole?.permissions?.attach_file : false,
+      ban_member: selectedRole ? selectedRole?.permissions?.ban_member : false,
+      kick_member: selectedRole ? selectedRole?.permissions?.kick_member : false,
       manage_channel: selectedRole
-        ? selectedRole.permissions.manage_channel
+        ? selectedRole?.permissions?.manage_channel
         : false,
       manage_message: selectedRole
-        ? selectedRole.permissions.manage_message
+        ? selectedRole?.permissions?.manage_message
         : false,
-      manage_role: selectedRole ? selectedRole.permissions.manage_role : false,
+      manage_role: selectedRole ? selectedRole?.permissions?.manage_role : false,
       manage_thread: selectedRole
-        ? selectedRole.permissions.manage_thread
+        ? selectedRole?.permissions?.manage_thread
         : false,
     },
   });
