@@ -29,11 +29,8 @@ export async function createServer(
   }
 }
 
-export async function joinServer(
-  serverId: string,
-  userId: string,
-  inviteCode: string,
-) {
+
+export async function joinServer(serverId: string, userId: string, inviteCode: string) {
   try {
     await api.update(
       '/servers/join',
@@ -42,21 +39,20 @@ export async function joinServer(
         userId,
         serverId,
       },
-      'POST',
-    ).then(() => {
+      'POST'
+    );
 
-      revalidatePath('/');
-      return {
-        success: true,
-        message: 'Success'
-      }
-    })
+    revalidatePath('/');
 
+    return {
+      success: true,
+      message: 'Success'
+    };
   } catch (error) {
     return {
       success: false,
       message: (error as Error).message
-    }
-
+    };
   }
 }
+

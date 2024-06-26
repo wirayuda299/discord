@@ -8,12 +8,13 @@ import { useAuth } from '@clerk/nextjs';
 
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '../ui/sheet';
 import useServerMembers from '@/hooks/useServerMember';
-import { cn } from '@/lib/utils';
 import { banMember } from '@/actions/members';
 import { createError } from '@/utils/error';
-
 import { useSocketStore } from '@/providers';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { usePermissionsContext } from '@/providers/permissions';
+import useFetch from '@/hooks/useFetch';
+import { getServerById } from '@/helper/server';
 
 export default function ServersMembers({
   serverId,
@@ -27,7 +28,8 @@ export default function ServersMembers({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { mutate } = useSWRConfig()
   const socket = useSocketStore(state => state.socket)
-
+  const { data: server, isLoading: serverLoading, error: serverError } = useFetch('server', () => getServerById(serverId))
+  const { permission, loading, errors } = usePermissionsContext()
 
   const handleBanMember = async (memberId: string) => {
     try {
@@ -46,11 +48,13 @@ export default function ServersMembers({
   }
 
 
-  if (isLoading)
+  if (isLoading || loading || serverLoading)
     return (
       <div className='h-9 w-full animate-pulse bg-foreground/35 brightness-105 md:w-9 md:bg-foreground'></div>
     );
-  if (error) return <p>{error.message}</p>;
+  if (error || serverError || errors) return <p>{error.message || serverError.message || errors.message}</p>;
+
+  const isAllowedToBanMember = (server?.owner_id === userId) || (permission && permission.ban_member)
 
   return (
     <Sheet>
@@ -108,20 +112,24 @@ export default function ServersMembers({
 
 
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger className='opacity-0 group-hover:opacity-100'>
-                  <Ellipsis className='text-gray-2' />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='min-w-48 rounded !bg-black text-white'>
-                  <button
-                    title='ban'
-                    disabled={isSubmitting}
-                    onClick={() => handleBanMember(member.user_id)}
-                    className='text-sm text-left rounded-sm w-full hover:bg-background/50 p-1 cursor-pointer'>
-                    {isSubmitting ? 'Loading..' : 'Ban Member'}
-                  </button>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {isAllowedToBanMember && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className='opacity-0 group-hover:opacity-100'>
+                    <Ellipsis className='text-gray-2' />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className='min-w-48 rounded !bg-black text-white'>
+                    <button
+                      title='ban'
+                      disabled={isSubmitting}
+                      onClick={() => handleBanMember(member.user_id)}
+                      className='text-sm text-left rounded-sm w-full hover:bg-background/50 p-1 cursor-pointer'>
+                      {isSubmitting ? 'Loading..' : 'Ban Member'}
+                    </button>
+
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+              )}
             </li>
           ))}
         </ul>

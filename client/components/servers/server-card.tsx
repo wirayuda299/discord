@@ -17,26 +17,22 @@ export default function ServerCard({ server, inviteCode, userId }: Props) {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleJoinServer = async () => {
-    try {
-      setIsLoading(true)
-      const res = await joinServer(
-        server.id,
-        userId!!,
-        inviteCode,
-      )
-      if (res?.success) {
-        toast.success("Welcome! You've successfully joined the server.")
-        router.push(`/server/${server.id}`);
-      }
-      if (!res?.success) {
-        toast.error(res?.message)
-      }
-
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setIsLoading(false)
+    setIsLoading(true)
+    const res = await joinServer(
+      server.id,
+      userId!!,
+      inviteCode,
+    )
+    console.log(res)
+    if (res?.success) {
+      toast.success("Welcome! You've successfully joined the server.")
+      router.push(`/server/${server.id}`);
+    } else {
+      toast.error(res?.message)
     }
+
+
+    setIsLoading(false)
   };
   return (
 

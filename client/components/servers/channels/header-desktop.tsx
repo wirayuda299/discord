@@ -21,7 +21,7 @@ import { PinnedMessageType, deleteChannelPinnedMessage } from '@/helper/message'
 import { AllThread } from '@/helper/threads';
 import SearchForm from '@/components/shared/search-form';
 import { useServerStates } from '@/providers';
-import ServersMembers from '../members';
+const ServerMembers = dynamic(() => import('../members'), { ssr: false })
 import { cn } from '@/lib/utils';
 
 
@@ -128,7 +128,7 @@ export default function ChannelsHeader({
               ))}
             </ul>
           </PinnedMessage>
-          <ServersMembers serverId={serverId}>
+          <ServerMembers serverId={serverId}>
             <Image
               className='min-w-6'
               src={'/server/icons/member.svg'}
@@ -136,7 +136,7 @@ export default function ChannelsHeader({
               height={24}
               alt='member'
             />
-          </ServersMembers>
+          </ServerMembers>
           <SearchForm />
           <Inbox>Channel inbox</Inbox>
           <Image

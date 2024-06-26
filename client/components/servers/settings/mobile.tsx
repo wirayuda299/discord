@@ -1,17 +1,19 @@
 import Image from 'next/image';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
 
 import { Permission, Servers } from '@/types/server';
-import ServerOverview from './overview/server-overview';
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import ServersMembers from '../members';
-import Roles from './roles/roles';
-import ServerBanList from './bans';
+const Roles = dynamic(() => import('./roles/roles'), { ssr: false })
+const ServerBanList = dynamic(() => import('./bans'), { ssr: false })
+const ServersMembers = dynamic(() => import('../members'), { ssr: false })
+const ServerOverview = dynamic(() => import('./overview/server-overview'), { ssr: false })
 
 export default function ServerSettingsMobile({
   server,
