@@ -20,15 +20,22 @@ import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
 import UserSettingsDesktop from '../settings/user-settings/desktop';
 import useWindowResize from '@/hooks/useWindowResize';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger, DialogHeader, DialogClose } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+  DialogHeader,
+  DialogClose
+} from '@/components/ui/dialog';
 import Roles from '../settings/roles/roles';
-
 import { Button } from '@/components/ui/button';
 import { leaveServer } from '@/helper/server';
 
+type Props = { server: Servers, channels: string[] }
 
-
-export default function ServersMenuDesktop({ server, channels }: { server: Servers, channels: string[] }) {
+export default function ServersMenuDesktop({ server, channels }: Props) {
   const { permission, errors, loading, userId } = usePermissionsContext();
   const router = useRouter()
   const params = useParams()

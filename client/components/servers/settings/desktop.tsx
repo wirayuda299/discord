@@ -19,17 +19,28 @@ import {
 } from '../../ui/dialog';
 import { getServerSettings } from '@/constants/servers-settings';
 import { Servers } from '@/types/server';
-const ServerOverview = dynamic(() => import('./overview/server-overview'));
-const Roles = dynamic(() => import('./roles/roles'));
-const EmojiUpload = dynamic(() => import('./emoji-upload'));
-const StickerUpload = dynamic(() => import('./sticker-upload'));
-const ServerBanList = dynamic(() => import('./bans'));
+import PulseLoader from '@/components/shared/pulse-loader';
+
+const ServerOverview = dynamic(() => import('./overview/server-overview'), {
+  loading: () => <PulseLoader />
+});
+const Roles = dynamic(() => import('./roles/roles'), {
+  loading: () => <PulseLoader />
+});
+const EmojiUpload = dynamic(() => import('./emoji-upload'), {
+  loading: () => <PulseLoader />
+});
+const StickerUpload = dynamic(() => import('./sticker-upload'), {
+  loading: () => <PulseLoader />
+});
+const ServerBanList = dynamic(() => import('./bans'), {
+  loading: () => <PulseLoader />
+});
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useServerStates } from '@/providers';
 import { deleteServer } from '@/helper/server';
-
 export default function ServerSettingsDesktop({ server }: { server: Servers }) {
   const { selectedSetting, setSelectedSetting } = useServerStates(
     useShallow((state) => ({

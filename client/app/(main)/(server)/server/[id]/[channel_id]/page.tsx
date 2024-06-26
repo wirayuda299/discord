@@ -5,11 +5,16 @@ import { redirect } from 'next/navigation';
 import { getPinnedMessages } from '@/helper/message';
 import { getAllThreads } from '@/helper/threads';
 import { isMemberOrAdmin } from '@/helper/server';
-import { Suspense } from 'react';
 import PulseLoader from '@/components/shared/pulse-loader';
 
 const ChannelsDetail = dynamic(
-  () => import('@/components/servers/channels/channel-detail'),
+  () => import('@/components/servers/channels/channel-detail'), {
+  ssr: false,
+  loading() {
+    return <PulseLoader />
+  },
+
+}
 );
 
 type Props = {
@@ -25,7 +30,6 @@ export default async function ChannelId({ searchParams, params }: Props) {
     redirect('/sign-in')
   }
   const { isAuthor, isMember } = await isMemberOrAdmin(userId, params.id)
-  console.log({ isAuthor, isMember })
   if (!isAuthor && !isMember) {
     redirect('/direct-messages')
   }
@@ -36,15 +40,13 @@ export default async function ChannelId({ searchParams, params }: Props) {
   ]);
 
   return (
-    <Suspense fallback={<PulseLoader />} key={params.channel_id}>
-      <ChannelsDetail
-        threads={allThreads}
-        pinnedMessages={pinnedMessages}
-        serverId={params.id}
-        channel_type={searchParams.channel_type}
-        channelName={searchParams.channel_name}
-        channelId={params.channel_id}
-      />
-    </Suspense>
+    <ChannelsDetail
+      threads={allThreads}
+      pinnedMessages={pinnedMessages}
+      serverId={params.id}
+      channel_type={searchParams.channel_type}
+      channelName={searchParams.channel_name}
+      channelId={params.channel_id}
+    />
   );
 }
