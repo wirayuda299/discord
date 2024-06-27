@@ -23,7 +23,7 @@ export default function UserAccount() {
   } = useFetch('user', async () => getUserById(userId!!));
 
   const handleClick = () => {
-    setSelectedSetting('profile');
+    setSelectedSetting('profiles');
     setSelectedUserOption('user');
   };
   if (userLoading) return <PulseLoader />;

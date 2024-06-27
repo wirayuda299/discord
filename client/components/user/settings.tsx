@@ -1,5 +1,8 @@
-import { Trash, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import Image from 'next/image';
+import { useClerk } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+
 
 import {
   Dialog,
@@ -13,8 +16,6 @@ import { useServerStates } from '@/providers';
 import UserAccount from '@/components/user/user-account';
 import UserProfile from '@/components/user/profiles';
 import useWindowResize from '@/hooks/useWindowResize';
-import { useClerk } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 
 export default function UserSettingsDesktop() {
   const { setSelectedSetting, selectedSetting } = useServerStates((state) => ({

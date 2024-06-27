@@ -18,7 +18,7 @@ import ServerInvitationModal from '../invite-modal';
 import CreateChannelDialog from '../channels/create-channel/dialog';
 import { usePermissionsContext } from '@/providers/permissions';
 import ServerSettingsDesktop from '../settings/desktop';
-import UserSettingsDesktop from '../settings/user-settings/desktop';
+import UserSettingsDesktop from '@/components/user/settings';
 import useWindowResize from '@/hooks/useWindowResize';
 import {
   Dialog,
