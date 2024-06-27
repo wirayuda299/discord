@@ -5,8 +5,8 @@ export const dynamic = 'force-static';
 
 export default function Home() {
   return (
-    <div className=" min-h-dvh  md:min-h-screen w-full bg-gradient-to-b from-blue-800 to-blue-500 select-none ">
-      <div className=" px-4 md:px-8 max-w-screen-2xl bg-cover bg-fixed  mx-auto bg-[url('/general/images/stars.webp')]">
+    <div className=" min-h-dvh  md:min-h-screen max-h-screen w-full bg-gradient-to-b from-blue-800 to-blue-500 select-none overflow-y-auto no-scrollbar">
+      <div className=" px-4 md:px-8 bg-cover bg-fixed max-w-screen-2xl  mx-auto bg-[url('/general/images/stars.webp')]">
         <header className="min-h-20 gap-3 sticky top-0 justify-between flex-center text-white">
           <div>
             <Link className="flex-center gap-3" href={'/'}>
@@ -20,20 +20,28 @@ export default function Home() {
           </Link>
         </header>
 
-        <section className="grid max-lg:grid-cols-1 grid-cols-2 text-white gap-5 justify-center items-center min-h-[calc(100vh-100px)] mx-auto pt-5 ">
-          <div className="max-w-[520px] flex flex-col gap-3">
-            <h1 className="md:text-6xl  text-3xl text-balance font-extrabold pb-2 to-white ">
+        <section className="grid min-[1200px]:grid-cols-2 text-white gap-5 justify-center items-center  no-scrollbar mx-auto ">
+          <div className="max-w-[500px] flex flex-col gap-3">
+            <h1 className="md:text-5xl  text-3xl text-balance font-extrabold pb-2 to-white ">
               Bringing People Together Through Fun and Interactive Chats
             </h1>
             <p className="text-sm md:text-base text-white">
               Our platform is perfect for engaging in group chats and video calls with friends or building a global community. Customize your own space to talk, connect, and hang out in real-time </p>
           </div>
 
+          <Image
+            priority
+            fetchPriority="high"
+            className="object-contain min-w-full  aspect-auto object-center"
+            sizes="400px"
+            src='/general/images/banner.png'
+            width={400}
+            height={400}
+            alt="mockup" />
 
-          <Image priority fetchPriority="high" className="object-cover aspect-auto object-center h-full" sizes="700px" src='/general/images/mockup.png' width={700} height={700} alt="mockup" />
         </section>
 
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
