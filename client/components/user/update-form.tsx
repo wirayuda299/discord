@@ -5,6 +5,8 @@ import { useUser } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
+
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +27,7 @@ import { updateServerProfile } from '@/helper/server';
 import UserInfo from './user-info';
 import { createError } from '@/utils/error';
 import { cn } from '@/lib/utils';
+import { revalidate } from '@/utils/cache';
 
 const schema = z.object({
   username: z.string().min(4),
@@ -41,6 +44,7 @@ export default function UserUpdateForm({
   serverProfile: ServerProfile;
   selectedOption: string;
 }) {
+  const pathname = usePathname()
   const { mutate } = useSWRConfig();
   // use this to track submitting, since there's bug in react-hook-form
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -177,6 +181,7 @@ export default function UserUpdateForm({
         toast.success('Server profile updated');
         mutate('server-profile');
       }
+      revalidate(pathname)
     } catch (error) {
       createError(error);
     } finally {
