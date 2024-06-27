@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import CreateServerModal from '@/components/create-server/modal';
+import CreateServerModal from '@/components/servers/create-server/modal';
 import { getConversationList } from '@/helper/conversations';
 import { getAllServerCreatedByCurrentUser } from '@/helper/server';
 

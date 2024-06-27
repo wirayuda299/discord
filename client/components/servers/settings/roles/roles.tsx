@@ -17,8 +17,18 @@ import { Role, getAllRoles } from '@/helper/roles';
 import useFetch from '@/hooks/useFetch';
 import PulseLoader from '@/components/shared/pulse-loader';
 import { cn } from '@/lib/utils';
+
 const RoleSettings = dynamic(() => import('./role-settings'));
 
+
+type Props = {
+  serverAuthor: string;
+  serverId: string;
+  styles?: string,
+  uiSize: string
+  permissionContainerStyle?: string
+  searchFormStyle?: string
+}
 export default function Roles({
   serverAuthor,
   serverId,
@@ -26,14 +36,7 @@ export default function Roles({
   searchFormStyle,
   permissionContainerStyle,
   uiSize
-}: {
-  serverAuthor: string;
-  serverId: string;
-  styles?: string,
-  uiSize: string
-  permissionContainerStyle?: string
-  searchFormStyle?: string
-}) {
+}: Props) {
   const { data, isLoading, error } = useFetch('roles', () =>
     getAllRoles(serverId),
   );
@@ -53,6 +56,7 @@ export default function Roles({
     (type: 'create' | 'update' | null) => setType(type),
     [],
   );
+
 
   if (isLoading) return <PulseLoader />;
   if (error) return <p>{error.message}</p>;
@@ -133,7 +137,7 @@ export default function Roles({
                   key={role.name}
                   onClick={() => {
                     selectRole(role);
-                    setType('update');
+                    setType('update')
                   }}
                   className='cursor-pointer border-gray-2/10 hover:!bg-foreground hover:!brightness-110'
                 >
