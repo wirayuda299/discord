@@ -2,6 +2,9 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
+
 
 import { PinnedMessageType } from '@/helper/message';
 import { AllThread } from '@/helper/threads';
@@ -9,9 +12,6 @@ import { useServerStates, useSocketStore } from '@/providers';
 import { Message } from '@/types/messages';
 import useWindowResize from '@/hooks/useWindowResize';
 import { BannedMembers } from '@/types/socket-states';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-
 const ChannelsMessages = dynamic(() => import('./messages'), { ssr: false });
 const ChannelDetailMobile = dynamic(() => import('./mobile'), { ssr: false });
 const ChannelsHeader = dynamic(() => import('./header-desktop'), { ssr: false })
@@ -53,7 +53,6 @@ export default function ChannelsDetail(props: Props) {
     socket?.on('set-banned-members', (members: BannedMembers[]) => {
       const membersMap = new Map(members.map(member => [member.id, member]))
       if (userId) {
-        console.log(membersMap.get(userId))
         const isInclude = membersMap.get(userId)
         if (isInclude?.id === userId) {
           router.push('/direct-messages')

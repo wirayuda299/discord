@@ -75,6 +75,8 @@ export default function ServerMenuMobile({
               />
             </div>
             <ServerInvitationModal
+              serverAuthor={server.owner_id}
+              currentUser={userId!}
               serverId={server.id}
               inviteCode={server.invite_code}
               serverName={server.name}

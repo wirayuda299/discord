@@ -41,6 +41,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useServerStates } from '@/providers';
 import { deleteServer } from '@/helper/server';
+
+
 export default function ServerSettingsDesktop({ server }: { server: Servers }) {
   const { selectedSetting, setSelectedSetting } = useServerStates(
     useShallow((state) => ({

@@ -1,6 +1,9 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { RefreshCcw } from 'lucide-react';
+
 
 import {
   Dialog,
@@ -10,6 +13,17 @@ import {
 } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { copyText } from '@/utils/copy';
+import { generateNewInviteCode } from '@/helper/server';
+
+type Props = {
+  styles?: string;
+  children: ReactNode;
+  serverId: string;
+  inviteCode: string;
+  serverName: string;
+  serverAuthor: string,
+  currentUser: string
+}
 
 export default function ServerInvitationModal({
   styles,
@@ -17,15 +31,12 @@ export default function ServerInvitationModal({
   serverId,
   inviteCode,
   serverName,
-}: {
-  styles?: string;
-  children: ReactNode;
-  serverId: string;
-  inviteCode: string;
-  serverName: string;
-}) {
+  serverAuthor,
+  currentUser
+}: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState(false)
+  const pathname = usePathname()
   const path = `${process.env.NEXT_PUBLIC_CLIENT_URL}/invite?serverId=${serverId}&inviteCode=${inviteCode}`;
 
   return (
@@ -61,6 +72,21 @@ export default function ServerInvitationModal({
             Copy
           </Button>
         </div>
+        {serverAuthor === currentUser && (
+          <button
+            disabled={isLoading}
+            onClick={async () => {
+
+              setIsLoading(true)
+              await generateNewInviteCode(serverId, pathname)
+              setTimeout(() => {
+                setIsLoading(false)
+
+              }, 500)
+            }}
+            className='text-left disabled:cursor-not-allowed text-sm flex-center gap-2'>Generate new invite code <RefreshCcw className={isLoading ? 'animate-spin' : ''} size={18} /></button>
+        )}
+
       </DialogContent>
     </Dialog>
   );

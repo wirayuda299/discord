@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Suspense, type ReactNode } from 'react';
+import { currentUser } from '@clerk/nextjs';
 
 import { getAllChannels, getServerById } from '@/helper/server';
 import ChannelItem from '@/components/servers/channels/channel-item';
@@ -16,14 +17,13 @@ type Props = {
 };
 
 export default async function ServerLayout({ params, children }: Props) {
+  const user = await currentUser()
   const [server, categories] = await Promise.all([
     getServerById(params.id),
     getAllChannels(params.id),
   ]);
 
   if (!server) return notFound();
-  const channels = categories.filter(category => category.channel_type === 'text').map(c => c.channel_id)
-
   return (
     <PermissionsProvider>
       <main className='flex w-full'>
@@ -34,7 +34,7 @@ export default async function ServerLayout({ params, children }: Props) {
               <div className='h-8 w-full animate-pulse rounded-md bg-foreground brightness-110'></div>
             }
           >
-            <ServersMenuDesktop server={server} channels={channels} />
+            <ServersMenuDesktop server={server} categories={categories} />
             <ServerMenuMobile server={server} categories={categories} />
           </Suspense>
           {server.banner && server.settings.show_banner_background && (
@@ -70,7 +70,7 @@ export default async function ServerLayout({ params, children }: Props) {
               </div>
             </div>
           )}
-          <ul className='flex w-full flex-col gap-3 self-start p-2 py-5'>
+          <ul className='flex w-full flex-col min-h-screen gap-3 self-start p-2 py-5'>
             {categories?.map((category) => (
               <ChannelItem
                 category={category}
@@ -79,6 +79,10 @@ export default async function ServerLayout({ params, children }: Props) {
               />
             ))}
           </ul>
+          <div className='sticky flex-center px-2 border-foreground gap-2 min-h-16 border-t bg-black md:bg-foreground bottom-0 w-full'>
+            <Image src={user?.imageUrl ?? '/general/icons/logo.svg'} width={50} height={50} alt='user' className='object-cover size-12 rounded-full' />
+            <span className='text-white text-lg'>{user?.username}</span>
+          </div>
         </aside>
         {children}
       </main>

@@ -63,7 +63,7 @@ export async function generateNewInviteCode(id: string, path: string) {
     await api.update(`/servers/new-invite-code`, { serverId: id }, 'PATCH');
     revalidate(path);
   } catch (error) {
-    throw error;
+    createError(error)
   }
 }
 

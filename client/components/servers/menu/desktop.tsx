@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { ChevronDown, Plus } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   DropdownMenu,
@@ -32,14 +32,17 @@ import {
 import Roles from '../settings/roles/roles';
 import { Button } from '@/components/ui/button';
 import { leaveServer } from '@/helper/server';
+import { Categories } from '@/types/channels';
 
-type Props = { server: Servers, channels: string[] }
+type Props = { server: Servers, categories: Categories[] }
 
-export default function ServersMenuDesktop({ server, channels }: Props) {
+export default function ServersMenuDesktop({ server, categories }: Props) {
   const { permission, errors, loading, userId } = usePermissionsContext();
   const router = useRouter()
   const params = useParams()
   const [isLoading, setIsLoading] = useState(false)
+
+  const channels = useMemo(() => categories.filter(channel => channel.channel_type === 'text').map(c => c.channel_id).flat(), [server.id])
 
   const { windowWidth } = useWindowResize();
   if (windowWidth < 768) return null;
@@ -74,6 +77,8 @@ export default function ServersMenuDesktop({ server, channels }: Props) {
         </DropdownMenuItem>
         <DropdownMenuSeparator className='border-b border-b-background' />
         <ServerInvitationModal
+          serverAuthor={server.owner_id}
+          currentUser={userId!}
           serverId={server.id}
           inviteCode={server.invite_code}
           serverName={server.name}
