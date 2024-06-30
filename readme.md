@@ -4,7 +4,6 @@ This project was created solely for learning and practice purposes related to sp
 
 ---------------------------------------------------------
 
-
 # ChatFusion
 
 Welcome to **ChatFusion**, a full-stack, real-time chat application inspired by Discord. This repository contains the source code for an interactive chat platform built with modern web development technologies and tools. Whether you're looking to dive into the codebase or explore the features, you're in the right place.
